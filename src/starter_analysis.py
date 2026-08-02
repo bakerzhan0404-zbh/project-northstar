@@ -31,7 +31,12 @@ def load_data() -> Dict[str, pd.DataFrame]:
         raise FileNotFoundError(
             f"Missing {missing}. Run `python3 src/generate_data.py` first."
         )
-    data = {name: pd.read_csv(RAW / filename) for name, filename in required.items()}
+    # Preserve categorical values such as the account sweep label ``None``;
+    # pandas otherwise interprets that valid label as a missing value.
+    data = {
+        name: pd.read_csv(RAW / filename, keep_default_na=False)
+        for name, filename in required.items()
+    }
     data["accounts"]["open_date"] = pd.to_datetime(data["accounts"]["open_date"])
     for column in ["date", "reported_to_group_date"]:
         data["balances"][column] = pd.to_datetime(data["balances"][column])
