@@ -1,0 +1,10 @@
+assumption_id,assumption,used_in,base_value,low_value,high_value,unit,source_or_rationale,sensitivity,validation_action,client_owner,status
+A001,"Balance is same-day visible when reported_to_group_date equals balance date",Visibility baseline,58.18,,,percent,"Date-level proxy because timestamps are unavailable",High,"Obtain receipt timestamps and agree cutoff definition",Daniel Wu / Sarah Coleman,Open
+A002,"Project FX rate on transaction/balance date is appropriate for USD translation",Control totals,Project rate,,,USD per local unit,Project dataset convention,Medium,"Confirm finance reporting convention and rate source",Group Finance,Open
+A003,"The sweep label 'None' is a valid category rather than missing data",Data ingestion,Valid category,,,categorical,Raw file and data dictionary,Low,"Confirm with data owner",Data owner,Open
+A004,"Preliminary restricted flags are not sufficient to prove immobility or mobility",Liquidity scenarios,Unvalidated,,,boolean,Data dictionary limitation,High,"Legal/tax/local certification by account",Legal / Tax / Regional Finance,Open
+A005,"Estimated available balances are suitable only for preliminary scenarios",Liquidity scenarios,Unvalidated,,,USD,Data dictionary limitation,High,"Reconcile to bank definitions and operating buffers",Daniel Wu,Open
+A006,"Repair minutes and process manual percentages represent management estimates",Capacity analysis,Management estimate,,,minutes/hours,Data dictionary and process file,High,"Time sample and classify control-critical work",Lucas Schneider / Martin Blake,Open
+A007,"Estimated account and payment fees are not an actual cashable baseline",P&L analysis,Estimated,,,USD,Data dictionary limitation,High,"Reconcile bank invoices and contractual pricing",Daniel Wu / Finance,Open
+A008,"Six months are directionally representative outside unobserved seasonality",Diagnostic trends,6,,,months,Available period only,High,"Obtain 12-24 months or constrain conclusions",Data owner,Open
+
