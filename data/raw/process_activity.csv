@@ -1,0 +1,10 @@
+team,process,frequency_per_month,minutes_per_instance,manual_percentage,loaded_hourly_cost_usd,control_criticality
+Group Treasury,Consolidated cash positioning,22,190,82,78,High
+Regional Finance,Local cash reporting,220,24,76,61,Medium
+Shared Services,Payment file preparation,340,31,58,49,High
+Shared Services,Payment exception repair,180,36,95,49,High
+Accounts Receivable,Receipt reconciliation,420,28,68,47,Medium
+Group Treasury,Intercompany funding decision,38,52,71,78,High
+Regional Finance,Cash forecast preparation,48,145,88,61,Medium
+IT Operations,Bank file support,32,64,45,84,High
+Controllers,Bank access review,16,105,54,92,High
