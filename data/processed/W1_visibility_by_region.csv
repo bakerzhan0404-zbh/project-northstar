@@ -1,0 +1,4 @@
+region,observations,accounts,same_day_observations,delayed_observations,automated_observations,manually_reported_observations,estimated_observations,same_day_rate_pct
+APAC,3982,22,2534,1448,2534,362,1086,63.64
+EMEA,3077,17,1629,1448,1629,724,724,52.94
+NA,2896,16,1629,1267,1629,543,724,56.25
