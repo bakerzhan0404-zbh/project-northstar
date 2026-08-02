@@ -1,0 +1,3 @@
+risk_id,risk_description,type,likelihood_1_to_5,impact_1_to_5,score,early_warning_indicator,mitigation,contingency,owner,status
+R001,,Delivery,,,,,,,,Open
+

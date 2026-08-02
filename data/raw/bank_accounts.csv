@@ -1,0 +1,56 @@
+account_id,entity_id,bank_name,country,currency,purpose,open_date,status,visibility_method,sweep_structure,annual_fee_usd,restricted_flag
+AC0001,E001,Union Atlantic,United States,USD,Operating,2011-05-20,Active,Spreadsheet,Domestic sweep,2400,False
+AC0002,E001,Pacific Crown,United States,USD,Collection,2012-05-12,Active,Portal,None,2400,False
+AC0003,E001,Meridian Commercial,United States,USD,Payroll,2020-02-10,Active,API,None,900,True
+AC0004,E001,Continental Trust,United States,USD,Legacy,2021-04-04,Dormant,Host-to-host,None,900,False
+AC0005,E002,Continental Trust,United States,USD,Operating,2013-12-07,Active,API,Domestic sweep,1200,False
+AC0006,E002,Pacific Crown,United States,USD,Collection,2022-06-13,Active,Host-to-host,None,900,False
+AC0007,E002,Northbridge Bank,United States,USD,Payroll,2011-09-12,Active,Host-to-host,None,1200,True
+AC0008,E002,Pacific Crown,United States,USD,Tax,2024-11-20,Active,Portal,None,3600,True
+AC0009,E002,Northbridge Bank,United States,USD,Legacy,2012-03-06,Dormant,Portal,None,3600,False
+AC0010,E003,Union Atlantic,United States,USD,Operating,2019-09-25,Active,Spreadsheet,Domestic sweep,900,False
+AC0011,E003,Continental Trust,United States,USD,Collection,2016-09-03,Active,API,None,1200,False
+AC0012,E003,Northbridge Bank,United States,USD,Payroll,2010-04-02,Active,Host-to-host,None,2400,True
+AC0013,E003,Union Atlantic,United States,USD,Tax,2018-04-09,Active,Host-to-host,None,1200,True
+AC0014,E004,Union Atlantic,Canada,CAD,Operating,2011-02-04,Active,API,Domestic sweep,3600,False
+AC0015,E004,Pacific Crown,Canada,CAD,Collection,2019-04-05,Active,Spreadsheet,None,1800,False
+AC0016,E004,Meridian Commercial,Canada,CAD,Payroll,2015-07-03,Active,Spreadsheet,None,1200,True
+AC0017,E005,Union Atlantic,United Kingdom,GBP,Operating,2022-04-10,Active,Spreadsheet,Regional pool,2400,False
+AC0018,E005,Union Atlantic,United Kingdom,GBP,Collection,2018-01-25,Active,Portal,None,900,False
+AC0019,E005,Union Atlantic,United Kingdom,GBP,Payroll,2018-08-12,Active,Host-to-host,None,900,True
+AC0020,E005,Meridian Commercial,United Kingdom,GBP,Tax,2020-01-17,Active,API,None,1800,True
+AC0021,E006,Continental Trust,Germany,EUR,Operating,2013-06-18,Active,Spreadsheet,Regional pool,1800,False
+AC0022,E006,Meridian Commercial,Germany,EUR,Collection,2020-10-06,Active,Portal,None,1800,False
+AC0023,E006,Northbridge Bank,Germany,EUR,Payroll,2022-12-23,Active,Host-to-host,None,1200,True
+AC0024,E006,Pacific Crown,Germany,EUR,Legacy,2011-10-01,Dormant,Host-to-host,None,2400,False
+AC0025,E007,Meridian Commercial,France,EUR,Operating,2021-01-14,Active,Spreadsheet,None,3600,False
+AC0026,E007,Union Atlantic,France,USD,Collection,2019-01-17,Active,Portal,None,2400,False
+AC0027,E007,Pacific Crown,France,EUR,Payroll,2012-02-10,Active,API,None,3600,True
+AC0028,E008,Meridian Commercial,Netherlands,EUR,Operating,2015-08-20,Active,Host-to-host,Regional pool,2400,False
+AC0029,E008,Continental Trust,Netherlands,EUR,Collection,2019-04-01,Active,API,None,1200,False
+AC0030,E008,Pacific Crown,Netherlands,USD,Payroll,2020-12-22,Active,API,None,2400,True
+AC0031,E009,Meridian Commercial,Spain,USD,Operating,2020-11-23,Active,Portal,None,3600,False
+AC0032,E009,Northbridge Bank,Spain,EUR,Collection,2019-04-22,Active,Host-to-host,None,900,False
+AC0033,E009,Meridian Commercial,Spain,EUR,Payroll,2020-04-20,Active,Spreadsheet,None,2400,True
+AC0034,E010,Continental Trust,Singapore,USD,Operating,2020-06-10,Active,Spreadsheet,None,900,False
+AC0035,E010,Pacific Crown,Singapore,SGD,Collection,2015-09-04,Active,Host-to-host,None,900,False
+AC0036,E010,Continental Trust,Singapore,SGD,Payroll,2024-01-24,Active,Host-to-host,None,2400,True
+AC0037,E010,Continental Trust,Singapore,SGD,Legacy,2013-12-18,Dormant,Host-to-host,None,900,False
+AC0038,E011,Pacific Crown,Australia,USD,Operating,2010-06-27,Active,Host-to-host,None,3600,False
+AC0039,E011,Continental Trust,Australia,AUD,Collection,2021-07-25,Active,Host-to-host,None,900,False
+AC0040,E011,Continental Trust,Australia,AUD,Payroll,2019-06-26,Active,Spreadsheet,None,3600,True
+AC0041,E012,Continental Trust,Japan,JPY,Operating,2023-10-06,Active,Host-to-host,None,1800,False
+AC0042,E012,Union Atlantic,Japan,USD,Collection,2013-01-23,Active,Host-to-host,None,3600,False
+AC0043,E012,Union Atlantic,Japan,JPY,Payroll,2021-02-24,Active,Portal,None,1200,True
+AC0044,E013,Northbridge Bank,South Korea,KRW,Operating,2020-11-16,Active,Host-to-host,None,1200,False
+AC0045,E013,Pacific Crown,South Korea,KRW,Collection,2022-02-16,Active,Spreadsheet,None,1200,False
+AC0046,E013,Union Atlantic,South Korea,KRW,Payroll,2014-03-07,Active,Spreadsheet,None,900,True
+AC0047,E014,Meridian Commercial,India,INR,Operating,2013-08-14,Active,Spreadsheet,None,2400,True
+AC0048,E014,Continental Trust,India,INR,Collection,2010-10-04,Active,Spreadsheet,None,3600,True
+AC0049,E014,Pacific Crown,India,USD,Payroll,2014-06-21,Active,API,None,900,True
+AC0050,E015,Union Atlantic,Hong Kong,HKD,Operating,2015-11-02,Active,Portal,None,1200,False
+AC0051,E015,Pacific Crown,Hong Kong,HKD,Collection,2017-11-04,Active,Host-to-host,None,1800,False
+AC0052,E015,Continental Trust,Hong Kong,HKD,Payroll,2022-01-07,Active,API,None,2400,True
+AC0053,E016,Pacific Crown,Singapore,USD,Operating,2014-11-12,Active,API,None,2400,False
+AC0054,E016,Northbridge Bank,Singapore,USD,Collection,2024-07-13,Active,Host-to-host,None,3600,False
+AC0055,E016,Meridian Commercial,Singapore,USD,Payroll,2023-08-06,Active,API,None,3600,True

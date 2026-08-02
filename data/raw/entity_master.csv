@@ -1,0 +1,17 @@
+entity_id,entity_name,region,country,functional_currency,revenue_usd_m,erp_system,acquisition_origin,cash_restriction_level
+E001,Aurelius Group Holdings,NA,United States,USD,420,Oracle-E1,Organic,Low
+E002,Aurelius Home US,NA,United States,USD,930,Oracle-E1,Organic,Low
+E003,Aurelius Wellness US,NA,United States,USD,510,Oracle-E1,Summit-2021,Low
+E004,Aurelius Canada,NA,Canada,CAD,215,Oracle-E1,Organic,Low
+E005,Aurelius UK,EMEA,United Kingdom,GBP,280,SAP-S4,Harbor-2020,Low
+E006,Aurelius Germany,EMEA,Germany,EUR,315,SAP-S4,Organic,Low
+E007,Aurelius France,EMEA,France,EUR,190,SAP-S4,Harbor-2020,Low
+E008,Aurelius Netherlands,EMEA,Netherlands,EUR,145,SAP-S4,Organic,Low
+E009,Aurelius Spain,EMEA,Spain,EUR,125,Legacy-D365,Verde-2023,Low
+E010,Aurelius Singapore,APAC,Singapore,SGD,155,SAP-S4,Organic,Medium
+E011,Aurelius Australia,APAC,Australia,AUD,195,SAP-S4,Organic,Low
+E012,Aurelius Japan,APAC,Japan,JPY,130,Legacy-D365,Kanso-2022,Medium
+E013,Aurelius Korea,APAC,South Korea,KRW,85,Legacy-D365,Kanso-2022,Medium
+E014,Aurelius India,APAC,India,INR,70,Legacy-D365,Organic,High
+E015,Aurelius Hong Kong,APAC,Hong Kong,HKD,65,SAP-S4,Organic,Medium
+E016,Aurelius Global Sourcing,APAC,Singapore,USD,70,SAP-S4,Organic,Medium
