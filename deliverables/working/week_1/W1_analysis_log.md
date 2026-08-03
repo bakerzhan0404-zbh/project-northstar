@@ -20,7 +20,7 @@
 - **Definitions:** Complete panel = every account/currency has one record for each of 181 calendar days. Required field = every supplied schema column.
 - **Transformation steps:** Load with `keep_default_na=False`; parse dates; validate keys; join account/entity/FX; translate using date/currency project rates.
 - **Reconciliation performed:** Row counts, unique keys, expected panels, relationship joins, currency consistency, missingness, control totals.
-- **Quality tests:** 18/18 expanded checks and 10/10 supplied tests pass.
+- **Quality tests:** 33/33 expanded checks and 10/10 supplied tests pass.
 - **Assumptions:** The categorical sweep label `None` is valid, not null.
 - **Sensitivity:** Not applicable to structural tests.
 - **Output files:** `data/processed/W1_data_quality_*.csv`, `W1_missingness_profile.csv`, `W1_visibility_by_region.csv`.
@@ -47,4 +47,3 @@
 - **Reconciliation:** Counts reconcile to 7,600 payments; nonexceptions have zero repair minutes.
 - **Finding supported:** Payment/process friction is material enough to investigate.
 - **Known limitations:** No reason codes, criticality, timestamps, observed labor, or fully loaded realization assumptions.
-

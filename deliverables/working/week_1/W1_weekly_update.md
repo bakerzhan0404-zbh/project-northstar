@@ -16,7 +16,7 @@ The engagement question, scope, stakeholder tensions, issue tree, and four-week 
 | Engagement framing | Executive question, scope, stakeholder map, kickoff questions | `W1_engagement_alignment.md` | Complete |
 | Problem structure | Prioritized issue tree and hypothesis changes | `W1_issue_tree.md` | Complete; evolves with evidence |
 | External evidence | Three observations and three-case comparison | `W1_external_evidence_brief.md`; source log | Official sources; limitations recorded |
-| Data readiness | Reproducible 18-check audit and report | `src/week1_data_quality.py`; processed CSVs; DQ report | 18/18 and 10/10 pass |
+| Data readiness | Reproducible 33-check audit and report | `src/week1_data_quality.py`; processed CSVs; DQ report | 33/33 and 10/10 pass |
 | Engagement controls | Workplan, analysis, decision, assumption, risk, findings, and interview logs | Week 1 folder | Initialized and current |
 
 ## What the evidence now suggests
