@@ -18,6 +18,7 @@ account_currencies,10,currencies,bank_accounts.csv,
 annual_account_fee_control_total,110100,USD/year,bank_accounts.csv,"Estimated, not actual pricing"
 dormant_zero_payment_legacy_candidates,4,accounts,calculation,Closure-validation candidates only; local dependencies unknown
 dormant_zero_payment_legacy_candidate_fees,7800,USD/year,calculation,Gross estimated fees before closure cost or feasibility validation
+dormant_zero_payment_legacy_candidate_average_positive_available,37459.35,USD/day,calculation,Aggregate daily average for the four-candidate cohort; not a closure approval
 balance_rows,9955,rows,daily_balances.csv,
 balance_start_date,2026-01-01,date,daily_balances.csv,
 balance_end_date,2026-06-30,date,daily_balances.csv,
@@ -33,6 +34,8 @@ one_day_delayed_observations,1629,observations,calculation,
 two_or_more_day_delayed_observations,2534,observations,calculation,
 median_two_plus_day_stale_positive_balance,18320212.25,USD/day,calculation,Positive closing value reported at least two calendar days late; not a loss estimate
 minimum_two_plus_day_stale_positive_balance,16392291.63,USD/day,calculation,Positive closing value reported at least two calendar days late; not a loss estimate
+median_delayed_positive_available_balance,26008791.69,USD/day,calculation,Positive estimated availability outside same-calendar-day visibility; not movable cash
+minimum_delayed_positive_available_balance,24021178.54,USD/day,calculation,Positive estimated availability outside same-calendar-day visibility; not movable cash
 maximum_reporting_delay,3,days,calculation,
 automated_balance_observations,5792,observations,daily_balances.csv,
 manually_reported_balance_observations,1629,observations,daily_balances.csv,
@@ -41,6 +44,8 @@ latest_closing_balance,59795482.77,USD,calculation,Ledger balance; not proof of 
 latest_available_balance,55662922.37,USD,calculation,Net estimated availability after negative positions; requires validation
 latest_gross_positive_available_balance,57801215.46,USD,calculation,Gross positive estimate before negative positions; requires validation
 latest_negative_available_balance,-2138293.1,USD,calculation,Two negative account positions
+latest_restricted_positive_available_balance,8053700.97,USD,calculation,Positive estimate on preliminarily flagged accounts; requires certification
+latest_unflagged_positive_available_balance,49747514.49,USD,calculation,Preliminarily unflagged does not mean movable
 latest_positive_available_value_weighted_same_day_rate,54.46,% of positive available USD,calculation,30 Jun. sensitivity; not start-of-day
 fx_rows,1810,rows,fx_rates.csv,
 fx_currencies,10,currencies,fx_rates.csv,
@@ -66,6 +71,10 @@ repair_minutes,20080,minutes,payments.csv,Management-estimated effort
 manual_payment_exception_share,63.47,% of exceptions,calculation,Association within supplied records; not causal attribution
 manual_payment_repair_share,63.35,% of repair minutes,calculation,Association within supplied records; not causal attribution
 manual_local_wire_ach_repair_share,49.6,% of repair minutes,calculation,"Manual local transfer, wire, and ACH cohorts combined"
+cross_border_payment_records,786,payments,calculation,Within supplied records; cross-border is not proof of an FX trade
+cross_border_payment_value,14722195.36,USD,calculation,Six-month gross supplied-record value; not settled value or FX exposure
+cross_border_payment_fees,35841.0,USD,calculation,Six-month estimated fees; not validated bank pricing
+cross_border_payment_repair_minutes,4921,minutes,calculation,Management-estimated effort within supplied records
 cross_border_wire_payment_share,10.34,% of payments,calculation,Within supplied records; population representativeness unproven
 cross_border_wire_exception_rate,13.99,%,calculation,Within supplied records; reason codes absent
 cross_border_wire_late_release_rate,8.78,%,calculation,Within supplied records; cutoff timestamps absent
@@ -77,7 +86,18 @@ process_file_exception_manual_hours_monthly,102.6,hours/month,calculation,Manage
 payment_extract_external_control_status,Not provided,status,project package,Representativeness cannot be established
 process_rows,9,activities,process_activity.csv,
 estimated_manual_process_hours_monthly,617.72,hours/month,calculation,Management estimates; not time-and-motion evidence
+estimated_manual_process_loaded_cost_monthly,35551.57,USD/month,calculation,Loaded-capacity equivalent; not cashable savings
+estimated_manual_process_loaded_cost_annual,426618.9,USD/year,calculation,Loaded-capacity equivalent; not cashable savings
+receipt_reconciliation_manual_hours_monthly,133.28,hours/month,calculation,Management process estimate; AR transaction evidence absent
 high_control_criticality_processes,6,activities,process_activity.csv,Control-critical does not mean the current manual method must remain
 high_control_manual_hours_monthly,315.48,hours/month,calculation,Management estimates; controls must be preserved or replaced
+sap_s4_payment_record_share,50.0,% of payments,calculation,Concentration anchor; supplied payment population representativeness unproven
+host_to_host_account_share,36.36,% of accounts,calculation,Concentration anchor; not a resilience conclusion
+union_atlantic_payment_record_share,28.33,% of payments,calculation,Concentration anchor; supplied payment population representativeness unproven
 illustrative_15pct_capacity_redeployment,1111.89,hours/year,calculation,Sensitivity only; not headcount or cashable savings
 illustrative_20pct_capacity_redeployment,1482.52,hours/year,calculation,Sensitivity only; not headcount or cashable savings
+hypothesis_40pct_receipt_capacity_redeployment,53.31,hours/month,analyst assumption,Bold target for Week 2 validation; not headcount or cashable savings
+hypothesis_150_hour_month_capacity_redeployment,150,hours/month,analyst assumption,"Equals 1,800 hours/year and 24.28% of the supplied process baseline"
+hypothesis_restricted_value_25pct_clearance,2013425.24,USD,analyst assumption,Stretch sensitivity; clearance does not itself prove mobility
+hypothesis_cross_border_25bps_cost_annualized,73610.98,USD/year,analyst assumption,Annualized screening sensitivity; not observed FX leakage
+hypothesis_cross_border_50bps_cost_annualized,147221.95,USD/year,analyst assumption,Annualized screening sensitivity; not observed FX leakage
