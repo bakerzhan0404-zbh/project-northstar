@@ -2,7 +2,7 @@
 
 ## Executive conclusion
 
-The six supplied datasets are **technically fit for Week 2 diagnostic analysis with controls, but not sufficient by themselves for a final liquidity or benefits decision**. All 10 supplied tests and all 18 expanded Week 1 checks pass. Keys are unique, required relationships resolve, the six-month balance and FX panels are complete, required fields are populated, and payment currencies match their debit accounts.
+The six supplied datasets are **technically fit for Week 2 diagnostic analysis with controls, but not sufficient by themselves for a final liquidity or benefits decision**. All 10 supplied tests and all 33 expanded Week 1 checks pass. Keys are unique, required relationships resolve, the six-month balance and FX panels are complete, required fields are populated, and payment currencies match their debit accounts.
 
 The principal risk is semantic rather than structural. “Available” balances are estimates, restriction flags are preliminary, reporting lacks timestamps, fees and effort are estimates, and the data does not establish legal transferability, required operating buffers, or exception root causes. These gaps can materially change the recommended ambition and value case.
 
