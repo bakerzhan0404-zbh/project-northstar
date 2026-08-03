@@ -1,8 +1,12 @@
 # Week 1 — Engagement Alignment
 
-**Prepared by:** Baker  
-**Reporting date:** 2 August 2026  
+**Prepared by:** Baker
+
+**Reporting date:** 2 August 2026
+
 **Evidence status:** Initial framing; hypotheses remain subject to Week 2 validation
+
+**Classification:** Confidential — Project Northstar simulated client material; client facts are `ACG-DATA`, calculations are `ANALYST-CALC`, and interpretations are `ANALYST-JUDGMENT`
 
 ## Executive question
 
@@ -44,7 +48,7 @@ ACG cannot currently provide a reconciled same-day answer to how much cash can b
 
 | Stakeholder claim | Current evidence | Status | Bias or counterpoint | Follow-up required |
 |---|---|---|---|---|
-| 60–70% of cash is visible at start of day | 58.18% of balance observations are reported same day under a date-level proxy | Partly corroborated, not equivalent | Start-of-day timing is unavailable; same-day may still be operationally late | Agree timestamp-based visibility definition and obtain actual report runs |
+| 60–70% of cash is visible at start of day | 32/55 accounts are same-date; 58.18% of account-days and 55.14% of positive closing USD use those accounts | Not comparable / unresolved | Count/date proxies are not percent of cash at start of day; timestamps are unavailable | Agree timestamp-based visibility definition and obtain actual report runs |
 | At least ten accounts could close | Four of 55 accounts are marked dormant | Unresolved | Dormant does not mean closable; payroll, tax, collection, resilience, and local requirements may apply | Local validation for purpose, activity, signatories, dependencies, and closure cost |
 | Incomplete invoice and beneficiary data drive rework | 31.51% of supplied payment records have manual touch and 6.30% have exceptions | Friction observed; root cause untested | Dataset lacks reason codes and beneficiary/invoice completeness fields | Obtain exception reason codes and sample repaired payments |
 | Centralization will improve visibility and control | External cases show potential, but not causal fit for ACG | Untested | Centralization can concentrate operational failure and reduce local responsiveness | Compare federated and centralized designs against failure scenarios |

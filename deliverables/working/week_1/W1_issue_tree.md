@@ -1,5 +1,7 @@
 # Week 1 — Decision-Led Issue Tree
 
+**Classification:** Confidential — Project Northstar simulated client material; statuses are analyst assessments pending client review
+
 ## Executive question
 
 Should ACG authorize a 90-day treasury-transformation mobilization, at what ambition, and with which Wave 1 initiatives and control conditions?
