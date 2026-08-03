@@ -27,4 +27,4 @@ Completed the engagement framing, issue tree, workplan, external evidence brief,
 
 ## Priorities for Week 2
 
-Complete the reconciled diagnostic; resolve or constrain payment, receivables, FX, and revenue gaps; and select four to six CFO-relevant findings with confidence and counterevidence.
+**P0:** Reconcile the account, visibility/liquidity, payment/process, and maturity diagnostics; promote four to six findings; complete the eight-page report and five-slide checkpoint. **P1:** Seek transferability, timestamp, payment-scope/root-cause, fee/borrowing, AR/FX, and stakeholder validation; carry unresolved gates into Week 3.
