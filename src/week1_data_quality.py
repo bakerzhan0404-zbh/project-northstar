@@ -38,7 +38,9 @@ def main() -> None:
     process = data["process"]
 
     payment_enriched = payments.merge(
-        accounts[["account_id", "entity_id", "currency"]].rename(columns={"currency": "account_currency"}),
+        accounts[
+            ["account_id", "entity_id", "currency", "bank_name", "visibility_method"]
+        ].rename(columns={"currency": "account_currency"}),
         on="account_id",
         how="left",
         validate="many_to_one",
@@ -48,7 +50,7 @@ def main() -> None:
         how="left",
         validate="many_to_one",
     ).merge(
-        entities[["entity_id", "region"]],
+        entities[["entity_id", "region", "erp_system"]],
         on="entity_id",
         how="left",
         validate="many_to_one",
@@ -63,6 +65,7 @@ def main() -> None:
     expected_fx_rows = fx["currency"].nunique() * fx["date"].nunique()
     same_day = balances["reporting_delay_days"].eq(0)
     balances["positive_closing_usd"] = balances["closing_balance_usd"].clip(lower=0)
+    balances["positive_available_usd"] = balances["available_balance_usd"].clip(lower=0)
     latest_balances = balances[balances["date"] == latest_date]
     latest_balances_same_day = latest_balances["reporting_delay_days"].eq(0)
     latest_positive_available = latest_balances["available_balance_usd"].clip(lower=0)
@@ -84,8 +87,22 @@ def main() -> None:
         .groupby("date")["positive_closing_usd"]
         .sum()
     )
+    delayed_positive_available_daily = (
+        balances.loc[balances["reporting_delay_days"].gt(0)]
+        .groupby("date")["positive_available_usd"]
+        .sum()
+    )
+    dormant_candidate_average_positive_available = (
+        balances.loc[
+            balances["account_id"].isin(dormant_validation_candidates["account_id"])
+        ]
+        .groupby("date")["positive_available_usd"]
+        .sum()
+        .mean()
+    )
     manual_payments = payments["manual_touch_flag"]
     manual_core_payment_types = payments["payment_type"].isin({"Local transfer", "Wire", "ACH"})
+    cross_border_payments = payments["cross_border_flag"]
     cross_border_wires = payments["payment_type"].eq("Wire") & payments["cross_border_flag"]
     process_manual_hours_monthly = (
         process["frequency_per_month"]
@@ -94,7 +111,17 @@ def main() -> None:
         / 100
         / 60
     )
+    process_manual_cost_monthly = process_manual_hours_monthly * process["loaded_hourly_cost_usd"]
     high_control_processes = process["control_criticality"].eq("High")
+    receipt_reconciliation_process = process["process"].eq("Receipt reconciliation")
+
+    restricted_positive_available_latest = latest_balances.loc[
+        latest_balances["restricted_flag"], "positive_available_usd"
+    ].sum()
+    unflagged_positive_available_latest = latest_balances.loc[
+        ~latest_balances["restricted_flag"], "positive_available_usd"
+    ].sum()
+    cross_border_value = payment_enriched.loc[cross_border_payments, "amount_usd"].sum()
 
     expected_schemas = {
         "entities": ["entity_id", "entity_name", "region", "country", "functional_currency", "revenue_usd_m", "erp_system", "acquisition_origin", "cash_restriction_level"],
@@ -125,6 +152,7 @@ def main() -> None:
         metric("annual_account_fee_control_total", accounts["annual_fee_usd"].sum(), "USD/year", "bank_accounts.csv", "Estimated, not actual pricing"),
         metric("dormant_zero_payment_legacy_candidates", len(dormant_validation_candidates), "accounts", "calculation", "Closure-validation candidates only; local dependencies unknown"),
         metric("dormant_zero_payment_legacy_candidate_fees", dormant_validation_candidates["annual_fee_usd"].sum(), "USD/year", "calculation", "Gross estimated fees before closure cost or feasibility validation"),
+        metric("dormant_zero_payment_legacy_candidate_average_positive_available", round(dormant_candidate_average_positive_available, 2), "USD/day", "calculation", "Aggregate daily average for the four-candidate cohort; not a closure approval"),
         metric("balance_rows", len(balances), "rows", "daily_balances.csv"),
         metric("balance_start_date", balances["date"].min().date().isoformat(), "date", "daily_balances.csv"),
         metric("balance_end_date", latest_date.date().isoformat(), "date", "daily_balances.csv"),
@@ -140,6 +168,8 @@ def main() -> None:
         metric("two_or_more_day_delayed_observations", balances["reporting_delay_days"].ge(2).sum(), "observations", "calculation"),
         metric("median_two_plus_day_stale_positive_balance", round(two_plus_day_stale_positive_daily.median(), 2), "USD/day", "calculation", "Positive closing value reported at least two calendar days late; not a loss estimate"),
         metric("minimum_two_plus_day_stale_positive_balance", round(two_plus_day_stale_positive_daily.min(), 2), "USD/day", "calculation", "Positive closing value reported at least two calendar days late; not a loss estimate"),
+        metric("median_delayed_positive_available_balance", round(delayed_positive_available_daily.median(), 2), "USD/day", "calculation", "Positive estimated availability outside same-calendar-day visibility; not movable cash"),
+        metric("minimum_delayed_positive_available_balance", round(delayed_positive_available_daily.min(), 2), "USD/day", "calculation", "Positive estimated availability outside same-calendar-day visibility; not movable cash"),
         metric("maximum_reporting_delay", balances["reporting_delay_days"].max(), "days", "calculation"),
         metric("automated_balance_observations", balances["source_quality"].eq("Automated").sum(), "observations", "daily_balances.csv"),
         metric("manually_reported_balance_observations", balances["source_quality"].eq("Manually reported").sum(), "observations", "daily_balances.csv"),
@@ -148,6 +178,8 @@ def main() -> None:
         metric("latest_available_balance", round(latest_balances["available_balance_usd"].sum(), 2), "USD", "calculation", "Net estimated availability after negative positions; requires validation"),
         metric("latest_gross_positive_available_balance", round(latest_positive_available.sum(), 2), "USD", "calculation", "Gross positive estimate before negative positions; requires validation"),
         metric("latest_negative_available_balance", round(latest_balances.loc[latest_balances["available_balance_usd"] < 0, "available_balance_usd"].sum(), 2), "USD", "calculation", "Two negative account positions"),
+        metric("latest_restricted_positive_available_balance", round(restricted_positive_available_latest, 2), "USD", "calculation", "Positive estimate on preliminarily flagged accounts; requires certification"),
+        metric("latest_unflagged_positive_available_balance", round(unflagged_positive_available_latest, 2), "USD", "calculation", "Preliminarily unflagged does not mean movable"),
         metric("latest_positive_available_value_weighted_same_day_rate", round(100 * latest_positive_available[latest_balances_same_day].sum() / latest_positive_available.sum(), 2), "% of positive available USD", "calculation", "30 Jun. sensitivity; not start-of-day"),
         metric("fx_rows", len(fx), "rows", "fx_rates.csv"),
         metric("fx_currencies", fx["currency"].nunique(), "currencies", "fx_rates.csv"),
@@ -173,6 +205,10 @@ def main() -> None:
         metric("manual_payment_exception_share", round(100 * payments.loc[manual_payments, "exception_flag"].sum() / payments["exception_flag"].sum(), 2), "% of exceptions", "calculation", "Association within supplied records; not causal attribution"),
         metric("manual_payment_repair_share", round(100 * payments.loc[manual_payments, "repair_minutes"].sum() / payments["repair_minutes"].sum(), 2), "% of repair minutes", "calculation", "Association within supplied records; not causal attribution"),
         metric("manual_local_wire_ach_repair_share", round(100 * payments.loc[manual_payments & manual_core_payment_types, "repair_minutes"].sum() / payments["repair_minutes"].sum(), 2), "% of repair minutes", "calculation", "Manual local transfer, wire, and ACH cohorts combined"),
+        metric("cross_border_payment_records", cross_border_payments.sum(), "payments", "calculation", "Within supplied records; cross-border is not proof of an FX trade"),
+        metric("cross_border_payment_value", round(cross_border_value, 2), "USD", "calculation", "Six-month gross supplied-record value; not settled value or FX exposure"),
+        metric("cross_border_payment_fees", round(payments.loc[cross_border_payments, "fee_usd"].sum(), 2), "USD", "calculation", "Six-month estimated fees; not validated bank pricing"),
+        metric("cross_border_payment_repair_minutes", payments.loc[cross_border_payments, "repair_minutes"].sum(), "minutes", "calculation", "Management-estimated effort within supplied records"),
         metric("cross_border_wire_payment_share", round(100 * cross_border_wires.mean(), 2), "% of payments", "calculation", "Within supplied records; population representativeness unproven"),
         metric("cross_border_wire_exception_rate", round(100 * payments.loc[cross_border_wires, "exception_flag"].mean(), 2), "%", "calculation", "Within supplied records; reason codes absent"),
         metric("cross_border_wire_late_release_rate", round(100 * payments.loc[cross_border_wires, "late_release_flag"].mean(), 2), "%", "calculation", "Within supplied records; cutoff timestamps absent"),
@@ -184,10 +220,21 @@ def main() -> None:
         metric("payment_extract_external_control_status", "Not provided", "status", "project package", "Representativeness cannot be established"),
         metric("process_rows", len(process), "activities", "process_activity.csv"),
         metric("estimated_manual_process_hours_monthly", round(process_manual_hours_monthly.sum(), 2), "hours/month", "calculation", "Management estimates; not time-and-motion evidence"),
+        metric("estimated_manual_process_loaded_cost_monthly", round(process_manual_cost_monthly.sum(), 2), "USD/month", "calculation", "Loaded-capacity equivalent; not cashable savings"),
+        metric("estimated_manual_process_loaded_cost_annual", round(process_manual_cost_monthly.sum() * 12, 2), "USD/year", "calculation", "Loaded-capacity equivalent; not cashable savings"),
+        metric("receipt_reconciliation_manual_hours_monthly", round(process_manual_hours_monthly.loc[receipt_reconciliation_process].sum(), 2), "hours/month", "calculation", "Management process estimate; AR transaction evidence absent"),
         metric("high_control_criticality_processes", high_control_processes.sum(), "activities", "process_activity.csv", "Control-critical does not mean the current manual method must remain"),
         metric("high_control_manual_hours_monthly", round(process_manual_hours_monthly.loc[high_control_processes].sum(), 2), "hours/month", "calculation", "Management estimates; controls must be preserved or replaced"),
+        metric("sap_s4_payment_record_share", round(100 * payment_enriched["erp_system"].eq("SAP-S4").mean(), 2), "% of payments", "calculation", "Concentration anchor; supplied payment population representativeness unproven"),
+        metric("host_to_host_account_share", round(100 * accounts["visibility_method"].eq("Host-to-host").mean(), 2), "% of accounts", "calculation", "Concentration anchor; not a resilience conclusion"),
+        metric("union_atlantic_payment_record_share", round(100 * payment_enriched["bank_name"].eq("Union Atlantic").mean(), 2), "% of payments", "calculation", "Concentration anchor; supplied payment population representativeness unproven"),
         metric("illustrative_15pct_capacity_redeployment", round(process_manual_hours_monthly.sum() * 12 * 0.15, 2), "hours/year", "calculation", "Sensitivity only; not headcount or cashable savings"),
         metric("illustrative_20pct_capacity_redeployment", round(process_manual_hours_monthly.sum() * 12 * 0.20, 2), "hours/year", "calculation", "Sensitivity only; not headcount or cashable savings"),
+        metric("hypothesis_40pct_receipt_capacity_redeployment", round(process_manual_hours_monthly.loc[receipt_reconciliation_process].sum() * 0.40, 2), "hours/month", "analyst assumption", "Bold target for Week 2 validation; not headcount or cashable savings"),
+        metric("hypothesis_150_hour_month_capacity_redeployment", 150, "hours/month", "analyst assumption", "Equals 1,800 hours/year and 24.28% of the supplied process baseline"),
+        metric("hypothesis_restricted_value_25pct_clearance", round(restricted_positive_available_latest * 0.25, 2), "USD", "analyst assumption", "Stretch sensitivity; clearance does not itself prove mobility"),
+        metric("hypothesis_cross_border_25bps_cost_annualized", round(cross_border_value * 2 * 0.0025, 2), "USD/year", "analyst assumption", "Annualized screening sensitivity; not observed FX leakage"),
+        metric("hypothesis_cross_border_50bps_cost_annualized", round(cross_border_value * 2 * 0.0050, 2), "USD/year", "analyst assumption", "Annualized screening sensitivity; not observed FX leakage"),
     ]
 
     missing_rows = []
