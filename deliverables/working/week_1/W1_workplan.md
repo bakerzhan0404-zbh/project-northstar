@@ -4,11 +4,13 @@
 
 By the end-of-Week-4 steering committee, decide whether to authorize a 90-day mobilization, the transformation ambition and Wave 1 initiatives, a funding/benefit validation range, required governance and controls, and deferred decisions.
 
+*Client owners and reviewers shown below are proposed until confirmed at the relevant checkpoint.*
+
 ## Milestones
 
 | Milestone | Date | Required decision/output | Owner | Status |
 |---|---|---|---|---|
-| Week 1 evidence foundation | 2026-08-02 | Agree priority questions and data-readiness conditions | Baker / Daniel Wu | Complete |
+| Week 1 evidence foundation | 2026-08-02 | Draft priority questions and data-readiness conditions for review | Baker; proposed reviewer: Daniel Wu | Draft complete; agreement pending |
 | Treasurer diagnostic review | 2026-08-09 | Agree material findings and unresolved validations | Baker / Daniel Wu | Not started |
 | CFO interim steering | 2026-08-16 | Align on preferred option and conditions | Elena Marquez | Not started |
 | Final steering committee | 2026-08-23 | Decide mobilization, Wave 1, funding range, governance, and deferrals | Steering committee | Not started |
@@ -48,4 +50,3 @@ By the end-of-Week-4 steering committee, decide whether to authorize a 90-day mo
 | No exception reason codes | Root cause remains inferential | Supply codes and repaired-payment sample | Lucas Schneider | Week 2 |
 | No actual bank fee or borrowing baseline | P&L benefit cannot be validated | Obtain invoices and facility statements | Daniel Wu / Finance | Week 3 |
 | No intraday receipt timestamps | Start-of-day KPI cannot be proven | Supply reporting logs and cutoff definition | Sarah Coleman | Week 2 |
-

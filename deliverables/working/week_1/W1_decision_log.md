@@ -1,5 +1,7 @@
 # Week 1 — Decision Log
 
+*Named client owners and decision makers are proposed from the stakeholder pack and require confirmation; no client checkpoint has yet occurred.*
+
 | ID | Date | Decision | Decision maker | Rationale | Conditions | Follow-up | Owner | Due |
 |---|---|---|---|---|---|---|---|---|
 | DEC-01 | 2026-08-02 | Treat raw data as immutable and produce all calculations through version-controlled code | Analyst | Reproducibility and auditability | Reconcile outputs to control totals | Maintain analysis log | Baker | Ongoing |
@@ -16,4 +18,3 @@
 | Operating autonomy model | Centralized; federated; local stabilization | Keep all three options open; define non-negotiable local service rights | Role capacity, controls, local constraints | Steering committee | Week 3 |
 | Closure-validation threshold | Dormant only; low activity; combined criteria | Use transparent multi-factor criteria with local sign-off | Activity, purpose, dependencies, closure cost | Regional Controllers | Week 2 |
 | Wave 1 pilot | Entity/region/process alternatives | Select outside peak period with rollback and SLA gates | Peak calendar, readiness, baseline, risks | Rachel Kim / Daniel Wu | Week 3 |
-
