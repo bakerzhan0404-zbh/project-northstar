@@ -19,8 +19,11 @@ balance_end_date,2026-06-30,date,daily_balances.csv,
 balance_dates,181,calendar days,daily_balances.csv,
 expected_balance_rows,9955,rows,calculation,
 balance_row_completeness,100.0,%,calculation,
-same_day_visibility_observations,5792,observations,calculation,
-same_day_visibility_rate,58.18,%,calculation,
+same_day_visibility_accounts,32,accounts,calculation,Count-weighted proxy; not percent of cash
+same_day_visibility_observations,5792,account-days,calculation,32 of 55 accounts repeat for each of 181 days
+same_day_visibility_rate,58.18,% of account-days,calculation,Not start-of-day or percent of cash
+within_one_day_visibility_rate,74.55,% of account-days,calculation,Sensitivity only; not proof of within 24 hours
+positive_closing_value_weighted_same_day_rate,55.14,% of positive closing USD,calculation,Value-weighted sensitivity; not start-of-day
 one_day_delayed_observations,1629,observations,calculation,
 two_or_more_day_delayed_observations,2534,observations,calculation,
 maximum_reporting_delay,3,days,calculation,
@@ -28,7 +31,10 @@ automated_balance_observations,5792,observations,daily_balances.csv,
 manually_reported_balance_observations,1629,observations,daily_balances.csv,
 estimated_balance_observations,2534,observations,daily_balances.csv,
 latest_closing_balance,59795482.77,USD,calculation,Ledger balance; not proof of transferability
-latest_available_balance,55662922.37,USD,calculation,Estimated availability; requires validation
+latest_available_balance,55662922.37,USD,calculation,Net estimated availability after negative positions; requires validation
+latest_gross_positive_available_balance,57801215.46,USD,calculation,Gross positive estimate before negative positions; requires validation
+latest_negative_available_balance,-2138293.1,USD,calculation,Two negative account positions
+latest_positive_available_value_weighted_same_day_rate,54.46,% of positive available USD,calculation,30 Jun. sensitivity; not start-of-day
 fx_rows,1810,rows,fx_rates.csv,
 fx_currencies,10,currencies,fx_rates.csv,
 fx_dates,181,calendar days,fx_rates.csv,
@@ -37,7 +43,7 @@ payment_rows,7600,rows,payments.csv,
 unique_payments,7600,payments,payments.csv,
 payment_start_date,2026-01-01,date,payments.csv,
 payment_end_date,2026-06-30,date,payments.csv,
-payment_value_control_total,198135489.5,USD,calculation,
+gross_supplied_payment_value_control_total,198135489.5,USD,calculation,Includes every supplied status; not settled value
 payment_fee_control_total,62613.0,USD,payments.csv,"Estimated fees, not actual bank pricing"
 manual_touch_payments,2395,payments,payments.csv,
 manual_touch_rate,31.51,%,calculation,
@@ -46,6 +52,14 @@ exception_rate,6.3,%,calculation,
 late_release_payments,380,payments,payments.csv,
 late_release_rate,5.0,%,calculation,
 rejected_payments,54,payments,payments.csv,
+pending_payments,17,payments,payments.csv,Status as of extract is not supplied
+rejected_payment_value,2183098.42,USD,calculation,Included in gross supplied value; not settled
+pending_payment_value,1551397.06,USD,calculation,Included in gross supplied value; settlement unknown
 repair_minutes,20080,minutes,payments.csv,Management-estimated effort
+payment_file_exception_volume_monthly,79.83,payments/month,calculation,Six-month supplied payment file
+payment_file_repair_hours_monthly,55.78,hours/month,calculation,Six-month supplied payment file
+process_file_exception_volume_monthly,180,instances/month,process_activity.csv,Management estimate; scope differs from payment file
+process_file_exception_manual_hours_monthly,102.6,hours/month,calculation,Management estimate; scope differs from payment file
+payment_extract_external_control_status,Not provided,status,project package,Representativeness cannot be established
 process_rows,9,activities,process_activity.csv,
 estimated_manual_process_hours_monthly,617.72,hours/month,calculation,Management estimates; not time-and-motion evidence
