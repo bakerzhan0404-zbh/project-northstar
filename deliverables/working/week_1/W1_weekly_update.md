@@ -27,4 +27,4 @@ Completed the engagement framing, issue tree, workplan, external evidence brief,
 
 ## Priorities for Week 2
 
-**P0:** Reconcile the account, visibility/liquidity, payment/process, and maturity diagnostics; promote four to six findings; complete the eight-page report and five-slide checkpoint. **P1:** Seek transferability, timestamp, payment-scope/root-cause, fee/borrowing, AR/FX, and stakeholder validation; carry unresolved gates into Week 3.
+Follow the [Week 2 execution brief](../week_2/W2_execution_brief.md): 18 traceable commits. **P0:** Reconcile 55 accounts, 9,955 account-days, and 7,600 payments; diagnose account, liquidity/visibility, payment/process, and maturity gaps; promote four to six report/deck findings. **P1:** Request missing timestamp/transferability, root-cause, financial, and AR/FX evidence.
