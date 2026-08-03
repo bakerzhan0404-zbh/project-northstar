@@ -39,7 +39,7 @@
 - Four processed Week 1 CSVs are reproducible from version-controlled code.
 - External claims S01–S05 were checked against official JPMorgan pages and logged with limitations.
 - The 548-word external evidence brief render-checks at two content pages.
-- The 300-word weekly update render-checks at one content page.
+- The weekly update render-checks at one content page.
 - Markdown local links resolve, CSV registers parse, and Git whitespace checks pass.
 
 ## Reproduce the evidence
