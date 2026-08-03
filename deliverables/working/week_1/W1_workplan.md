@@ -26,6 +26,7 @@ By the end-of-Week-4 steering committee, decide whether to authorize a 90-day mo
 | W2-01 | Where is account complexity avoidable? | Account candidate criteria and sensitivity | Baker | Aug 3 | Aug 6 | Local-purpose validation | Not started |
 | W2-02 | What cash is visible/apparently available? | Visibility, liquidity, surplus/deficit scenarios | Baker | Aug 3 | Aug 7 | Restriction/buffer assumptions | Not started |
 | W2-03 | Where do payments fail? | KPI segmentation and root-cause tree | Baker | Aug 4 | Aug 7 | Exception reason data | Not started |
+| W2-03A | What can be concluded about receivables and FX? | Confirm scope limits; request AR/remittance and FX transaction/exposure extracts | Baker | Aug 4 | Aug 6 | Additional client data | Not started |
 | W2-04 | What operating gaps cause symptoms? | Process maps, RACI, maturity heatmap | Baker | Aug 5 | Aug 8 | Stakeholder validation | Not started |
 | W2-05 | What matters most? | Eight-page diagnostic and five-slide checkpoint | Baker | Aug 7 | Aug 9 | W2-01–04 | Not started |
 | W3-01 | What choices are credible? | Design principles, three options, weighted matrix | Baker | Aug 10 | Aug 12 | Agreed diagnosis | Not started |
@@ -50,3 +51,5 @@ By the end-of-Week-4 steering committee, decide whether to authorize a 90-day mo
 | No exception reason codes | Root cause remains inferential | Supply codes and repaired-payment sample | Lucas Schneider | Week 2 |
 | No actual bank fee or borrowing baseline | P&L benefit cannot be validated | Obtain invoices and facility statements | Daniel Wu / Finance | Week 3 |
 | No intraday receipt timestamps | Start-of-day KPI cannot be proven | Supply reporting logs and cutoff definition | Sarah Coleman | Week 2 |
+| No AR/remittance or matching data | Receivables reconciliation cannot be diagnosed | Supply AR ledger, receipt, remittance, match-status, reason, and aging extracts | Proposed: Group Finance / AR owner | Week 2 |
+| No FX transaction/exposure data | FX patterns, costs, and risk cannot be diagnosed | Supply trade, exposure, hedge, spread/fee, and settlement extracts | Proposed: Group Treasury / Finance | Week 2 |

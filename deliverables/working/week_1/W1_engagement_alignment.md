@@ -20,6 +20,8 @@ ACG cannot currently provide a reconciled same-day answer to how much cash can b
 | Cash visibility, reporting timeliness, and source quality | Legal, tax, regulatory, sanctions, or accounting advice |
 | Ledger, estimated available, restricted, required, and potentially mobilizable cash distinctions | Detailed system architecture or implementation coding |
 | Payment execution, exceptions, late release, repair, and diagnostic reconciliation | Bank pricing negotiation or credit underwriting |
+| Receivables reconciliation at a diagnostic level | Detailed receivables redesign without AR/remittance evidence |
+| FX transaction and exposure patterns at a diagnostic level | Hedging advice, market-risk limits, or execution recommendations |
 | Treasury organization, governance, controls, data ownership, and technology enablement | Claims about proprietary JPMorgan capabilities or actual client recommendations |
 | Options, value ranges, sequencing, change risks, and KPIs | Treating positive balances as automatically transferable |
 
@@ -34,6 +36,9 @@ ACG cannot currently provide a reconciled same-day answer to how much cash can b
 | Priya Nair | APAC validation and adoption leader | Medium | High | Local restrictions, settlement timing, autonomy | Validate account and liquidity classifications locally |
 | Lucas Schneider | Payment-process evidence owner | Medium | High | Incomplete upstream data and exception repair | Trace exceptions to intake and format root causes |
 | Rachel Kim | NA business-service representative | Medium | High | Peak-season continuity and service levels | Pilot away from peak; define protected payment SLAs |
+| Group Finance and data owners | Baseline and data-certification roles | High | High | Reconciled financial totals, extract completeness, and metric ownership | Confirm revenue, fee, borrowing, AR, FX, and payment control totals |
+| Legal and Tax leads | Liquidity/account validation gatekeepers | High | High | Transferability, pooling, and entity/account constraints | Validate rather than delegate legal/tax conclusions to the project |
+| Other regional controllers/local finance | Local account, buffer, and adoption validators | Medium | High | Market requirements, settlement timing, and service continuity | Use structured account/entity certification and exception review |
 
 ## Stakeholder evidence synthesis
 
@@ -41,7 +46,7 @@ ACG cannot currently provide a reconciled same-day answer to how much cash can b
 |---|---|---|---|---|
 | 60–70% of cash is visible at start of day | 58.18% of balance observations are reported same day under a date-level proxy | Partly corroborated, not equivalent | Start-of-day timing is unavailable; same-day may still be operationally late | Agree timestamp-based visibility definition and obtain actual report runs |
 | At least ten accounts could close | Four of 55 accounts are marked dormant | Unresolved | Dormant does not mean closable; payroll, tax, collection, resilience, and local requirements may apply | Local validation for purpose, activity, signatories, dependencies, and closure cost |
-| Incomplete invoice and beneficiary data drive rework | 31.51% of payments have manual touch and 6.30% have exceptions | Directionally consistent | Dataset lacks reason codes and beneficiary/invoice completeness fields | Obtain exception reason codes and sample repaired payments |
+| Incomplete invoice and beneficiary data drive rework | 31.51% of supplied payment records have manual touch and 6.30% have exceptions | Friction observed; root cause untested | Dataset lacks reason codes and beneficiary/invoice completeness fields | Obtain exception reason codes and sample repaired payments |
 | Centralization will improve visibility and control | External cases show potential, but not causal fit for ACG | Untested | Centralization can concentrate operational failure and reduce local responsiveness | Compare federated and centralized designs against failure scenarios |
 | Local balances may not be idle | 21 accounts are preliminarily restricted; legal availability is not supplied | Supported as a necessary caution | Restriction flag is only indicative | Legal/tax/local treasury validation and operating-buffer definition |
 | Connectivity can be built | ACG has three ERPs and four visibility methods | Feasible in principle, not designed | One legacy ERP retires in ~2 years; ownership is unresolved | Confirm systems of record, owners, architecture constraints, and retirement plan |
@@ -55,7 +60,7 @@ ACG cannot currently provide a reconciled same-day answer to how much cash can b
 4. **Challenge:** What evidence supports the belief that at least ten accounts can close, and which dependencies could make a dormant account essential?
 5. **Challenge:** Could the borrowing event have been economically rational because surplus cash was restricted, mistimed, or costly to transfer?
 6. **Challenge:** Is technology genuinely the constraint, or would automating inconsistent ownership and reference data scale existing defects?
-7. Which payment types, entities, and upstream data defects create the highest operational and supplier risk?
+7. Which payment, receivables-reconciliation, and FX transaction patterns create the highest operational, liquidity, or supplier risk—and which cannot be tested with the current package?
 8. Which controls are mandatory, and where does current manual effort represent required control rather than avoidable waste?
 9. What local autonomy and service levels must the future model preserve, especially for urgent payments and peak season?
 10. Which benefits must be visible inside 12 months, who will validate each baseline, and what funding envelope is plausible?
@@ -77,4 +82,3 @@ At the Week 4 steering committee, ACG can state:
 3. Which operating model can ACG implement around three ERPs, limited FY2026 funding, local autonomy, and peak-season constraints?
 
 **Data issue most capable of reversing the recommendation:** the dataset cannot prove legal or operational transferability. If most apparent surplus is restricted or required locally, a liquidity-centralization-led business case could materially weaken and Wave 1 should shift toward visibility, data ownership, controls, and process standardization.
-
