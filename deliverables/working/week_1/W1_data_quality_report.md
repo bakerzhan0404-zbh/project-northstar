@@ -2,7 +2,7 @@
 
 ## Executive conclusion
 
-The six supplied datasets are **technically fit for Week 2 diagnostic analysis with controls, but not sufficient by themselves for a final liquidity or benefits decision**. All 10 supplied tests and all 33 expanded Week 1 checks pass. Keys are unique, required relationships resolve, the six-month balance and FX panels are complete, required fields are populated, and payment currencies match their debit accounts.
+The six supplied datasets are **technically fit for Week 2 diagnostic analysis with controls, but not sufficient by themselves for a final liquidity or benefits decision**. All 10 supplied tests and all 52 expanded Week 1 checks pass. Keys are unique, required relationships resolve, the six-month balance and FX-rate panels are complete, required fields are populated, and payment currencies match their debit accounts.
 
 The principal risk is semantic rather than structural. “Available” balances are estimates, restriction flags are preliminary, reporting lacks timestamps, fees and effort are estimates, and the data does not establish legal transferability, required operating buffers, or exception root causes. These gaps can materially change the recommended ambition and value case.
 
@@ -14,14 +14,14 @@ The principal risk is semantic rather than structural. “Available” balances 
 | Accounts | 55 accounts; 51 active; 4 dormant; 5 banks; 10 currencies | Unique account IDs; all entities resolve |
 | Balances | 9,955 observations; 55 accounts × 181 days; 1 Jan–30 Jun 2026 | 100% row completeness; unique account/date; all account and FX joins resolve |
 | FX | 1,810 observations; 10 currencies × 181 days | 100% panel completeness; unique currency/date |
-| Payments | 7,600 payments; $198.14m translated value; $62,613 estimated fees | Unique payment IDs; all accounts and FX resolve; currency matches account |
-| Process activity | 9 activities; 617.72 estimated manual hours/month | Structurally complete; inputs are management estimates |
+| Payments | 7,600 supplied records; $198.14m gross translated value across all statuses; $62,613 estimated fees | Unique IDs and valid joins; extract-to-source control and sampling method not supplied |
+| Process activity | 9 supplied activities; 617.72 estimated manual hours/month | All supplied rows populated; expected activity universe is not defined and inputs are management estimates |
 
-**Point-in-time balance control (30 Jun. 2026):** $59.80m ledger closing balance and $55.66m estimated available balance. Neither figure proves legal or operational transferability.
+**Point-in-time balance control (30 Jun. 2026):** $59.80m net ledger closing balance. Estimated available positions comprise $57.80m gross positive balances and two negative accounts totaling $(2.14)m, producing $55.66m net estimated availability. None proves legal or operational transferability.
 
 ## Quality tests
 
-All expanded checks passed: primary keys; composite balance/FX keys; account/entity relationships; balance/payment account relationships; balance/payment FX joins; account/payment currency consistency; complete balance and FX panels; nonnegative reporting delay and repair minutes; positive-closing available balances not exceeding closing balances; zero repair minutes for nonexceptions; and required-field completeness.
+All expanded checks passed, including: exact schemas and project date bounds; primary and composite keys; relationship and FX joins; panel completeness and continuity; required fields; categorical domains and boolean types; source-quality/visibility mapping; payment-status/exception/repair consistency; positive rates and amounts; nonnegative fees and process inputs; and valid reporting delays. These tests establish internal consistency—not source-system completeness or economic availability.
 
 The loader was corrected to preserve the valid sweep category `None`; pandas had initially interpreted this category as null. Raw data was not changed.
 
@@ -29,7 +29,9 @@ The loader was corrected to preserve the valid sweep category `None`; pandas had
 
 | Measure | Result | Interpretation |
 |---|---:|---|
-| Same-day balance observations | 5,792 / 9,955 (58.18%) | Date-level proxy; not equivalent to start-of-day availability |
+| Same-day accounts/account-days | 32 / 55 accounts; 5,792 / 9,955 account-days (58.18%) | Count-weighted date proxy; not percent of cash or start-of-day availability |
+| Within-one-calendar-day sensitivity | 7,421 / 9,955 account-days (74.55%) | Alternative definition only; not proof of visibility within 24 hours |
+| Same-day positive-balance value sensitivity | 55.14% of positive closing USD across the period | Value-weighted proxy; still not start-of-day visibility |
 | One-day delayed | 1,629 (16.36%) | Could make the group position stale |
 | Two-or-more-day delayed | 2,534 (25.45%) | Material visibility limitation |
 | Maximum delay | 3 days | Requires operational validation |
@@ -37,14 +39,15 @@ The loader was corrected to preserve the valid sweep category `None`; pandas had
 | Manually reported | 1,629 (16.36%) | Mapped from portal reporting |
 | Estimated | 2,534 (25.45%) | Mapped from spreadsheets |
 
-Same-day visibility varies by region: APAC 63.64%, NA 56.25%, and EMEA 52.94%. This partly corroborates the Treasurer's 60–70% estimate but is not a like-for-like comparison because no start-of-day timestamp is supplied.
+Count-weighted same-day rates vary by region: APAC 63.64%, NA 56.25%, and EMEA 52.94%. These measures cannot corroborate the Treasurer's 60–70% estimate of cash visible at the start of day: the project metric repeats accounts across dates, the value-weighted sensitivity is 55.14%, and no intraday timestamp is supplied.
 
 ## Preliminary payment/process signals—not final diagnostic findings
 
-- 2,395 payments (31.51%) have manual touch.
-- 479 (6.30%) have exceptions; 380 (5.00%) are late; 54 are rejected.
-- Recorded repair totals 20,080 minutes. This is a capacity indicator, not headcount or cashable cost reduction.
-- Process activity implies 617.72 manual hours/month, based on management estimates rather than observation.
+- Of 7,600 supplied payment records, 2,395 (31.51%) have manual touch, 479 (6.30%) have exceptions, and 380 (5.00%) are late. Representativeness cannot be established without an extract control total and sampling method.
+- The $198.14m gross translated control includes every status, including 54 rejected records worth $2.18m and 17 pending records worth $1.55m; it is not confirmed settled value.
+- Recorded repair totals 20,080 minutes, or 55.78 hours/month across the six-month file. This is a capacity indicator, not headcount or cashable cost reduction.
+- The process file separately estimates 180 exception-repair instances and 102.60 manual hours/month, versus 79.83 exceptions and 55.78 repair hours/month implied by the payment file. The 84% hours difference requires a scope and period reconciliation.
+- All nine supplied process rows imply 617.72 manual hours/month, based on management estimates rather than observation.
 
 These signals justify Week 2 segmentation but do not establish root cause because reason codes, beneficiary/invoice completeness, approval timestamps, and payment criticality are absent.
 
@@ -63,16 +66,20 @@ These signals justify Week 2 segmentation but do not establish root cause becaus
 | DQ-09 | No borrowing rates, facility usage, or transfer costs | Cannot quantify avoidable external funding | Obtain facility statements, interest, FX, tax, and transfer cost data | Treasurer / FP&A | High |
 | DQ-10 | No account dependency/signatory/closure-cost data | Dormant does not equal closable | Perform local account certification and closure checklist | Regional Controllers | High |
 | DQ-11 | Entity revenue sums to $3.9bn versus $3.8bn in the client brief | Entity-level sizing and denominator-based metrics could be misstated | Reconcile scope, period, eliminations, and rounding with Group Finance | Group Finance | Medium |
+| DQ-12 | No AR ledger, receipt, remittance, match-status, reason, or aging data | Receivables reconciliation cannot be diagnosed | Obtain reconciled receivables extracts and source-system controls | Group Finance / AR owner | High |
+| DQ-13 | FX file contains rates only; no trades, exposures, hedges, spreads/fees, or settlements | FX transaction patterns, costs, and risks cannot be diagnosed | Obtain FX transaction/exposure extracts and policy context | Group Treasury / Finance | High |
+| DQ-14 | Payment extract control total and sampling method are absent | Rates may not represent ACG's full payment population | Reconcile record/value totals to source and document extract logic | Shared Services / Data owner | High |
+| DQ-15 | Payment file implies 79.83 exceptions and 55.78 repair hours/month versus process estimates of 180 and 102.60 | Process capacity and root-cause baselines may use different scope or periods | Reconcile definitions, populations, periods, and manual-percentage treatment | Shared Services / Process owner | High |
 
 ## What can and cannot be answered confidently
 
-**Can be answered now:** dataset population and integrity; account/entity/bank/currency footprint; historical date-level reporting delay; supplied source-quality mix; descriptive manual/exception/late rates; preliminary restricted/dormant populations; reproducible control totals.
+**Can be answered now:** supplied-dataset population and internal integrity; account/entity/bank/currency footprint; historical date-level reporting delay; supplied source-quality mix; descriptive rates within the 7,600-record payment file; preliminary restricted/dormant populations; reproducible control totals.
 
-**Cannot yet be answered confidently:** cash movable within 24 hours; accounts that can actually close; avoidable borrowing; cashable fee or labor savings; payment-exception root causes; legal feasibility of pooling; reconciled revenue by entity; target platform; or the preferred operating model.
+**Cannot yet be answered confidently:** cash movable within 24 hours; accounts that can actually close; avoidable borrowing; cashable fee or labor savings; payment-exception root causes or population rates; receivables-reconciliation performance; FX transaction/exposure patterns; legal feasibility of pooling; reconciled revenue by entity; target platform; or the preferred operating model.
 
 ## Week 2 analysis conditions
 
-Proceed with transparent definitions, scenario ranges, and flags for unvalidated restrictions. Keep raw files unchanged, write all calculated outputs to `data/processed/`, reconcile every segmentation to the baselines above, and do not promote apparent liquidity or estimated effort into benefits without client validation.
+Proceed with transparent definitions, alternative metric sensitivities, scenario ranges, and flags for unvalidated restrictions. Keep raw files unchanged, write all calculated outputs to `data/processed/`, reconcile every segmentation to the baselines above, and do not promote apparent liquidity, sample rates, or estimated effort into benefits without client validation. Treat receivables and FX as explicit evidence gaps until the requested extracts arrive.
 
 ## Reproducibility
 
