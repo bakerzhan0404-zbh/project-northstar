@@ -1,5 +1,7 @@
 # Week 1 — Data Quality and Readiness Report
 
+**Classification:** Confidential — `ACG-DATA` and `ANALYST-CALC`; limitations and treatments are `ANALYST-JUDGMENT`
+
 ## Executive conclusion
 
 The six supplied datasets are **technically fit for Week 2 diagnostic analysis with controls, but not sufficient by themselves for a final liquidity or benefits decision**. All 10 supplied tests and all 52 expanded Week 1 checks pass. Keys are unique, required relationships resolve, the six-month balance and FX-rate panels are complete, required fields are populated, and payment currencies match their debit accounts.

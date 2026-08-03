@@ -1,5 +1,7 @@
 # Project Northstar — Workplan
 
+**Classification:** Confidential — working plan pending client/manager review
+
 ## Current steering decision
 
 By the end-of-Week-4 steering committee, decide whether to authorize a 90-day mobilization, the transformation ambition and Wave 1 initiatives, a funding/benefit validation range, required governance and controls, and deferred decisions.
