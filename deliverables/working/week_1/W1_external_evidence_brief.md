@@ -1,58 +1,43 @@
 # Week 1 — External Evidence Brief
 
-**Purpose:** use official JPMorgan public material to challenge and refine ACG hypotheses—not to select a product or copy another client's solution.  
-**Access/verification date:** 2 August 2026
+**Classification:** Confidential — Project Northstar simulated client material
+
+**Purpose:** use public evidence to refine ACG hypotheses, not select a product or copy a client solution
+
+**Verified:** 2 August 2026; full claim records and limitations are in `W1_source_log.csv`
 
 ## Three observations that change the workplan
 
 ### 1. Automation presence is not end-to-end automation
 
-J.P. Morgan Payments reports that 87% of surveyed organizations have some treasury/payments automation, while only 39% describe their systems as mostly or fully automated (ASUG/J.P. Morgan, n=107). This supports testing the full ACG workflow rather than counting API or host-to-host connections. ACG already shows the same structural warning: 58.18% of balance observations are same-day, while 41.82% arrive later; 31.51% of payments require manual touch.
+**[JPM-PUBLIC — S01](https://www.jpmorgan.com/insights/payments/trends-innovation/payments-outlook-trends-2026).** J.P. Morgan Payments reports that 87% of surveyed organizations have some treasury/payments automation, while 39% describe their systems as mostly or fully automated (ASUG/J.P. Morgan, n=107). Test ACG's workflow from source through reconciliation—not whether an API exists.
 
-**Evidence needed at ACG:** workflow steps from source creation through reconciliation, interface coverage, exception handling, reference-data ownership, and timestamps.  
-**Limitation/alternative interpretation:** the survey is small and SAP-oriented; adoption levels are not performance targets and do not prove automation causes better outcomes.  
-**Hypothesis effect:** strengthens the hypothesis that process/data standardization must precede or accompany connectivity.
+**ACG test — ANALYST-CALC A02/A03.** Only 32 of 55 accounts are reported on the balance date; 31.51% of supplied payment records have manual touch. Obtain timestamps, interface coverage, exception handling, and data ownership. The small, SAP-oriented survey is neither a target nor causal proof; it supports testing process/data standards alongside connectivity.
 
-### 2. Scale and acquisition can create fragmentation, but account count alone does not prove inefficiency
+### 2. Growth can create fragmentation, but account count alone proves little
 
-The Fortescue public story describes growth to more than 180 accounts across countries and currencies, followed by standardized connectivity and liquidity changes. Ansys describes acquisition-driven decentralization and reports rationalizing more than 80 accounts across 27 banks while improving visibility over $550 million. These cases make structural drivers—entities, markets, currencies, acquisitions, connectivity, and purpose—more relevant than a raw account-count benchmark.
+**JPM-PUBLIC — [S02](https://www.jpmorgan.com/insights/treasury/liquidity-management/fortescue-global-treasury-transformation)/[S03](https://www.jpmorgan.com/insights/treasury/liquidity-management/emea-treasury-transformation-ansys).** Fortescue describes growth to 180+ accounts across countries/currencies. Ansys reports rationalizing 80+ accounts across 27 banks and visibility over $550m after acquisition-driven decentralization.
 
-**Evidence needed at ACG:** transaction activity, purpose, balance behavior, local requirements, signatories, service dependencies, fees, and closure costs for each account.  
-**Limitation/alternative interpretation:** both are JPMorgan client-success stories and do not disclose counterfactuals, total program cost, full methodology, or unsuccessful elements.  
-**Hypothesis effect:** weakens any claim that 55 accounts are inherently excessive; supports a rules-based closure-validation cohort.
+**ACG test — ACG-DATA/ANALYST-JUDGMENT.** Assess activity, purpose, balance behavior, local requirements, dependencies, fees, and closure costs. These sponsor-published stories omit full cost and counterfactuals; they do not support raw account count as a benchmark. Use rules-based closure validation.
 
-### 3. Structured data and local-market design are prerequisites to useful automation
+### 3. Structured source data and local-market design precede useful automation
 
-J.P. Morgan's ISO 20022 explainer states that structured, richer payment data can improve reconciliation, integration, screening, and automation; JPMorgan Chase states it went live with ISO 20022 in March 2023. The Mettler-Toledo China story links document-free cross-border processing, ERP integration, and local-market design to shorter processing and less manual work. For ACG, this reinforces Lucas Schneider's claim that incomplete invoice and beneficiary information—not only the bank platform—may drive repair.
+**JPM-PUBLIC — [S04](https://www.jpmorgan.com/insights/treasury/treasury-management/mettler-toledo-china-treasury-transformation)/[S05](https://www.jpmorgan.com/insights/treasury/treasury-management/what-is-iso-20022).** J.P. Morgan states structured payment data can support reconciliation and automation; its Mettler-Toledo China case links local design and ERP integration to less manual processing.
 
-**Evidence needed at ACG:** exception reason codes, mandatory-field completeness, payment-format map, beneficiary-master ownership, rejection detail, and local documentation requirements.  
-**Limitation/alternative interpretation:** ISO 20022 does not repair poor source data by itself, and the China case may depend on market-specific programs unavailable elsewhere.  
-**Hypothesis effect:** prioritizes data ownership and intake standards; does not turn Northstar into an ISO migration project.
+**ACG test — ACG-DATA/ANALYST-JUDGMENT.** Obtain exception reasons, field completeness, formats, beneficiary ownership, and local rules. ISO 20022 cannot repair poor source data; a China-specific program may not transfer. Prioritize ownership and intake standards, not an ISO migration.
 
-## Transformation-case comparison
+## Required three-case sample from S06
 
-| Case | Context/problem | Intervention described publicly | Reported outcome | Evidence strength | Relevance and caution for ACG |
-|---|---|---|---|---|---|
-| Fortescue | Global growth; 180+ accounts; manual reconciliation; cross-border complexity | Standardized connectivity, liquidity, account, FX, and trade capabilities | Near-real-time visibility across 14 countries; less manual administration | Medium-low: named client, concrete footprint, but marketing case with limited methodology | Tests whether ACG needs scalable standards before another acquisition; does not establish product fit |
-| Ansys | Acquisition-driven decentralization; small teams; local forecasting | EMEA liquidity centralization, multi-entity/multicurrency structure, host-to-host reporting | 80+ accounts rationalized across 27 banks; visibility over $550m | Medium-low: quantified outcome but no cost or counterfactual | Supports regional option design; ACG must validate restrictions and local service needs first |
-| Mettler-Toledo China | Manual documentation, AR reconciliation, time-zone funding constraints | Local cross-border simplification, ERP integration, reference-based reconciliation, on-demand funding | Processing reduced from 3–4 days to one; one FTE reportedly freed; less paper | Medium-low: quantified but market-specific and sponsor-published | Demonstrates local tailoring and upstream data importance; outcomes cannot be transplanted to ACG |
+The required [S06 client-story](https://www.jpmorgan.com/payments/client-stories) sample uses Fortescue, Ansys, and Mettler-Toledo; individual pages are logged as S02–S04.
 
-## Repeated themes and evidence gaps
+| Case | Context and intervention | Reported outcome | Evidence strength and ACG relevance |
+|---|---|---|---|
+| Fortescue | Global growth, 180+ accounts, manual reconciliation; standardized connectivity and liquidity capabilities | Near-real-time visibility across 14 countries and less manual administration | Medium-low: named footprint but sponsor-published. Tests scalable standards; does not establish product fit. |
+| Ansys | Acquisition-driven decentralization; EMEA liquidity centralization and host-to-host reporting | 80+ accounts rationalized across 27 banks; visibility over $550m | Medium-low: quantified but no full economics. Supports a regional option subject to ACG constraints. |
+| Mettler-Toledo China | Manual documentation/AR reconciliation; local simplification and ERP integration | Processing reportedly fell from 3–4 days to one and one FTE was freed | Medium-low: quantified but market-specific. Reinforces local tailoring and upstream-data discipline. |
 
-**Themes across sources:** (1) connectivity creates value only when processes and data are standardized; (2) visibility and liquidity design must follow entity and local-market constraints; (3) transformation combines operating-model change, governance, and technology rather than technology alone.
+## Synthesis and boundaries
 
-**External evidence remains insufficient on:** (1) the proportion of ACG balances legally and operationally movable within 24 hours; and (2) the cost, timing, control risk, and realized benefit of a comparable transformation under ACG's three-ERP and funding constraints.
+Three themes shape Week 2: connectivity depends on standardized data/processes; liquidity design must respect entity/local constraints; and transformation combines governance, controls, operating-model change, and technology. External evidence cannot establish ACG cash movable within 24 hours or ACG-specific economics and risk.
 
-## Why no public solution was copied
-
-The cases differ in industry, scale, jurisdictions, systems, legal structure, and starting maturity. They are sponsor-published success stories, not controlled comparisons. Northstar therefore uses them to form questions and option criteria. ACG's recommendation must be derived from reconciled client data, locally validated constraints, explicit assumptions, credible alternatives, and quantified implementation conditions.
-
-## Sources
-
-- [J.P. Morgan Payments, “Payments Outlook: Five Trends Powering Payments in 2026,” 23 Apr. 2026](https://www.jpmorgan.com/insights/payments/trends-innovation/payments-outlook-trends-2026)
-- [J.P. Morgan Payments, “Fortescue's Global Treasury Transformation,” 19 Jun. 2026](https://www.jpmorgan.com/insights/treasury/liquidity-management/fortescue-global-treasury-transformation)
-- [J.P. Morgan Payments, “Ansys transforms treasury through centralized liquidity solution,” 20 Aug. 2024](https://www.jpmorgan.com/insights/treasury/liquidity-management/emea-treasury-transformation-ansys)
-- [J.P. Morgan Payments, “Mettler-Toledo's Treasury Transformation in China,” 22 Jul. 2025](https://www.jpmorgan.com/insights/treasury/treasury-management/mettler-toledo-china-treasury-transformation)
-- [J.P. Morgan, “ISO 20022 Migration: The journey to faster payments automation”](https://www.jpmorgan.com/insights/treasury/treasury-management/what-is-iso-20022)
-- [J.P. Morgan Payments client stories](https://www.jpmorgan.com/payments/client-stories)
-
+No public solution was copied: the cases differ in industry, scale, jurisdictions, systems, legal structure, and maturity. They are marketing evidence, not controlled comparisons. ACG's recommendation must come from reconciled client evidence, explicit assumptions, tested alternatives, and implementation conditions. Complete citations, publication/access dates, methods, and limitations are in `W1_source_log.csv`.
