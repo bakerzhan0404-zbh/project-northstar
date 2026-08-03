@@ -19,6 +19,12 @@ def metric(name: str, value, unit: str, source: str, note: str = "") -> dict:
     return {"metric": name, "value": value, "unit": unit, "source": source, "note": note}
 
 
+def missing_mask(series: pd.Series) -> pd.Series:
+    """Treat nulls and blank text as missing while preserving valid labels."""
+    blank = series.astype("string").str.strip().eq("").fillna(False)
+    return series.isna() | blank
+
+
 def main() -> None:
     PROCESSED.mkdir(parents=True, exist_ok=True)
     data = load_data()
@@ -112,13 +118,22 @@ def main() -> None:
     missing_rows = []
     for dataset_name, frame in data.items():
         for column in frame.columns:
+            missing = missing_mask(frame[column])
             missing_rows.append({
                 "dataset": dataset_name,
                 "column": column,
-                "missing_count": int(frame[column].isna().sum()),
-                "missing_rate_pct": round(100 * frame[column].isna().mean(), 4),
+                "missing_count": int(missing.sum()),
+                "missing_rate_pct": round(100 * missing.mean(), 4),
             })
 
+    balance_dates = pd.DatetimeIndex(sorted(balances["date"].unique()))
+    expected_dates = pd.date_range(balance_dates.min(), balance_dates.max(), freq="D")
+    payment_flag_columns = [
+        "cross_border_flag",
+        "manual_touch_flag",
+        "exception_flag",
+        "late_release_flag",
+    ]
     checks = [
         ("entity_primary_key_unique", entities["entity_id"].is_unique),
         ("account_primary_key_unique", accounts["account_id"].is_unique),
@@ -137,7 +152,22 @@ def main() -> None:
         ("available_not_above_positive_closing", (balances.loc[balances["closing_balance_local"] > 0, "available_balance_local"] <= balances.loc[balances["closing_balance_local"] > 0, "closing_balance_local"]).all()),
         ("repair_minutes_nonnegative", payments["repair_minutes"].ge(0).all()),
         ("nonexception_repair_minutes_zero", payments.loc[~payments["exception_flag"], "repair_minutes"].eq(0).all()),
-        ("all_required_fields_complete", all(frame.notna().all().all() for frame in data.values())),
+        ("all_required_fields_complete", all(not missing_mask(frame[column]).any() for frame in data.values() for column in frame.columns)),
+        ("entity_region_domain_valid", entities["region"].isin({"NA", "EMEA", "APAC"}).all()),
+        ("account_status_domain_valid", accounts["status"].isin({"Active", "Dormant"}).all()),
+        ("visibility_method_domain_valid", accounts["visibility_method"].isin({"API", "Host-to-host", "Portal", "Spreadsheet"}).all()),
+        ("balance_source_quality_domain_valid", balances["source_quality"].isin({"Automated", "Manually reported", "Estimated"}).all()),
+        ("payment_status_domain_valid", payments["status"].isin({"Completed", "Repaired", "Rejected", "Pending"}).all()),
+        ("restricted_flag_is_boolean", pd.api.types.is_bool_dtype(accounts["restricted_flag"])),
+        ("payment_flags_are_boolean", all(pd.api.types.is_bool_dtype(payments[column]) for column in payment_flag_columns)),
+        ("fx_rates_positive", fx["usd_per_unit"].gt(0).all()),
+        ("payment_amounts_positive", payments["amount_local"].gt(0).all()),
+        ("payment_fees_nonnegative", payments["fee_usd"].ge(0).all()),
+        ("account_fees_nonnegative", accounts["annual_fee_usd"].ge(0).all()),
+        ("balance_date_range_contiguous", balance_dates.equals(expected_dates)),
+        ("fx_dates_match_balance_dates", pd.DatetimeIndex(sorted(fx["date"].unique())).equals(balance_dates)),
+        ("process_numeric_inputs_nonnegative", process[["frequency_per_month", "minutes_per_instance", "loaded_hourly_cost_usd"]].ge(0).all().all()),
+        ("process_manual_percentage_in_range", process["manual_percentage"].between(0, 100).all()),
     ]
     check_frame = pd.DataFrame(checks, columns=["check", "passed"])
 
