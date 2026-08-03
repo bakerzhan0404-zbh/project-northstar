@@ -61,6 +61,21 @@ def main() -> None:
     latest_balances = balances[balances["date"] == latest_date]
     expected_balance_rows = accounts["account_id"].nunique() * balances["date"].nunique()
     expected_fx_rows = fx["currency"].nunique() * fx["date"].nunique()
+    same_day = balances["reporting_delay_days"].eq(0)
+    balances["positive_closing_usd"] = balances["closing_balance_usd"].clip(lower=0)
+    latest_balances = balances[balances["date"] == latest_date]
+    latest_balances_same_day = latest_balances["reporting_delay_days"].eq(0)
+    latest_positive_available = latest_balances["available_balance_usd"].clip(lower=0)
+    payment_exception_process = process[process["process"].eq("Payment exception repair")].iloc[0]
+
+    expected_schemas = {
+        "entities": ["entity_id", "entity_name", "region", "country", "functional_currency", "revenue_usd_m", "erp_system", "acquisition_origin", "cash_restriction_level"],
+        "accounts": ["account_id", "entity_id", "bank_name", "country", "currency", "purpose", "open_date", "status", "visibility_method", "sweep_structure", "annual_fee_usd", "restricted_flag"],
+        "balances": ["date", "account_id", "closing_balance_local", "available_balance_local", "reported_to_group_date", "source_quality"],
+        "payments": ["payment_id", "payment_date", "account_id", "payment_type", "currency", "amount_local", "cross_border_flag", "manual_touch_flag", "exception_flag", "late_release_flag", "repair_minutes", "fee_usd", "status"],
+        "fx": ["date", "currency", "usd_per_unit"],
+        "process": ["team", "process", "frequency_per_month", "minutes_per_instance", "manual_percentage", "loaded_hourly_cost_usd", "control_criticality"],
+    }
 
     rows = [
         metric("entity_rows", len(entities), "rows", "entity_master.csv"),
@@ -83,8 +98,11 @@ def main() -> None:
         metric("balance_dates", balances["date"].nunique(), "calendar days", "daily_balances.csv"),
         metric("expected_balance_rows", expected_balance_rows, "rows", "calculation"),
         metric("balance_row_completeness", round(100 * len(balances) / expected_balance_rows, 2), "%", "calculation"),
-        metric("same_day_visibility_observations", balances["reporting_delay_days"].eq(0).sum(), "observations", "calculation"),
-        metric("same_day_visibility_rate", round(100 * balances["reporting_delay_days"].eq(0).mean(), 2), "%", "calculation"),
+        metric("same_day_visibility_accounts", balances.loc[same_day, "account_id"].nunique(), "accounts", "calculation", "Count-weighted proxy; not percent of cash"),
+        metric("same_day_visibility_observations", same_day.sum(), "account-days", "calculation", "32 of 55 accounts repeat for each of 181 days"),
+        metric("same_day_visibility_rate", round(100 * same_day.mean(), 2), "% of account-days", "calculation", "Not start-of-day or percent of cash"),
+        metric("within_one_day_visibility_rate", round(100 * balances["reporting_delay_days"].le(1).mean(), 2), "% of account-days", "calculation", "Sensitivity only; not proof of within 24 hours"),
+        metric("positive_closing_value_weighted_same_day_rate", round(100 * balances.loc[same_day, "positive_closing_usd"].sum() / balances["positive_closing_usd"].sum(), 2), "% of positive closing USD", "calculation", "Value-weighted sensitivity; not start-of-day"),
         metric("one_day_delayed_observations", balances["reporting_delay_days"].eq(1).sum(), "observations", "calculation"),
         metric("two_or_more_day_delayed_observations", balances["reporting_delay_days"].ge(2).sum(), "observations", "calculation"),
         metric("maximum_reporting_delay", balances["reporting_delay_days"].max(), "days", "calculation"),
@@ -92,7 +110,10 @@ def main() -> None:
         metric("manually_reported_balance_observations", balances["source_quality"].eq("Manually reported").sum(), "observations", "daily_balances.csv"),
         metric("estimated_balance_observations", balances["source_quality"].eq("Estimated").sum(), "observations", "daily_balances.csv"),
         metric("latest_closing_balance", round(latest_balances["closing_balance_usd"].sum(), 2), "USD", "calculation", "Ledger balance; not proof of transferability"),
-        metric("latest_available_balance", round(latest_balances["available_balance_usd"].sum(), 2), "USD", "calculation", "Estimated availability; requires validation"),
+        metric("latest_available_balance", round(latest_balances["available_balance_usd"].sum(), 2), "USD", "calculation", "Net estimated availability after negative positions; requires validation"),
+        metric("latest_gross_positive_available_balance", round(latest_positive_available.sum(), 2), "USD", "calculation", "Gross positive estimate before negative positions; requires validation"),
+        metric("latest_negative_available_balance", round(latest_balances.loc[latest_balances["available_balance_usd"] < 0, "available_balance_usd"].sum(), 2), "USD", "calculation", "Two negative account positions"),
+        metric("latest_positive_available_value_weighted_same_day_rate", round(100 * latest_positive_available[latest_balances_same_day].sum() / latest_positive_available.sum(), 2), "% of positive available USD", "calculation", "30 Jun. sensitivity; not start-of-day"),
         metric("fx_rows", len(fx), "rows", "fx_rates.csv"),
         metric("fx_currencies", fx["currency"].nunique(), "currencies", "fx_rates.csv"),
         metric("fx_dates", fx["date"].nunique(), "calendar days", "fx_rates.csv"),
@@ -101,7 +122,7 @@ def main() -> None:
         metric("unique_payments", payments["payment_id"].nunique(), "payments", "payments.csv"),
         metric("payment_start_date", payments["payment_date"].min().date().isoformat(), "date", "payments.csv"),
         metric("payment_end_date", payments["payment_date"].max().date().isoformat(), "date", "payments.csv"),
-        metric("payment_value_control_total", round(payment_enriched["amount_usd"].sum(), 2), "USD", "calculation"),
+        metric("gross_supplied_payment_value_control_total", round(payment_enriched["amount_usd"].sum(), 2), "USD", "calculation", "Includes every supplied status; not settled value"),
         metric("payment_fee_control_total", round(payments["fee_usd"].sum(), 2), "USD", "payments.csv", "Estimated fees, not actual bank pricing"),
         metric("manual_touch_payments", payments["manual_touch_flag"].sum(), "payments", "payments.csv"),
         metric("manual_touch_rate", round(100 * payments["manual_touch_flag"].mean(), 2), "%", "calculation"),
@@ -110,7 +131,15 @@ def main() -> None:
         metric("late_release_payments", payments["late_release_flag"].sum(), "payments", "payments.csv"),
         metric("late_release_rate", round(100 * payments["late_release_flag"].mean(), 2), "%", "calculation"),
         metric("rejected_payments", payments["status"].eq("Rejected").sum(), "payments", "payments.csv"),
+        metric("pending_payments", payments["status"].eq("Pending").sum(), "payments", "payments.csv", "Status as of extract is not supplied"),
+        metric("rejected_payment_value", round(payment_enriched.loc[payment_enriched["status"].eq("Rejected"), "amount_usd"].sum(), 2), "USD", "calculation", "Included in gross supplied value; not settled"),
+        metric("pending_payment_value", round(payment_enriched.loc[payment_enriched["status"].eq("Pending"), "amount_usd"].sum(), 2), "USD", "calculation", "Included in gross supplied value; settlement unknown"),
         metric("repair_minutes", payments["repair_minutes"].sum(), "minutes", "payments.csv", "Management-estimated effort"),
+        metric("payment_file_exception_volume_monthly", round(payments["exception_flag"].sum() / 6, 2), "payments/month", "calculation", "Six-month supplied payment file"),
+        metric("payment_file_repair_hours_monthly", round(payments["repair_minutes"].sum() / 60 / 6, 2), "hours/month", "calculation", "Six-month supplied payment file"),
+        metric("process_file_exception_volume_monthly", payment_exception_process["frequency_per_month"], "instances/month", "process_activity.csv", "Management estimate; scope differs from payment file"),
+        metric("process_file_exception_manual_hours_monthly", round(payment_exception_process["frequency_per_month"] * payment_exception_process["minutes_per_instance"] * payment_exception_process["manual_percentage"] / 100 / 60, 2), "hours/month", "calculation", "Management estimate; scope differs from payment file"),
+        metric("payment_extract_external_control_status", "Not provided", "status", "project package", "Representativeness cannot be established"),
         metric("process_rows", len(process), "activities", "process_activity.csv"),
         metric("estimated_manual_process_hours_monthly", round((process["frequency_per_month"] * process["minutes_per_instance"] * process["manual_percentage"] / 100 / 60).sum(), 2), "hours/month", "calculation", "Management estimates; not time-and-motion evidence"),
     ]
@@ -168,6 +197,25 @@ def main() -> None:
         ("fx_dates_match_balance_dates", pd.DatetimeIndex(sorted(fx["date"].unique())).equals(balance_dates)),
         ("process_numeric_inputs_nonnegative", process[["frequency_per_month", "minutes_per_instance", "loaded_hourly_cost_usd"]].ge(0).all().all()),
         ("process_manual_percentage_in_range", process["manual_percentage"].between(0, 100).all()),
+        ("entity_schema_exact", list(entities.columns) == expected_schemas["entities"]),
+        ("account_schema_exact", list(accounts.columns) == expected_schemas["accounts"]),
+        ("balance_schema_exact", list(data["balances"].columns) == expected_schemas["balances"]),
+        ("payment_schema_exact", list(payments.columns) == expected_schemas["payments"]),
+        ("fx_schema_exact", list(fx.columns) == expected_schemas["fx"]),
+        ("process_schema_exact", list(process.columns) == expected_schemas["process"]),
+        ("balance_period_matches_project", balances["date"].min() == pd.Timestamp("2026-01-01") and balances["date"].max() == pd.Timestamp("2026-06-30")),
+        ("fx_period_matches_project", fx["date"].min() == pd.Timestamp("2026-01-01") and fx["date"].max() == pd.Timestamp("2026-06-30")),
+        ("visibility_source_quality_mapping_valid", balances["source_quality"].eq(balances["visibility_method"].map({"API": "Automated", "Host-to-host": "Automated", "Portal": "Manually reported", "Spreadsheet": "Estimated"})).all()),
+        ("repaired_payments_are_exceptions", payments.loc[payments["status"].eq("Repaired"), "exception_flag"].all()),
+        ("rejected_payments_are_exceptions", payments.loc[payments["status"].eq("Rejected"), "exception_flag"].all()),
+        ("completed_payments_are_not_exceptions", (~payments.loc[payments["status"].eq("Completed"), "exception_flag"]).all()),
+        ("exception_payments_have_repair_minutes", payments.loc[payments["exception_flag"], "repair_minutes"].gt(0).all()),
+        ("account_purpose_domain_valid", accounts["purpose"].isin({"Operating", "Collection", "Payroll", "Tax", "Legacy"}).all()),
+        ("sweep_structure_domain_valid", accounts["sweep_structure"].isin({"None", "Domestic sweep", "Regional pool"}).all()),
+        ("entity_restriction_domain_valid", entities["cash_restriction_level"].isin({"Low", "Medium", "High"}).all()),
+        ("payment_type_domain_valid", payments["payment_type"].isin({"Local transfer", "ACH", "Wire", "Payroll", "Tax", "Internal transfer"}).all()),
+        ("process_control_criticality_domain_valid", process["control_criticality"].isin({"Low", "Medium", "High"}).all()),
+        ("payment_dates_have_fx_coverage", payment_enriched["payment_date"].between(fx["date"].min(), fx["date"].max()).all()),
     ]
     check_frame = pd.DataFrame(checks, columns=["check", "passed"])
 
