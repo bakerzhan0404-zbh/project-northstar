@@ -10,9 +10,14 @@ unique_accounts,55,accounts,bank_accounts.csv,
 active_accounts,51,accounts,bank_accounts.csv,
 dormant_accounts,4,accounts,bank_accounts.csv,
 restricted_accounts_preliminary,21,accounts,bank_accounts.csv,Requires legal/tax validation
+restricted_account_rate,38.18,% of accounts,calculation,Preliminary flags; not legal/tax conclusions
+entities_with_preliminary_restricted_accounts,16,entities,calculation,Requires local validation
+countries_with_preliminary_restricted_accounts,13,countries,calculation,Requires local validation
 banks,5,banks,bank_accounts.csv,
 account_currencies,10,currencies,bank_accounts.csv,
 annual_account_fee_control_total,110100,USD/year,bank_accounts.csv,"Estimated, not actual pricing"
+dormant_zero_payment_legacy_candidates,4,accounts,calculation,Closure-validation candidates only; local dependencies unknown
+dormant_zero_payment_legacy_candidate_fees,7800,USD/year,calculation,Gross estimated fees before closure cost or feasibility validation
 balance_rows,9955,rows,daily_balances.csv,
 balance_start_date,2026-01-01,date,daily_balances.csv,
 balance_end_date,2026-06-30,date,daily_balances.csv,
@@ -26,6 +31,8 @@ within_one_day_visibility_rate,74.55,% of account-days,calculation,Sensitivity o
 positive_closing_value_weighted_same_day_rate,55.14,% of positive closing USD,calculation,Value-weighted sensitivity; not start-of-day
 one_day_delayed_observations,1629,observations,calculation,
 two_or_more_day_delayed_observations,2534,observations,calculation,
+median_two_plus_day_stale_positive_balance,18320212.25,USD/day,calculation,Positive closing value reported at least two calendar days late; not a loss estimate
+minimum_two_plus_day_stale_positive_balance,16392291.63,USD/day,calculation,Positive closing value reported at least two calendar days late; not a loss estimate
 maximum_reporting_delay,3,days,calculation,
 automated_balance_observations,5792,observations,daily_balances.csv,
 manually_reported_balance_observations,1629,observations,daily_balances.csv,
@@ -56,6 +63,13 @@ pending_payments,17,payments,payments.csv,Status as of extract is not supplied
 rejected_payment_value,2183098.42,USD,calculation,Included in gross supplied value; not settled
 pending_payment_value,1551397.06,USD,calculation,Included in gross supplied value; settlement unknown
 repair_minutes,20080,minutes,payments.csv,Management-estimated effort
+manual_payment_exception_share,63.47,% of exceptions,calculation,Association within supplied records; not causal attribution
+manual_payment_repair_share,63.35,% of repair minutes,calculation,Association within supplied records; not causal attribution
+manual_local_wire_ach_repair_share,49.6,% of repair minutes,calculation,"Manual local transfer, wire, and ACH cohorts combined"
+cross_border_wire_payment_share,10.34,% of payments,calculation,Within supplied records; population representativeness unproven
+cross_border_wire_exception_rate,13.99,%,calculation,Within supplied records; reason codes absent
+cross_border_wire_late_release_rate,8.78,%,calculation,Within supplied records; cutoff timestamps absent
+cross_border_wire_repair_share,24.51,% of repair minutes,calculation,Within supplied records; repair time is management-estimated
 payment_file_exception_volume_monthly,79.83,payments/month,calculation,Six-month supplied payment file
 payment_file_repair_hours_monthly,55.78,hours/month,calculation,Six-month supplied payment file
 process_file_exception_volume_monthly,180,instances/month,process_activity.csv,Management estimate; scope differs from payment file
@@ -63,3 +77,7 @@ process_file_exception_manual_hours_monthly,102.6,hours/month,calculation,Manage
 payment_extract_external_control_status,Not provided,status,project package,Representativeness cannot be established
 process_rows,9,activities,process_activity.csv,
 estimated_manual_process_hours_monthly,617.72,hours/month,calculation,Management estimates; not time-and-motion evidence
+high_control_criticality_processes,6,activities,process_activity.csv,Control-critical does not mean the current manual method must remain
+high_control_manual_hours_monthly,315.48,hours/month,calculation,Management estimates; controls must be preserved or replaced
+illustrative_15pct_capacity_redeployment,1111.89,hours/year,calculation,Sensitivity only; not headcount or cashable savings
+illustrative_20pct_capacity_redeployment,1482.52,hours/year,calculation,Sensitivity only; not headcount or cashable savings
