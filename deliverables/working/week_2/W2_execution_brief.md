@@ -33,6 +33,21 @@ I will not begin with a predetermined solution. I will build the diagnostic in s
 9. I will add code, generated outputs, tests, and the related analysis-log update to the same logical analytical commit.
 10. I will stage explicit file paths, review the staged diff, commit locally, and avoid including `.DS_Store` files.
 
+## Week 1 hypothesis thresholds I will carry forward
+
+These are intentionally ambitious `ANALYST-ASSUMPTION` tests, not findings. I will retain them as the Week 2 base and stress cases unless new evidence supports a documented change.
+
+| Theme | Base hypothesis | Stress, stretch, or acceptance test |
+|---|---|---|
+| Liquidity | Validate at least $35m as movable within 24 hours | $21m stress; $46.2m upside |
+| Accounts | Close all four dormant candidates within 12 months | Two closures under stress; ten remains management's stretch |
+| Visibility | Reach 50/55 same-day accounts and reduce median delayed positive availability below $5m | Upgrade 18/23 delayed accounts, including 12/14 spreadsheet accounts |
+| Payment friction | Reach no more than 20% manual touch, 4% exceptions, 3.5% late release, and 12,000 repair minutes | Cross-border cohort at no more than 7% exceptions, 5% late release, 2,500 repair minutes, and zero critical failures |
+| Capacity | Redeploy at least 150 hours/month; test 53.31 hours/month in receipt reconciliation | One-third realization stress equals 50 hours/month |
+| Restrictions and FX | Clear at least $2.01m of flagged positive availability; test 25–50 basis points of cross-border cost | $4.03m restriction-clearance stretch; 95% FX evidence reconciliation gate |
+| Execution | Pilot 10 delayed accounts before the remaining eight-account rollout | Four consecutive weeks meeting service gates; rollback within four hours |
+| Benefits | Require complete evidence and Finance approval for every funded-base benefit | Recommendation survives $21m mobility, two closures, and 50 hours/month; realized value reaches 90% of target for three months |
+
 ## P0 mission 1 — Establish the analytical contract and baseline
 
 ### What I will do
