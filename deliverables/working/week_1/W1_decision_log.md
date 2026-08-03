@@ -9,6 +9,8 @@
 | DEC-03 | 2026-08-02 | Do not count positive/available balance as mobilizable cash | Analyst | Legal, tax, regulatory, operational, and timing validation absent | Build scenarios and obtain local sign-off | Liquidity validation matrix | Daniel Wu | Before Week 3 |
 | DEC-04 | 2026-08-02 | Use JPMorgan public cases only as hypothesis/context evidence | Analyst | Case studies are sponsor-published and not causal proof | Record limitations and ACG evidence tests | Maintain source log | Baker | Ongoing |
 | DEC-05 | 2026-08-02 | Classify Week 1 overall status Amber | Analyst | Structural data passes, but high-impact semantic gaps remain | Escalate owners and validation actions | Review at Week 2 checkpoint | Baker | 2026-08-09 |
+| DEC-06 | 2026-08-02 | Label 58.18% as a count-weighted account-day proxy, not percent of cash or start-of-day coverage | Analyst | 32 of 55 same-day accounts repeat across 181 dates and timestamps are absent | Show within-one-day and positive-value sensitivities separately | Replace when timestamped logs arrive | Daniel Wu / Sarah Coleman | Week 2 |
+| DEC-07 | 2026-08-02 | Treat $198.14m as gross supplied-record value and keep payment/process estimates separate | Analyst | Rejected/pending records are included and exception scopes do not reconcile | Obtain extract controls and reconcile process definitions | Update diagnostic baseline | Shared Services / Data owner | Week 2 |
 
 ## Open client decisions
 
@@ -17,4 +19,6 @@
 | Definition of reliable daily visibility | Start-of-day; by cutoff; within 24 hours | Use timestamped coverage, balance type, confidence, and reconciliation | Report logs and operating need | Daniel Wu | Week 2 |
 | Operating autonomy model | Centralized; federated; local stabilization | Keep all three options open; define non-negotiable local service rights | Role capacity, controls, local constraints | Steering committee | Week 3 |
 | Closure-validation threshold | Dormant only; low activity; combined criteria | Use transparent multi-factor criteria with local sign-off | Activity, purpose, dependencies, closure cost | Regional Controllers | Week 2 |
-| Wave 1 pilot | Entity/region/process alternatives | Select outside peak period with rollback and SLA gates | Peak calendar, readiness, baseline, risks | Rachel Kim / Daniel Wu | Week 3 |
+| Wave 1 deployment sequence | Pilot-first; phased regional; process-led; other controlled sequence | Compare readiness and service risk; require peak blackout, rollback, SLA, and control gates | Peak calendar, dependencies, readiness, baselines, risks | Rachel Kim / Daniel Wu | Week 3 |
+| Revenue and extract baselines | Accept supplied figures; reconcile; constrain use | Reconcile before denominator-based analysis or benefits | Revenue perimeter; payment source totals/sampling; process scope | Group Finance / Data owners | Week 2 |
+| Receivables and FX evidence coverage | Supply data; narrow scope; defer conclusions | Request controlled extracts and explicitly constrain conclusions until received | AR/remittance/matching and FX transaction/exposure records | Group Finance / Group Treasury | Week 2 |
