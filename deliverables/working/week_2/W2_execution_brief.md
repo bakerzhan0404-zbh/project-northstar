@@ -2,7 +2,7 @@
 
 **Prepared by:** Baker
 
-**Working period:** 3–9 August 2026
+**Working period:** 10–16 August 2026
 
 **Status:** Planned
 
