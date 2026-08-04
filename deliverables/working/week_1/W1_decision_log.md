@@ -11,6 +11,7 @@
 | DEC-05 | 2026-08-02 | Classify Week 1 overall status Amber | Analyst | Structural data passes, but high-impact semantic gaps remain | Escalate owners and validation actions | Review at Week 2 checkpoint | Baker | 2026-08-16 |
 | DEC-06 | 2026-08-02 | Label 58.18% as a count-weighted account-day proxy, not percent of cash or start-of-day coverage | Analyst | 32 of 55 same-day accounts repeat across 181 dates and timestamps are absent | Show within-one-day and positive-value sensitivities separately | Replace when timestamped logs arrive | Daniel Wu / Sarah Coleman | Week 2 |
 | DEC-07 | 2026-08-02 | Treat $198.14m as gross supplied-record value and keep payment/process estimates separate | Analyst | Rejected/pending records are included and exception scopes do not reconcile | Obtain extract controls and reconcile process definitions | Update diagnostic baseline | Shared Services / Data owner | Week 2 |
+| DEC-08 | 2026-08-03 | Prioritize three evidence packages as gates to the Week 3 recommendation | Analyst | Timestamped visibility, liquidity transferability/economics, and controlled payment evidence can change the core recommendation; other gaps are secondary or option-dependent | Keep AR and FX P1 unless controlled data arrives | Track the three gates separately from the complete evidence backlog | Baker / proposed client owners | Before Week 3 |
 
 ## Open client decisions
 

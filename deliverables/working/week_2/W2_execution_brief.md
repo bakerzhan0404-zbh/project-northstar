@@ -287,22 +287,24 @@ The report is no more than eight pages, the deck contains five core slides, ever
 17. `Build the Week 2 diagnostic checkpoint deck`
 18. `Finalize the Week 2 diagnostic pack`
 
-## P1 missions — Complete when evidence becomes available
+## Evidence requests and P1 missions
 
-I will request and log the following evidence during Week 2. If it arrives, I will add each new dataset or validation through a separate commit with its own reconciliation and analysis-log entry.
+### Three gates to the Week 3 recommendation
 
-1. Timestamped balance-reporting logs and agreed cutoff definitions
-2. Legal, tax, regulatory, and operational transferability assessments
-3. Required local operating cash buffers and settlement calendars
-4. Account dependencies, signatories, local purposes, and closure costs
-5. Payment population control totals, sampling logic, reason codes, approval timestamps, and criticality
-6. Actual bank invoices, facility use, borrowing rates, and transfer costs
-7. Twelve to twenty-four months of history for seasonality analysis
-8. AR, receipt, remittance, match-status, reason, and aging records
-9. FX trades, exposures, hedges, spreads, fees, and settlement records
-10. Stakeholder validation of the process maps, RACI, root causes, and maturity scores
+1. **Timestamped visibility evidence:** Receipt timestamps, cutoff, balance type, source, and reconciliation for all 55 accounts.
+2. **Liquidity transferability and economics:** Account-level legal/local certification, operating buffers, settlement constraints, funding events, facility use, and borrowing/transfer costs.
+3. **Controlled payment evidence:** Source population/value totals, sampling logic, reason codes, approval/release timestamps, and criticality for the supplied 7,600-record extract.
 
-If evidence does not arrive, I will document the gap, the affected decision, the validation owner, and the earliest point at which the decision can safely be made. I will not substitute an external benchmark or analyst assumption for missing ACG evidence.
+### Secondary and option-dependent backlog
+
+- Account dependencies, signatories, local purposes, and closure costs
+- Twelve to twenty-four months of history for seasonality analysis
+- AR, receipt, remittance, match-status, reason, and aging records
+- FX trades, exposures, hedges, spreads, fees, and settlement records
+- Stakeholder validation of targeted process, responsibility, root-cause, and maturity work
+- Reconciliation of the $3.9bn entity sum to the $3.8bn brief
+
+If evidence arrives, I will add it through a separate commit with its own reconciliation and analysis-log entry. If it does not, I will record the affected decision, owner, and earliest safe decision point. I will not substitute an external benchmark or analyst assumption for missing ACG evidence.
 
 ## Commit and review routine
 
