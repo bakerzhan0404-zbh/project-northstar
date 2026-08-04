@@ -65,7 +65,7 @@ These are intentionally ambitious `ANALYST-ASSUMPTION` tests, not findings. I wi
 | Accounts | Close all four dormant candidates within 12 months | Two closures under stress; ten remains management's stretch |
 | Visibility | Reach 50/55 same-day accounts and reduce median delayed positive availability below $5m | Upgrade 18/23 delayed accounts, including 12/14 spreadsheet accounts |
 | Payment friction | Reach no more than 20% manual touch, 4% exceptions, 3.5% late release, and 12,000 repair minutes | Cross-border cohort at no more than 7% exceptions, 5% late release, 2,500 repair minutes, and zero critical failures |
-| Capacity | Redeploy at least 150 hours/month; test 53.31 hours/month in receipt reconciliation | One-third realization stress equals 50 hours/month |
+| Capacity | Redeploy at least 150 hours/month; if controlled receivables data arrives, test 53.31 hours/month in receipt reconciliation | One-third realization stress equals 50 hours/month |
 | Restrictions | Clear at least $2.01m of flagged positive availability | $4.03m restriction-clearance stretch; no amount becomes movable cash without account-level certification |
 | FX evidence (P1) | If controlled transaction data arrives, test 25–50 basis points of cross-border cost | Reconcile at least 95% of transaction value before drawing a conclusion; otherwise retain an evidence gap |
 | Execution | Pilot 10 delayed accounts before the remaining eight-account rollout | Four consecutive weeks meeting service gates; rollback within four hours |

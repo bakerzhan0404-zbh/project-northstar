@@ -10,11 +10,11 @@ Should ACG authorize a 90-day treasury-transformation mobilization, at what ambi
 
 ## Decision logic at a glance
 
-The tree follows one direction: **diagnose the problem → assess its consequence or value → test feasibility and downside protection → decide and execute**. This assigns one owner to each question instead of repeating the same metric under both value and risk.
+The branches follow one direction: **diagnose the problem → assess its consequence or value and test feasibility → decide and execute**. Consequence and feasibility can branch from the same diagnosis; they answer different questions and should not repeat ownership of the same metric.
 
-- Visibility path: `V1 → R1 → F1 → E2`
+- Visibility paths: `V1 → R1 → F3` for consequence/value and `V1 → F1 → E2` for delivery feasibility
 - Liquidity path: `F2 → V2 → F3 → E3`
-- Payment path: `V4 → R2 → E2`
+- Payment paths: `V4 → R2 → E2` for service/control consequence and `V4 → F3 → E3` for the integrated value test
 - Account path: `V3 → F2 → F3`
 - Receivables and FX: `V5 / R4` remain data-gated and do not receive equal Week 2 depth without controlled subject data.
 
@@ -23,8 +23,8 @@ The tree follows one direction: **diagnose the problem → assess its consequenc
 | ID | Decision question | Current evidence anchor | Week 2 test/target | Depends on / feeds | Priority | Status |
 |---|---|---|---|---|---|---|
 | <a id="v1"></a>V1 | Where and why is cash reporting late, estimated, or unreliable? | The date-only proxy identifies 32/55 same-day accounts, 23 delayed accounts, and 4,163 delayed account-days; timestamps are absent. | **Establish the timestamped KPI and isolate causes by source, region, method, and account.** | Feeds R1 and F1 | High | Unresolved |
-| <a id="v3"></a>V3 | Which accounts create avoidable cost and complexity? | Four dormant, zero-payment legacy accounts average $37.46k of aggregate positive availability and carry $7.8k of estimated annual fees. | **Validate all four closures within 12 months; use two closures as the downside and management's ten as a stretch requiring six additional candidates.** | Feeds F2 and F3 | High | Unresolved |
-| <a id="v4"></a>V4 | Within the supplied 7,600 records, where is payment friction concentrated and which process conditions are associated with it? | Manual-touch records are 31.51% of the supplied extract but represent 63.47% of exceptions and 63.35% of repair minutes. | **Reconcile the extract and test no more than 20% manual touch and 12,000 repair minutes over a comparable 7,600-record scope; do not infer causation.** | Feeds R2 | High | Unresolved |
+| <a id="v3"></a>V3 | Which accounts create avoidable cost and complexity? | Four dormant, zero-payment legacy accounts average $37.46k of aggregate positive availability and carry $7.8k of estimated annual fees. | **Validate all four closures within 12 months; use two closures as the downside and management's ten as a stretch requiring six additional candidates.** | Feeds F2 for closure validation | High | Unresolved |
+| <a id="v4"></a>V4 | Within the supplied 7,600 records, where is payment friction concentrated and which process conditions are associated with it? | Manual-touch records are 31.51% of the supplied extract but represent 63.47% of exceptions and 63.35% of repair minutes. | **Reconcile the extract and test no more than 20% manual touch and 12,000 repair minutes over a comparable 7,600-record scope; do not infer causation.** | Feeds R2 and F3 | High | Unresolved |
 | <a id="v5"></a>V5 | Where does receivables reconciliation create delay, manual work, or trapped working capital? | The process estimate implies 133.28 manual hours/month, but no AR, remittance, or match-status transactions are supplied. | **If controlled subject data arrives, test 40% / 53.31 hours per month of redeployment; otherwise defer the conclusion.** | Data-gated; may feed F3 | P1 | Unresolved |
 
 ### 2. Assess the consequence or value
@@ -41,14 +41,14 @@ The tree follows one direction: **diagnose the problem → assess its consequenc
 | ID | Decision question | Current evidence anchor | Week 2 test/target | Depends on / feeds | Priority | Status |
 |---|---|---|---|---|---|---|
 | <a id="f1"></a>F1 | Can the visibility gap be closed without replacing the three ERPs? | Twenty-three accounts are delayed and 14 use spreadsheet/estimated reporting. | **Upgrade 18/23 delayed accounts, including 12/14 spreadsheet accounts, to reach at least 50/55 same-day accounts and fewer than 5% on estimated sources within 12 months.** | Depends on V1; feeds E2 | High | Untested |
-| <a id="f2"></a>F2 | Which legal, tax, regulatory, buffer, and local-service constraints apply to each account, and which can be mitigated? | Twenty-one preliminarily restricted accounts hold $8.05m of positive estimated availability; the flags are not certification. | **Certify all 21 within 90 days, own 100% of exceptions, and test 25% / $2.01m base and 50% / $4.03m stretch clearance. F2 books no cash benefit.** | Feeds V2 and V3 | High | Unresolved |
+| <a id="f2"></a>F2 | Which legal, tax, regulatory, buffer, and local-service constraints apply to each account, and which can be mitigated? | Twenty-one preliminarily restricted accounts hold $8.05m of positive estimated availability; the flags are not certification. | **Certify all 21 within 90 days, own 100% of exceptions, and test 25% / $2.01m base and 50% / $4.03m stretch clearance. F2 books no cash benefit.** | Depends on V3 for closure candidates; feeds V2 and F3 | High | Unresolved |
 | <a id="r3"></a>R3 | Could centralization concentrate control or resilience risk? | Six high-criticality activities represent 315.48 of 617.72 manual hours/month; SAP-S4, host-to-host, and Union Atlantic each exceed 25% concentration. | **Map or replace 100% of control purpose and test fallback for every component above 25% concentration.** | Feeds E1 and E2 | High | Untested |
 
 ### 4. Decide and execute
 
 | ID | Decision question | Current evidence anchor | Week 2 test/target | Depends on / feeds | Priority | Status |
 |---|---|---|---|---|---|---|
-| <a id="f3"></a>F3 | Can the integrated foundation wave demonstrate value within 12 months and limited funding? | The component baselines are calculable, but implementation cost, timing, and realized benefits are not validated. | **Test $35m movable cash, 50/55 same-day accounts, four closures, and 150 of 617.72 manual hours/month redeployed; require the $21m / two-closure / 50-hour downside to hold.** | Depends on V2, V3, R1, and any data-gated value | High | Untested |
+| <a id="f3"></a>F3 | Can the integrated foundation wave demonstrate value within 12 months and limited funding? | The component baselines are calculable, but implementation cost, timing, and realized benefits are not validated. | **Test $35m movable cash, 50/55 same-day accounts, four closures, and 150 of 617.72 manual hours/month redeployed; require the $21m / two-closure / 50-hour downside to hold.** | Depends on V2, V3, V4, F1, F2, R1, and any data-gated value | High | Untested |
 | <a id="e1"></a>E1 | Which governance model preserves accountability and local responsiveness? | ACG spans 16 entities and 55 accounts; current decision rights and exception ownership are not validated. | **Test a federated model with global standards over 100% of scope, one local certifier per entity, named ownership of all decisions/exceptions, and two-business-day escalation.** | Depends on R3 | High | Untested |
 | <a id="e2"></a>E2 | What sequence minimizes disruption while delivering the visibility and payment targets? | Twenty-three accounts are delayed; readiness, peak calendar, criticality, and rollback evidence are absent. | **Pilot 10 delayed accounts covering at least 25% of the supplied records; scale only after four compliant weeks, zero critical disruptions, and rollback within four hours.** | Depends on F1, R2, and R3 | High | Unresolved |
 | <a id="e3"></a>E3 | How will benefits and control improvements be validated? | No benefit line is yet Finance-approved or demonstrated as realized. | **Require 100% evidence completeness and Finance approval for the funded base case; recognize realized value only after at least 90% of target for three consecutive months.** | Depends on F3 | Medium | Untested |
