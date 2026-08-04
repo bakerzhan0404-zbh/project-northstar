@@ -8,6 +8,18 @@
 
 **Classification:** Project Northstar simulated client material
 
+## Executive direction — what matters in 90 seconds
+
+Week 2 will not analyze every treasury topic equally. It will test three executive findings and produce only four to six conclusions that could change the Week 3 recommendation.
+
+| Finding entering Week 2 | Decision test | Critical request |
+|---|---|---|
+| Visibility: 23/55 accounts are delayed and median positive estimated availability outside same-day visibility is $26.01m | Is the gap operationally real, does it create a greater-than-$5m funding/decision consequence, and can 50/55 accounts reach the target without ERP replacement? | Timestamped receipt/cutoff/reconciliation evidence for all 55 accounts |
+| Liquidity: $57.80m gross positive estimated availability is not validated movable cash | Does the evidence support the $21m stress / $35m base / $46.2m upside range after restrictions, buffers, timing, and entity rules? | Account-level transferability, buffers, funding events, facility use, and borrowing/transfer costs |
+| Payments: within the **7,600 supplied records only**, manual touch is 31.51%, exceptions 6.30%, late release 5.00%, and repair 20,080 minutes | Which cohorts matter, what service/control consequence follows, and which apparent causes survive validation? No result will be generalized to ACG's full population without source reconciliation. | Source population/value control, sampling logic, reason codes, approval/release timestamps, and criticality |
+
+**Executive output:** three findings above, plus no more than three supporting findings on account rationalization, operating-model/control feasibility, or another issue that materially changes the decision. Receivables and FX remain P1 and data-gated.
+
 ## My Week 2 mission
 
 In Week 2, I will turn the Week 1 evidence foundation into a reconciled current-state diagnostic. My goal is to determine which treasury problems are material enough to affect ACG's transformation choice, explain their likely causes, and distinguish clearly between what the supplied evidence proves and what still requires client validation.
