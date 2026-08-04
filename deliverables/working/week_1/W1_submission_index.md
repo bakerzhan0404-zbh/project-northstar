@@ -24,7 +24,7 @@ These three files are the main review path. Technical controls, methods, and det
 |---|---|---|
 | [Technical assurance summary](W1_data_quality_report.md) | Reconciliations, evidence limitations, treatments, and decision impact | Ready; technical support, not the executive narrative |
 | [Analysis log](W1_analysis_log.md) | Detailed inputs, definitions, transformations, sensitivities, and outputs | Current through A05 |
-| [Full 52-control inventory](../../../data/processed/W1_data_quality_checks.csv) | Check-level result, severity, metric, expected result, and analytical implication | 52 of 52 pass |
+| [Full 52-control inventory](../../../data/processed/W1_data_quality_checks.csv) | Check name and pass/fail result for every expanded control | 52 of 52 pass |
 | [Data-quality metrics](../../../data/processed/W1_data_quality_metrics.csv) | Reproducible control totals and qualified analytical measures | Current |
 | [Missingness profile](../../../data/processed/W1_missingness_profile.csv) | Field-level completeness evidence | Current |
 | [Visibility by region](../../../data/processed/W1_visibility_by_region.csv) | Supporting regional visibility cut | Current |
