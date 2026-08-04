@@ -70,10 +70,10 @@ pending_payment_value,1551397.06,USD,calculation,Included in gross supplied valu
 repair_minutes,20080,minutes,payments.csv,Management-estimated effort within supplied extract; representativeness unproven
 manual_payment_exception_share,63.47,% of exceptions,calculation,Association within supplied records; not causal attribution
 manual_payment_repair_share,63.35,% of repair minutes,calculation,Association within supplied records; not causal attribution
-manual_local_wire_ach_repair_share,49.6,% of repair minutes,calculation,"Manual local transfer, wire, and ACH cohorts combined"
+manual_local_wire_ach_repair_share,49.6,% of repair minutes,calculation,"Manual local transfer, wire, and ACH cohorts within supplied 7,600-record extract; association not causal"
 cross_border_payment_records,786,payments,calculation,Within supplied records; cross-border is not proof of an FX trade
 cross_border_payment_value,14722195.36,USD,calculation,Six-month gross supplied-record value; not settled value or FX exposure
-cross_border_payment_fees,35841.0,USD,calculation,Six-month estimated fees; not validated bank pricing
+cross_border_payment_fees,35841.0,USD,calculation,"Within supplied 7,600-record extract; six-month estimated fees, not validated bank pricing"
 cross_border_payment_repair_minutes,4921,minutes,calculation,Management-estimated effort within supplied records
 cross_border_wire_payment_share,10.34,% of payments,calculation,Within supplied records; population representativeness unproven
 cross_border_wire_exception_rate,13.99,%,calculation,Within supplied records; reason codes absent
