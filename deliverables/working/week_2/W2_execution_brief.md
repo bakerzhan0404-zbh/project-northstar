@@ -12,11 +12,11 @@
 
 Week 2 will not analyze every treasury topic equally. It will test three executive findings and produce only four to six conclusions that could change the Week 3 recommendation.
 
-| Finding entering Week 2 | Decision test | Critical request |
+| Observed anchor entering Week 2 | Hypothesis and decision test | Week 3 evidence gate |
 |---|---|---|
-| Visibility: 23/55 accounts are delayed and median positive estimated availability outside same-day visibility is $26.01m | Is the gap operationally real, does it create a greater-than-$5m funding/decision consequence, and can 50/55 accounts reach the target without ERP replacement? | Timestamped receipt/cutoff/reconciliation evidence for all 55 accounts |
-| Liquidity: $57.80m gross positive estimated availability is not validated movable cash | Does the evidence support the $21m stress / $35m base / $46.2m upside range after restrictions, buffers, timing, and entity rules? | Account-level transferability, buffers, funding events, facility use, and borrowing/transfer costs |
-| Payments: within the **7,600 supplied records only**, manual touch is 31.51%, exceptions 6.30%, late release 5.00%, and repair 20,080 minutes | Which cohorts matter, what service/control consequence follows, and which apparent causes survive validation? No result will be generalized to ACG's full population without source reconciliation. | Source population/value control, sampling logic, reason codes, approval/release timestamps, and criticality |
+| Visibility evidence: 23/55 accounts are delayed and median positive estimated availability outside same-day visibility is $26.01m | Is the gap operationally real, does it create a greater-than-$5m funding/decision consequence, and can 50/55 accounts reach the target without ERP replacement? | Timestamped receipt/cutoff/reconciliation evidence for all 55 accounts |
+| Liquidity boundary: $57.80m gross positive estimated availability is not validated movable cash | Does the evidence support the $21m stress / $35m base / $46.2m upside range after restrictions, buffers, timing, and entity rules? | Account-level transferability, buffers, funding events, facility use, and borrowing/transfer costs |
+| Payment signal: within the **7,600 supplied records only**, manual touch is 31.51%, exceptions 6.30%, late release 5.00%, and repair is 20,080 minutes | Which cohorts matter, what service/control consequence follows, and which apparent causes survive validation? No result will be generalized to ACG's full population without source reconciliation. | Source population/value control, sampling logic, reason codes, approval/release timestamps, and criticality |
 
 **Executive output:** three findings above, plus no more than three supporting findings on account rationalization, operating-model/control feasibility, or another issue that materially changes the decision. Receivables and FX remain P1 and data-gated.
 
@@ -31,6 +31,16 @@ I will not begin with a predetermined solution. I will build the diagnostic in s
 - **P0 — required:** Work that must be complete for a defensible Week 2 diagnostic and submission.
 - **P1 — conditional enrichment:** Work that improves confidence or scope if additional client evidence becomes available, but will not delay the P0 diagnostic.
 - A P1 evidence request in Week 2 may become a P0 dependency for the Week 3 recommendation and business case.
+
+## Finding-promotion and depth rule
+
+| Depth | Week 2 topics | Rule |
+|---|---|---|
+| **Full P0 diagnosis** | Cash visibility; liquidity and cash mobility; payment friction within the supplied 7,600-record extract | Complete reconciled analysis because these topics can directly change Wave 1 scope, value, or risk. |
+| **P0 supporting screen** | Account rationalization; targeted operating-model and control feasibility | Analyze only far enough to determine whether each topic earns one of at most three supporting-finding slots or changes implementation sequencing. |
+| **P1 and data-gated** | Receivables; FX transactions/exposure; broad maturity scoring; exhaustive process mapping | Do not develop a main-report section unless controlled evidence arrives and the result could change the recommendation. Record the gap instead. |
+
+Only four to six findings may enter the main report. A finding is promoted only if it is material to the decision, reconciles to the baseline, has a clear consequence, survives a counterevidence test, and leads to a decision or action. Detailed methods, control results, and domain cuts will sit in appendices.
 
 ## My working rules
 
@@ -56,7 +66,8 @@ These are intentionally ambitious `ANALYST-ASSUMPTION` tests, not findings. I wi
 | Visibility | Reach 50/55 same-day accounts and reduce median delayed positive availability below $5m | Upgrade 18/23 delayed accounts, including 12/14 spreadsheet accounts |
 | Payment friction | Reach no more than 20% manual touch, 4% exceptions, 3.5% late release, and 12,000 repair minutes | Cross-border cohort at no more than 7% exceptions, 5% late release, 2,500 repair minutes, and zero critical failures |
 | Capacity | Redeploy at least 150 hours/month; test 53.31 hours/month in receipt reconciliation | One-third realization stress equals 50 hours/month |
-| Restrictions and FX | Clear at least $2.01m of flagged positive availability; test 25–50 basis points of cross-border cost | $4.03m restriction-clearance stretch; 95% FX evidence reconciliation gate |
+| Restrictions | Clear at least $2.01m of flagged positive availability | $4.03m restriction-clearance stretch; no amount becomes movable cash without account-level certification |
+| FX evidence (P1) | If controlled transaction data arrives, test 25–50 basis points of cross-border cost | Reconcile at least 95% of transaction value before drawing a conclusion; otherwise retain an evidence gap |
 | Execution | Pilot 10 delayed accounts before the remaining eight-account rollout | Four consecutive weeks meeting service gates; rollback within four hours |
 | Benefits | Require complete evidence and Finance approval for every funded-base benefit | Recommendation survives $21m mobility, two closures, and 50 hours/month; realized value reaches 90% of target for three months |
 
@@ -89,7 +100,7 @@ Every later Week 2 output uses the same reconciled analytical layer, and the ori
 3. `Build Week 2 reconciled analysis baseline`
 4. `Test Week 2 diagnostic reconciliations`
 
-## P0 mission 2 — Diagnose account fragmentation
+## P0 supporting screen 2 — Test account-rationalization feasibility
 
 ### Question I will answer
 
@@ -97,6 +108,7 @@ Every later Week 2 output uses the same reconciled analytical layer, and the ori
 
 ### What I will do
 
+- Run a bounded screen and deepen it only if candidate closures could materially change Wave 1 scope, value, risk, or sequencing.
 - Profile the 55 accounts by region, entity, bank, currency, purpose, age, ERP, acquisition origin, visibility method, sweep structure, status, preliminary restriction, activity, balance, and estimated annual fee.
 - Define transparent screening criteria for dormant, legacy, low-activity, low-value, high-fee, or operationally overlapping accounts.
 - Protect payroll, tax, collection, restricted, regulatory, resilience, and locally required accounts from automatic closure conclusions.
@@ -214,36 +226,32 @@ All payment segments reconcile to the 7,600 supplied records, $198.14 million gr
 11. `Locate payment friction concentrations`
 12. `Reconcile payment repair and process capacity`
 
-## P0 mission 6 — Diagnose the operating model and maturity
+## P0 supporting screen 6 — Test targeted operating-model and control feasibility
 
-### Questions I will answer
+### Question I will answer
 
-> Which process, governance, data, technology, organization, and control weaknesses appear to cause the observed symptoms?
-
-> How far is the current treasury model from a realistic 18-month target?
+> Can ACG implement and control the interventions implied by the promoted findings, and which likely causes or ownership gaps could prevent delivery?
 
 ### What I will do
 
-- Map the current cash-positioning process from local balance collection through Group Treasury reporting and funding decisions.
-- Map the payment process from business request through data intake, approval, release, repair, and completion.
-- Identify ERP, spreadsheet, bank, and manual handoff boundaries; rework loops; control points; and unclear ownership.
-- Draft a RACI across Group Treasury, regional and local finance, Shared Services, IT, business units, Finance/data owners, and Internal Audit.
-- Build a root-cause tree across data, process, policy, systems, organization, governance, controls, and user behavior.
-- Define observable 1–5 maturity criteria before scoring governance, organization, process, technology, data, controls, and performance management.
-- Assign evidence, confidence, decision implication, priority action, and an 18-month target to every maturity score.
+- Map only the cash-visibility, liquidity, and payment steps needed to explain or implement the promoted findings.
+- Trace the relevant ERP, spreadsheet, bank, and manual handoffs; rework loops; control points; and unclear ownership.
+- Draft a targeted RACI for the owners needed to validate evidence, approve interventions, protect controls, and deliver Wave 1.
+- Test likely causes across data, process, policy, systems, organization, governance, controls, and user behavior without converting association into proof.
+- Use observable maturity criteria only where a capability gap changes an intervention or its sequencing; do not create an equal-weight seven-dimension scorecard by default.
 
 ### Interpretation boundary
 
-The process maps, RACI, root-cause hypotheses, and stakeholder-dependent maturity scores will remain draft until validated with process owners.
+The targeted process views, RACI, cause hypotheses, and any capability assessments will remain draft until validated with process owners.
 
 ### Completion gate
 
-Every process issue and maturity score cites evidence, states confidence, and distinguishes a symptom from a likely cause.
+Every supporting point traces to a promoted finding, cites evidence, states confidence, and distinguishes a symptom from a likely cause. Week 2 will not produce a broad maturity profile unless it earns a decision-relevant finding.
 
 ### Planned commits
 
-13. `Map current treasury processes and responsibilities`
-14. `Score treasury maturity with evidence`
+13. `Map causes and responsibilities behind promoted findings`
+14. `Assess targeted operating-model feasibility`
 
 ## P0 mission 7 — Synthesize and communicate the diagnostic
 
@@ -259,26 +267,30 @@ Every process issue and maturity score cites evidence, states confidence, and di
 
 ### Planned report sequence
 
-1. Executive diagnostic
-2. Account footprint
-3. Cash visibility
-4. Liquidity and scenarios
-5. Payment operations
-6. Process and operating model
-7. Maturity and root causes
-8. Management implications and unresolved validations
+1. Three findings, three decisions, and three requests
+2. Ranked four to six decision-relevant findings
+3. Consequences and likely causes
+4. Week 3 option implications and decision thresholds
+5. Unresolved validations and next decisions
+
+### Planned technical appendices
+
+1. Definitions, evidence boundaries, and methods
+2. Week 2 reconciliations and the Week 1 52-control inventory
+3. Detailed domain cuts, sensitivities, and unpromoted observations
+4. Analysis log, assumptions, risks, decisions, findings, and source notes
 
 ### Planned five-slide checkpoint sequence
 
-1. Executive diagnosis and decisions required
-2. Account footprint and visibility
-3. Liquidity scenarios and transferability limitation
-4. Payment and process friction with likely root causes
-5. Maturity gaps, priorities, and validation requests
+1. Executive diagnosis: three findings, decisions, and requests
+2. Cash visibility and mobility
+3. Payment friction—explicitly limited to the supplied 7,600 records
+4. Supporting feasibility findings that earned promotion
+5. Decisions, Week 3 implications, and the three evidence gates
 
 ### Completion gate
 
-The report is no more than eight pages, the deck contains five core slides, every material number traces to a processed output, and all limitations that could change the recommendation are visible.
+The main report is no more than eight pages, the deck contains five core slides, every material number traces to a processed output, and all limitations that could change the recommendation are visible. Technical methods, control results, and detailed domain cuts appear only in the appendices.
 
 ### Planned commits
 
@@ -323,12 +335,8 @@ I will keep these commits local during active development unless a mentor checkp
 
 By the end of Week 2, I should be able to explain:
 
-- Which four to six treasury problems matter most to ACG's transformation decision
-- The magnitude and distribution of each problem
-- Which conclusions are observed facts, calculations, assumptions, or judgments
-- Which likely root causes are supported and which remain hypotheses
-- Which accounts require closure validation rather than immediate closure
-- The difference between observed cash, apparent availability, scenario surplus, and validated movable cash
-- Where payment and process friction is concentrated without overstating causation or savings
-- Which operating-model and maturity gaps should guide the Week 3 strategic options
-- Which unresolved evidence could materially change the recommendation
+- Which four to six findings matter most and exactly how each changes ACG's transformation decision
+- Which statements are observed facts, calculations, assumptions, or judgments—including the 7,600-record boundary on every payment conclusion
+- The difference between observed cash, apparent availability, scenario surplus, and validated movable cash, and which threshold the evidence supports
+- Which likely causes, account candidates, and implementation constraints are supported versus still hypotheses
+- Which three evidence packages remain critical, who should supply them, and what Week 3 decision each package unlocks
