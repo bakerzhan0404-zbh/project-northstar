@@ -51,23 +51,23 @@ fx_rows,1810,rows,fx_rates.csv,
 fx_currencies,10,currencies,fx_rates.csv,
 fx_dates,181,calendar days,fx_rates.csv,
 expected_fx_rows,1810,rows,calculation,
-payment_rows,7600,rows,payments.csv,
-unique_payments,7600,payments,payments.csv,
+payment_rows,7600,rows,payments.csv,Supplied extract; source-population completeness and sampling are unproven
+unique_payments,7600,payments,payments.csv,Supplied extract; not a certified enterprise population
 payment_start_date,2026-01-01,date,payments.csv,
 payment_end_date,2026-06-30,date,payments.csv,
-gross_supplied_payment_value_control_total,198135489.5,USD,calculation,Includes every supplied status; not settled value
-payment_fee_control_total,62613.0,USD,payments.csv,"Estimated fees, not actual bank pricing"
-manual_touch_payments,2395,payments,payments.csv,
-manual_touch_rate,31.51,%,calculation,
-exception_payments,479,payments,payments.csv,
-exception_rate,6.3,%,calculation,
-late_release_payments,380,payments,payments.csv,
-late_release_rate,5.0,%,calculation,
-rejected_payments,54,payments,payments.csv,
-pending_payments,17,payments,payments.csv,Status as of extract is not supplied
+gross_supplied_payment_value_control_total,198135489.5,USD,calculation,Within supplied extract and includes every status; not settled value or enterprise total
+payment_fee_control_total,62613.0,USD,payments.csv,"Within supplied extract; estimated fees, not actual bank pricing or enterprise total"
+manual_touch_payments,2395,payments,payments.csv,"Within supplied 7,600-record extract; representativeness unproven"
+manual_touch_rate,31.51,%,calculation,"Within supplied 7,600-record extract; not an ACG-wide rate"
+exception_payments,479,payments,payments.csv,"Within supplied 7,600-record extract; representativeness unproven"
+exception_rate,6.3,%,calculation,"Within supplied 7,600-record extract; not an ACG-wide rate"
+late_release_payments,380,payments,payments.csv,"Within supplied 7,600-record extract; representativeness unproven"
+late_release_rate,5.0,%,calculation,"Within supplied 7,600-record extract; not an ACG-wide rate"
+rejected_payments,54,payments,payments.csv,"Within supplied 7,600-record extract; not an ACG-wide rate"
+pending_payments,17,payments,payments.csv,Within supplied extract; status as-of date and enterprise representativeness are not supplied
 rejected_payment_value,2183098.42,USD,calculation,Included in gross supplied value; not settled
 pending_payment_value,1551397.06,USD,calculation,Included in gross supplied value; settlement unknown
-repair_minutes,20080,minutes,payments.csv,Management-estimated effort
+repair_minutes,20080,minutes,payments.csv,Management-estimated effort within supplied extract; representativeness unproven
 manual_payment_exception_share,63.47,% of exceptions,calculation,Association within supplied records; not causal attribution
 manual_payment_repair_share,63.35,% of repair minutes,calculation,Association within supplied records; not causal attribution
 manual_local_wire_ach_repair_share,49.6,% of repair minutes,calculation,"Manual local transfer, wire, and ACH cohorts combined"

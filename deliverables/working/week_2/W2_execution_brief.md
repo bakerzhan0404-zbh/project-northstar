@@ -206,7 +206,7 @@ Missing reason codes, approval timestamps, invoice fields, beneficiary fields, a
 
 ### Completion gate
 
-All payment segments reconcile to 7,600 records, $198.14 million gross supplied value, and 20,080 repair minutes. The payment and process baselines remain separately labeled until their scope difference is validated.
+All payment segments reconcile to the 7,600 supplied records, $198.14 million gross supplied-record value, and 20,080 repair minutes. No rate or concentration is generalized to ACG's full population, and the payment/process baselines remain separately labeled until both scope differences and source-population coverage are validated.
 
 ### Planned commits
 
