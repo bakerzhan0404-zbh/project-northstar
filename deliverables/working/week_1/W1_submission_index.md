@@ -55,14 +55,17 @@ python3 tests/test_data_quality.py
 
 Calculated outputs are stored under `data/processed/`. Do not edit `data/raw/` manually.
 
-## Items requiring client/mentor confirmation
+## Three Week 3-critical evidence packages
 
-1. Confirm the executive question, priority hypotheses, checkpoint dates, and proposed owners.
-2. Define start-of-day visibility and supply timestamped reporting logs.
-3. Validate restrictions, operating buffers, seasonality, and legal/tax transferability.
-4. Reconcile payment extract coverage and payment/process exception scope.
-5. Supply AR/remittance/matching and FX transaction/exposure records or formally constrain scope.
-6. Reconcile the $3.9bn entity revenue sum to the $3.8bn client brief and obtain actual fee/borrowing baselines.
+1. **Visibility:** Timestamped reporting logs, cutoff, balance type, source, and reconciliation for all 55 accounts.
+2. **Liquidity transferability and economics:** Account-level certification, operating buffers, settlement constraints, funding events, facility use, and borrowing/transfer costs.
+3. **Controlled payments:** Source population/value control, sampling logic, reason codes, approval/release timestamps, and criticality for the supplied 7,600-record extract.
+
+## Secondary and option-dependent confirmations
+
+- Confirm the executive question, checkpoint dates, proposed owners, and closure-validation criteria.
+- Supply AR/remittance/matching and FX transaction/exposure records or keep those workstreams P1 and explicitly constrained.
+- Reconcile the $3.9bn entity revenue sum to the $3.8bn client brief before using revenue denominators.
 
 ## Evidence-label convention
 

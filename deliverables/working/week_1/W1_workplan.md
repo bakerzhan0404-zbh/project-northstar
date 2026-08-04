@@ -28,7 +28,7 @@ By the end-of-Week-4 steering committee, decide whether to authorize a 90-day mo
 | W2-01 | Where is account complexity avoidable? | Account candidate criteria and sensitivity | Baker | Aug 10 | Aug 13 | Local-purpose validation | Not started |
 | W2-02 | What cash is visible/apparently available? | Visibility, liquidity, surplus/deficit scenarios | Baker | Aug 10 | Aug 14 | Restriction/buffer assumptions | Not started |
 | W2-03 | Where do payments fail? | KPI segmentation and root-cause tree | Baker | Aug 11 | Aug 14 | Exception reason data | Not started |
-| W2-03A | What can be concluded about receivables and FX? | Confirm scope limits; request AR/remittance and FX transaction/exposure extracts | Baker | Aug 11 | Aug 13 | Additional client data | Not started |
+| W2-P1A | What can be concluded about receivables and FX? | Confirm scope limits; request controlled extracts only as data-gated enrichment | Baker | Aug 11 | Aug 13 | Additional client data | P1 / data-gated |
 | W2-04 | What operating gaps cause symptoms? | Process maps, RACI, maturity heatmap | Baker | Aug 12 | Aug 15 | Stakeholder validation | Not started |
 | W2-05 | What matters most? | Eight-page diagnostic and five-slide checkpoint | Baker | Aug 14 | Aug 16 | W2-01–04 | Not started |
 | W3-01 | What choices are credible? | Design principles, three options, weighted matrix | Baker | Aug 17 | Aug 19 | Agreed diagnosis | Not started |
@@ -45,13 +45,20 @@ By the end-of-Week-4 steering committee, decide whether to authorize a 90-day mo
 2. Separate observed balances from apparently available and validated movable cash.
 3. Convert the diagnostic into four to six decision-relevant findings with counterevidence and confidence.
 
-## Blockers requiring escalation
+## Three Week 3-critical evidence gates
 
-| Blocker | Decision impact | Action/ask | Owner | Required by |
+| Priority gate | Decision impact | Minimum action/ask | Proposed owner | Required by |
 |---|---|---|---|---|
-| No legal/tax transferability evidence | Liquidity opportunity cannot be validated | Obtain account/entity restriction assessment | Daniel Wu / Legal / Tax | Before Week 3 business case |
-| No exception reason codes | Root cause remains inferential | Supply codes and repaired-payment sample | Lucas Schneider | Week 2 |
-| No actual bank fee or borrowing baseline | P&L benefit cannot be validated | Obtain invoices and facility statements | Daniel Wu / Finance | Week 3 |
-| No intraday receipt timestamps | Start-of-day KPI cannot be proven | Supply reporting logs and cutoff definition | Sarah Coleman | Week 2 |
-| No AR/remittance or matching data | Receivables reconciliation cannot be diagnosed | Supply AR ledger, receipt, remittance, match-status, reason, and aging extracts | Proposed: Group Finance / AR owner | Week 2 |
-| No FX transaction/exposure data | FX patterns, costs, and risk cannot be diagnosed | Supply trade, exposure, hedge, spread/fee, and settlement extracts | Proposed: Group Treasury / Finance | Week 2 |
+| 1. Timestamped visibility evidence | Cannot establish start-of-day performance or isolate reporting causes | Supply receipt timestamps, cutoff, balance type, source, and reconciliation for all 55 accounts | Treasurer / CIO / data owners | Week 2 |
+| 2. Liquidity transferability and economics | Cannot validate movable cash, funding consequence, or the Week 3 value range | Certify account-level restrictions, buffers, settlement constraints, funding events, facility use, and borrowing/transfer costs | Treasury / Legal / Tax / Regional Finance / FP&A | Before Week 3 business case |
+| 3. Controlled payment evidence | Cannot generalize the 7,600-record results or establish root causes and service impact | Reconcile source population/value totals and supply sampling logic, reason codes, approval/release timestamps, and criticality | Shared Services / data owner | Week 2 |
+
+## Secondary and option-dependent evidence backlog
+
+| Evidence gap | Treatment until supplied | Proposed owner |
+|---|---|---|
+| Account dependencies, signatories, local purposes, and closure costs | Keep account closures as validation candidates, not approved savings | Regional Controllers |
+| Twelve to twenty-four months of history | Constrain seasonality conclusions to the supplied six months | Data owner |
+| AR/remittance/matching records | Keep receivables P1 and do not quantify transaction performance or working-capital value | Group Finance / AR owner |
+| FX trades/exposures/hedges/spreads/settlements | Keep FX P1 and treat the 25–50 basis-point range only as a screening hypothesis | Group Treasury / Finance |
+| $3.9bn versus $3.8bn revenue perimeter | Avoid unsupported denominator-based conclusions until reconciled | Group Finance |
