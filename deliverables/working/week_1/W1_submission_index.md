@@ -10,39 +10,43 @@
 
 **Classification:** Confidential — Project Northstar simulated client material
 
-## Recommended review order
+## Executive review path — start here
 
-1. [Engagement alignment](W1_engagement_alignment.md) — decision, scope, stakeholders, kickoff questions, and success definition
-2. [Decision-led issue tree](W1_issue_tree.md) — priority questions, hypotheses, evidence requirements, and status
-3. [External evidence brief](W1_external_evidence_brief.md) — two-page public-evidence context and three-case S06 sample
-4. [Data quality and readiness report](W1_data_quality_report.md) — reconciliations, limitations, treatments, and decision impact
-5. [Weekly update](W1_weekly_update.md) — one-page status, evidence changes, requests, uncertainty, and Week 2 priorities
+1. [Weekly update](W1_weekly_update.md) — the 90-second recommendation, three findings, three decisions, and three requests
+2. [Decision-led issue tree](W1_issue_tree.md) — the diagnosis-to-consequence logic and the hypotheses Week 2 will test
+3. [Findings log](W1_findings_log.md) — the traceable fact–implication–action chain behind the executive story
 
-## Required and supporting records
+These three files are the main review path. Technical controls, methods, and detailed supporting records are deliberately separated below so the executive story remains focused on implications.
+
+## Technical assurance and appendix
+
+| File | Appendix role | Review status |
+|---|---|---|
+| [Technical assurance summary](W1_data_quality_report.md) | Reconciliations, evidence limitations, treatments, and decision impact | Ready; technical support, not the executive narrative |
+| [Analysis log](W1_analysis_log.md) | Detailed inputs, definitions, transformations, sensitivities, and outputs | Current through A05 |
+| [Full 52-control inventory](../../../data/processed/W1_data_quality_checks.csv) | Check-level result, severity, metric, expected result, and analytical implication | 52 of 52 pass |
+| [Data-quality metrics](../../../data/processed/W1_data_quality_metrics.csv) | Reproducible control totals and qualified analytical measures | Current |
+| [Missingness profile](../../../data/processed/W1_missingness_profile.csv) | Field-level completeness evidence | Current |
+| [Visibility by region](../../../data/processed/W1_visibility_by_region.csv) | Supporting regional visibility cut | Current |
+
+## Governance and supporting records
 
 | File | Purpose | Review status |
 |---|---|---|
+| [Engagement alignment](W1_engagement_alignment.md) | Decision, scope, stakeholders, kickoff questions, and success definition | Draft complete; agreement pending |
 | [Workplan](W1_workplan.md) | Four-week tasks, dependencies, milestones, and blockers | Draft complete; agreement pending |
+| [External evidence brief](W1_external_evidence_brief.md) | Public-evidence context and three-case S06 sample | Ready; contextual evidence only |
 | [Source log](W1_source_log.csv) | External claims, links, methods, limitations, and use | Current; reverify before final submission |
-| [Analysis log](W1_analysis_log.md) | Inputs, definitions, transformations, tests, sensitivities, and outputs | Current through A03 |
 | [Assumptions register](W1_assumptions_register.csv) | Uncertainty, sensitivity, validation action, and proposed owner | Current; one assumption closed |
 | [Risk register](W1_risk_register.csv) | Delivery, analytical, benefit, control, and evidence risks | Current; owners proposed |
 | [Decision log](W1_decision_log.md) | Analyst decisions and open client decisions | Current; no client checkpoint yet |
-| [Findings log](W1_findings_log.md) | Fact–implication–action chain with confidence/counterevidence | Draft findings only |
 | [Stakeholder evidence notes](W1_interview_notes.md) | Claims, evidence needs, bias, and follow-up | Based on supplied pack, not new interviews |
 
-## Quality gate completed
+## Assurance status
 
-- All 10 supplied data-quality tests pass.
-- All 52 expanded controls pass, covering schema, keys, relationships, date panels, domains, flags, FX, status logic, missingness, and numeric ranges.
-- Six raw files reproduce exactly from deterministic seed `20260730`; raw data remains unchanged.
-- Four processed Week 1 CSVs are reproducible from version-controlled code.
-- External claims S01–S05 were checked against official JPMorgan pages and logged with limitations.
-- The 548-word external evidence brief render-checks at two content pages.
-- The weekly update render-checks at one content page.
-- Markdown local links resolve, CSV registers parse, and Git whitespace checks pass.
+All 10 supplied tests and all 52 expanded controls pass. Six raw files reproduce from deterministic seed `20260730`, and four processed Week 1 CSVs reproduce from version-controlled code. The controls establish internal consistency and reproducibility—not source-system completeness, legal transferability, or representativeness of the supplied payment extract. See the technical appendix above for check-level evidence.
 
-## Reproduce the evidence
+## Reproduce the technical appendix
 
 From the repository root, run:
 

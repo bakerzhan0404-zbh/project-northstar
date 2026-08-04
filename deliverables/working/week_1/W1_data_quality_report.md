@@ -1,6 +1,8 @@
-# Week 1 — Data Quality and Readiness Report
+# Week 1 — Technical Assurance Summary: Data Quality and Readiness
 
 **Classification:** Confidential — `ACG-DATA` and `ANALYST-CALC`; limitations and treatments are `ANALYST-JUDGMENT`
+
+**Pack role:** Technical assurance supporting the executive narrative. Detailed methods are in the [analysis log](W1_analysis_log.md), and check-level results are in the [full 52-control inventory](../../../data/processed/W1_data_quality_checks.csv).
 
 ## Executive conclusion
 
@@ -53,7 +55,7 @@ Count-weighted same-day rates vary by region: APAC 63.64%, NA 56.25%, and EMEA 5
 
 These signals justify Week 2 segmentation but do not establish root cause because reason codes, beneficiary/invoice completeness, approval timestamps, and payment criticality are absent.
 
-## Data-quality issue and treatment log
+## Appendix A — Data-quality issue and treatment log
 
 | ID | Issue | Decision impact | Proposed treatment | Validation owner | Severity |
 |---|---|---|---|---|---|
