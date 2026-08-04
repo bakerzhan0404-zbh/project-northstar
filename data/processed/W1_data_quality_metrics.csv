@@ -91,9 +91,9 @@ estimated_manual_process_loaded_cost_annual,426618.9,USD/year,calculation,Loaded
 receipt_reconciliation_manual_hours_monthly,133.28,hours/month,calculation,Management process estimate; AR transaction evidence absent
 high_control_criticality_processes,6,activities,process_activity.csv,Control-critical does not mean the current manual method must remain
 high_control_manual_hours_monthly,315.48,hours/month,calculation,Management estimates; controls must be preserved or replaced
-sap_s4_payment_record_share,50.0,% of payments,calculation,Concentration anchor; supplied payment population representativeness unproven
+sap_s4_payment_record_share,50.0,% of payments,calculation,"Within supplied 7,600-record extract; representativeness unproven"
 host_to_host_account_share,36.36,% of accounts,calculation,Concentration anchor; not a resilience conclusion
-union_atlantic_payment_record_share,28.33,% of payments,calculation,Concentration anchor; supplied payment population representativeness unproven
+union_atlantic_payment_record_share,28.33,% of payments,calculation,"Within supplied 7,600-record extract; representativeness unproven"
 illustrative_15pct_capacity_redeployment,1111.89,hours/year,calculation,Sensitivity only; not headcount or cashable savings
 illustrative_20pct_capacity_redeployment,1482.52,hours/year,calculation,Sensitivity only; not headcount or cashable savings
 hypothesis_40pct_receipt_capacity_redeployment,53.31,hours/month,analyst assumption,Bold target for Week 2 validation; not headcount or cashable savings

@@ -18,7 +18,7 @@ Week 2 will not analyze every treasury topic equally. It will test three executi
 | Liquidity boundary: $57.80m gross positive estimated availability is not validated movable cash | Does the evidence support the $21m stress / $35m base / $46.2m upside range after restrictions, buffers, timing, and entity rules? | Account-level transferability, buffers, funding events, facility use, and borrowing/transfer costs |
 | Payment signal: within the **7,600 supplied records only**, manual touch is 31.51%, exceptions 6.30%, late release 5.00%, and repair is 20,080 minutes | Which cohorts matter, what service/control consequence follows, and which apparent causes survive validation? No result will be generalized to ACG's full population without source reconciliation. | Source population/value control, sampling logic, reason codes, approval/release timestamps, and criticality |
 
-**Executive output:** three findings above, plus no more than three supporting findings on account rationalization, operating-model/control feasibility, or another issue that materially changes the decision. Receivables and FX remain P1 and data-gated.
+**Executive output:** the three findings above, plus one to three supporting findings on account rationalization, operating-model/control feasibility, or another issue that materially changes the decision. Receivables and FX remain P1 and data-gated.
 
 ## My Week 2 mission
 
