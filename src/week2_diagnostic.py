@@ -9,7 +9,7 @@ process hours are capacity estimates rather than cashable savings.
 """
 
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 import pandas as pd
 
@@ -287,6 +287,200 @@ def build_visibility_diagnostic(balances: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def build_liquidity_scenarios(
+    balances: pd.DataFrame, payments: pd.DataFrame
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Build daily liquidity layers and 7/14-day operating-buffer sensitivities.
+
+    The buffers use supplied payment records in the trailing calendar window
+    ending on the latest balance date. They are screening sensitivities, not a
+    certified cash forecast or minimum operating-cash policy.
+    """
+    working = balances.copy()
+    working["positive_closing_usd"] = working["closing_balance_usd"].clip(lower=0)
+    working["negative_closing_usd"] = working["closing_balance_usd"].clip(upper=0)
+    working["positive_available_usd"] = working["available_balance_usd"].clip(
+        lower=0
+    )
+    working["negative_available_usd"] = working["available_balance_usd"].clip(
+        upper=0
+    )
+    working["restricted_positive_available_usd"] = working[
+        "positive_available_usd"
+    ].where(working["restricted_flag"], 0)
+    working["unflagged_positive_available_usd"] = working[
+        "positive_available_usd"
+    ].where(~working["restricted_flag"], 0)
+    working["delayed_positive_available_usd"] = working[
+        "positive_available_usd"
+    ].where(working["reporting_delay_days"].gt(0), 0)
+
+    daily = working.groupby("date", as_index=False).agg(
+        net_closing_usd=("closing_balance_usd", "sum"),
+        gross_positive_closing_usd=("positive_closing_usd", "sum"),
+        gross_negative_closing_usd=("negative_closing_usd", "sum"),
+        net_estimated_available_usd=("available_balance_usd", "sum"),
+        gross_positive_estimated_available_usd=("positive_available_usd", "sum"),
+        gross_negative_estimated_available_usd=("negative_available_usd", "sum"),
+        preliminarily_restricted_positive_available_usd=(
+            "restricted_positive_available_usd",
+            "sum",
+        ),
+        preliminarily_unflagged_positive_available_usd=(
+            "unflagged_positive_available_usd",
+            "sum",
+        ),
+        delayed_positive_available_usd=("delayed_positive_available_usd", "sum"),
+    )
+    daily["evidence_label"] = "ANALYST-CALC"
+    daily["decision_boundary"] = (
+        "Estimated availability and preliminary flags do not establish transferability"
+    )
+
+    latest_date = working["date"].max()
+    account_scenarios = working.loc[working["date"].eq(latest_date)].copy()
+    for window_days in [7, 14]:
+        window_start = latest_date - pd.Timedelta(days=window_days - 1)
+        buffer_by_account = (
+            payments.loc[
+                payments["payment_date"].between(window_start, latest_date)
+            ]
+            .groupby("account_id")["amount_usd"]
+            .sum()
+        )
+        buffer_column = f"supplied_payment_buffer_{window_days}d_usd"
+        surplus_column = f"scenario_surplus_after_{window_days}d_buffer_usd"
+        account_scenarios[buffer_column] = (
+            account_scenarios["account_id"].map(buffer_by_account).fillna(0.0)
+        )
+        account_scenarios[surplus_column] = (
+            account_scenarios["positive_available_usd"]
+            - account_scenarios[buffer_column]
+        ).clip(lower=0)
+        account_scenarios[surplus_column] = account_scenarios[surplus_column].where(
+            ~account_scenarios["restricted_flag"], 0.0
+        )
+    account_scenarios["scenario_date"] = latest_date
+    account_scenarios["evidence_label"] = "ANALYST-CALC / ANALYST-ASSUMPTION"
+    account_scenarios["decision_boundary"] = (
+        "Buffers use an uncertified supplied-payment extract; surplus is not movable cash"
+    )
+    account_columns = [
+        "scenario_date",
+        "account_id",
+        "entity_id",
+        "entity_name",
+        "region",
+        "country",
+        "currency",
+        "purpose",
+        "restricted_flag",
+        "reporting_delay_days",
+        "closing_balance_usd",
+        "available_balance_usd",
+        "positive_available_usd",
+        "supplied_payment_buffer_7d_usd",
+        "scenario_surplus_after_7d_buffer_usd",
+        "supplied_payment_buffer_14d_usd",
+        "scenario_surplus_after_14d_buffer_usd",
+        "evidence_label",
+        "decision_boundary",
+    ]
+    account_scenarios = account_scenarios[account_columns].sort_values("account_id")
+
+    latest_daily = daily.loc[daily["date"].eq(latest_date)].iloc[0]
+    unflagged = account_scenarios.loc[~account_scenarios["restricted_flag"]]
+    summary_rows = [
+        (
+            "observed_net_ledger_balance",
+            latest_daily["net_closing_usd"],
+            "Observed layer",
+            "Ledger position; not a transferability measure",
+            "ANALYST-CALC",
+        ),
+        (
+            "net_estimated_available_balance",
+            latest_daily["net_estimated_available_usd"],
+            "Estimated layer",
+            "Includes negative positions; not validated movable cash",
+            "ANALYST-CALC",
+        ),
+        (
+            "gross_positive_estimated_available_balance",
+            latest_daily["gross_positive_estimated_available_usd"],
+            "Estimated layer",
+            "Before negative positions, restrictions, and buffers",
+            "ANALYST-CALC",
+        ),
+        (
+            "preliminarily_restricted_positive_available_balance",
+            latest_daily["preliminarily_restricted_positive_available_usd"],
+            "Restriction screen",
+            "Preliminary flag only; requires account-level certification",
+            "ANALYST-CALC",
+        ),
+        (
+            "preliminarily_unflagged_positive_available_balance",
+            latest_daily["preliminarily_unflagged_positive_available_usd"],
+            "Restriction screen",
+            "Unflagged does not mean movable",
+            "ANALYST-CALC",
+        ),
+        (
+            "unflagged_supplied_payment_buffer_7d",
+            unflagged["supplied_payment_buffer_7d_usd"].sum(),
+            "Illustrative buffer",
+            "Trailing seven calendar days in uncertified supplied-payment extract",
+            "ANALYST-ASSUMPTION",
+        ),
+        (
+            "unflagged_scenario_surplus_after_7d_buffer",
+            account_scenarios[
+                "scenario_surplus_after_7d_buffer_usd"
+            ].sum(),
+            "Scenario surplus",
+            "Not validated movable cash",
+            "ANALYST-CALC / ANALYST-ASSUMPTION",
+        ),
+        (
+            "unflagged_supplied_payment_buffer_14d",
+            unflagged["supplied_payment_buffer_14d_usd"].sum(),
+            "Illustrative buffer",
+            "Trailing 14 calendar days in uncertified supplied-payment extract",
+            "ANALYST-ASSUMPTION",
+        ),
+        (
+            "unflagged_scenario_surplus_after_14d_buffer",
+            account_scenarios[
+                "scenario_surplus_after_14d_buffer_usd"
+            ].sum(),
+            "Scenario surplus",
+            "Not validated movable cash",
+            "ANALYST-CALC / ANALYST-ASSUMPTION",
+        ),
+        (
+            "validated_movable_cash",
+            float("nan"),
+            "Validated value",
+            "Not established by supplied data",
+            "NOT ESTABLISHED",
+        ),
+    ]
+    summary = pd.DataFrame(
+        summary_rows,
+        columns=[
+            "metric",
+            "value_usd",
+            "liquidity_layer",
+            "interpretation",
+            "evidence_label",
+        ],
+    )
+    summary.insert(0, "scenario_date", latest_date)
+    summary["value_usd"] = summary["value_usd"].round(2)
+    return daily, account_scenarios, summary
+
+
 def build_reconciliation_metrics(
     data: Dict[str, pd.DataFrame],
     balances: pd.DataFrame,
@@ -397,11 +591,19 @@ def main() -> None:
     )
     account_diagnostic = build_account_diagnostic(data, balances, payments)
     visibility_diagnostic = build_visibility_diagnostic(balances)
+    liquidity_daily, liquidity_accounts, liquidity_summary = build_liquidity_scenarios(
+        balances, payments
+    )
     reconciliation.to_csv(PROCESSED / "W2_reconciliation_metrics.csv", index=False)
     account_diagnostic.to_csv(PROCESSED / "W2_account_diagnostic.csv", index=False)
     visibility_diagnostic.to_csv(
         PROCESSED / "W2_visibility_diagnostic.csv", index=False
     )
+    liquidity_daily.to_csv(PROCESSED / "W2_liquidity_daily.csv", index=False)
+    liquidity_accounts.to_csv(
+        PROCESSED / "W2_liquidity_account_scenarios.csv", index=False
+    )
+    liquidity_summary.to_csv(PROCESSED / "W2_liquidity_scenarios.csv", index=False)
     print(reconciliation.to_string(index=False))
     candidates = account_diagnostic.loc[
         account_diagnostic["closure_validation_candidate"]
@@ -414,6 +616,9 @@ def main() -> None:
     print("Wrote data/processed/W2_reconciliation_metrics.csv")
     print("Wrote data/processed/W2_account_diagnostic.csv")
     print("Wrote data/processed/W2_visibility_diagnostic.csv")
+    print("Wrote data/processed/W2_liquidity_daily.csv")
+    print("Wrote data/processed/W2_liquidity_account_scenarios.csv")
+    print("Wrote data/processed/W2_liquidity_scenarios.csv")
 
 
 if __name__ == "__main__":

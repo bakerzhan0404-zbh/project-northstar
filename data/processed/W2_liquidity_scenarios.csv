@@ -1,0 +1,11 @@
+scenario_date,metric,value_usd,liquidity_layer,interpretation,evidence_label
+2026-06-30,observed_net_ledger_balance,59795482.77,Observed layer,Ledger position; not a transferability measure,ANALYST-CALC
+2026-06-30,net_estimated_available_balance,55662922.37,Estimated layer,Includes negative positions; not validated movable cash,ANALYST-CALC
+2026-06-30,gross_positive_estimated_available_balance,57801215.46,Estimated layer,"Before negative positions, restrictions, and buffers",ANALYST-CALC
+2026-06-30,preliminarily_restricted_positive_available_balance,8053700.97,Restriction screen,Preliminary flag only; requires account-level certification,ANALYST-CALC
+2026-06-30,preliminarily_unflagged_positive_available_balance,49747514.49,Restriction screen,Unflagged does not mean movable,ANALYST-CALC
+2026-06-30,unflagged_supplied_payment_buffer_7d,5485896.33,Illustrative buffer,Trailing seven calendar days in uncertified supplied-payment extract,ANALYST-ASSUMPTION
+2026-06-30,unflagged_scenario_surplus_after_7d_buffer,44983080.88,Scenario surplus,Not validated movable cash,ANALYST-CALC / ANALYST-ASSUMPTION
+2026-06-30,unflagged_supplied_payment_buffer_14d,10828186.91,Illustrative buffer,Trailing 14 calendar days in uncertified supplied-payment extract,ANALYST-ASSUMPTION
+2026-06-30,unflagged_scenario_surplus_after_14d_buffer,40265783.82,Scenario surplus,Not validated movable cash,ANALYST-CALC / ANALYST-ASSUMPTION
+2026-06-30,validated_movable_cash,,Validated value,Not established by supplied data,NOT ESTABLISHED

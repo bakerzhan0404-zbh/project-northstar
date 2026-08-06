@@ -26,7 +26,7 @@
 | A06 | Week 2 analytical contract and baseline | Do all later modules use one controlled population and definition set? | Complete | `W2_metric_contract.md`; `W2_reconciliation_metrics.csv` |
 | A07 | Account rationalization screen | Which accounts merit local closure validation without weakening required services or controls? | Complete | `W2_account_diagnostic.csv` |
 | A08 | Cash visibility diagnostic | Where is cash reporting insufficiently timely for Group Treasury decisions? | Complete | `W2_visibility_diagnostic.csv` |
-| A09 | Liquidity and buffer scenarios | What is observed, apparently available, buffer-dependent, or still unvalidated? | Planned | Pending |
+| A09 | Liquidity and buffer scenarios | What is observed, apparently available, buffer-dependent, or still unvalidated? | Complete | `W2_liquidity_daily.csv`; `W2_liquidity_account_scenarios.csv`; `W2_liquidity_scenarios.csv` |
 | A10 | Simultaneous surplus/deficit | How often do positive and negative positions coexist? | Planned | Pending |
 | A11 | Payment friction profile | Which supplied-record cohorts drive manual work, exceptions, delay, and repair? | Planned | Pending |
 | A12 | Process capacity and controls | Which estimated manual activities are material and which controls must be preserved? | Planned | Pending |
@@ -75,3 +75,17 @@
 - **Code and test:** `build_visibility_diagnostic()` in `src/week2_diagnostic.py`; six visibility assertions in `tests/test_week2_diagnostic.py`.
 - **Output:** `data/processed/W2_visibility_diagnostic.csv`.
 - **Finding implication:** Visibility earns promotion as a current-state finding; its value case remains dependent on mobility and funding evidence.
+
+## A09 — Liquidity and operating-buffer scenarios
+
+- **Decision question:** What is observed, estimated, preliminarily unflagged, buffer-dependent, or genuinely validated for movement?
+- **Owner/date:** Baker / 12 August 2026
+- **Inputs:** All 9,955 enriched account-day balances and the 7,600 supplied payment records.
+- **Population and exclusions:** Daily balance layers use the full six-month panel. The account scenario uses all 55 accounts on 30 June 2026. Preliminary restricted accounts remain visible but receive zero scenario surplus. No account is described as legally or operationally transferable.
+- **Definitions:** Gross positive estimated availability floors negative account positions at zero. Seven- and 14-day buffers equal supplied payment value by account in the trailing calendar window ending 30 June. Scenario surplus equals positive estimated availability less that buffer, floored at zero, and then excludes preliminarily restricted accounts.
+- **Reconciliation:** On 30 June, $57.80m gross positive estimated availability less $(2.14)m negative positions equals $55.66m net estimated availability. Preliminary restriction flags cover $8.05m; $49.75m is preliminarily unflagged.
+- **Sensitivity result:** The unflagged seven-day buffer is $5.49m and leaves $44.98m of scenario surplus. The unflagged 14-day buffer is $10.83m and leaves $40.27m. Both exceed the $35m Week 1 base hypothesis, but neither validates $35m as movable cash because the payment extract, minimum operating cash, timing, legal, tax, and funding needs are not certified.
+- **Counterevidence:** A longer or peak-event buffer, incomplete payment coverage, local restrictions, settlement timing, trapped cash, and forecast error could reduce the screen. The 14-day result falls below the $46.2m upside hypothesis.
+- **Code and test:** `build_liquidity_scenarios()` in `src/week2_diagnostic.py`; eight liquidity assertions in `tests/test_week2_diagnostic.py`.
+- **Outputs:** `data/processed/W2_liquidity_daily.csv`, `W2_liquidity_account_scenarios.csv`, and `W2_liquidity_scenarios.csv`.
+- **Finding implication:** The screen supports continued liquidity option design, but the Week 3 business case must show zero validated movable cash until account-level transferability and operating-buffer evidence is supplied.

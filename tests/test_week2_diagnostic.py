@@ -3,6 +3,8 @@
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -11,6 +13,7 @@ from starter_analysis import enrich_balances, load_data, validate_keys  # noqa: 
 from week2_diagnostic import (  # noqa: E402
     build_account_diagnostic,
     build_visibility_diagnostic,
+    build_liquidity_scenarios,
     build_reconciliation_metrics,
     calculate_process_capacity,
     enrich_payments,
@@ -37,6 +40,10 @@ def main() -> None:
     visibility_source = visibility.loc[
         visibility["dimension"].eq("visibility_method")
     ].set_index("category")
+    liquidity_daily, liquidity_accounts, liquidity_summary = (
+        build_liquidity_scenarios(balances, payments)
+    )
+    liquidity_metrics = liquidity_summary.set_index("metric")["value_usd"]
 
     checks = {
         "revenue control remains $3.9bn": metrics.loc[
@@ -89,6 +96,32 @@ def main() -> None:
             "Spreadsheet", "two_plus_day_delayed_observations"
         ]
         == 14 * 181,
+        "liquidity daily output covers 181 dates": len(liquidity_daily) == 181,
+        "liquidity account scenario covers 55 accounts": len(liquidity_accounts)
+        == 55,
+        "latest net estimated availability reconciles": liquidity_metrics[
+            "net_estimated_available_balance"
+        ]
+        == 55_662_922.37,
+        "latest gross positive estimate reconciles": liquidity_metrics[
+            "gross_positive_estimated_available_balance"
+        ]
+        == 57_801_215.46,
+        "preliminary restriction layer reconciles": liquidity_metrics[
+            "preliminarily_restricted_positive_available_balance"
+        ]
+        == 8_053_700.97,
+        "seven-day scenario surplus reconciles": liquidity_metrics[
+            "unflagged_scenario_surplus_after_7d_buffer"
+        ]
+        == 44_983_080.88,
+        "14-day scenario surplus reconciles": liquidity_metrics[
+            "unflagged_scenario_surplus_after_14d_buffer"
+        ]
+        == 40_265_783.82,
+        "validated movable cash remains unestablished": pd.isna(
+            liquidity_metrics["validated_movable_cash"]
+        ),
     }
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():
