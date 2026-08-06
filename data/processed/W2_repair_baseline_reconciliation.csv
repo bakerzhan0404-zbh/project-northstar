@@ -1,0 +1,11 @@
+metric,value,unit,definition,evidence_label,decision_boundary
+payment_file_exception_records_monthly,79.8333,records/month,Six-month supplied payment total divided by six,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+payment_file_repair_hours_monthly,55.7778,hours/month,Six-month supplied repair minutes divided by 60 and six,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+process_file_exception_instances_monthly,180.0,instances/month,Management estimate in process_activity.csv,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+process_file_exception_manual_hours_monthly,102.6,hours/month,Frequency × minutes × manual percentage,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+exception_volume_difference_monthly,100.1667,instances/month,Process estimate less payment-file average,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+repair_hour_difference_monthly,46.8222,hours/month,Process estimate less payment-file average,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+process_to_payment_exception_volume_ratio,2.2547,ratio,Unreconciled populations; do not combine,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+process_to_payment_repair_hour_ratio,1.8394,ratio,Unreconciled populations; do not combine,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+week2_capacity_target_share,0.2428,share,150 hours/month target is an analyst assumption,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline
+week2_capacity_stress_share,0.0809,share,50 hours/month stress case is an analyst assumption,ANALYST-CALC / ANALYST-ASSUMPTION,Source scope and removability are unresolved; no combined capacity or P&L baseline

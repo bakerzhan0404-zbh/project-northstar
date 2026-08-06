@@ -17,6 +17,7 @@ from week2_diagnostic import (  # noqa: E402
     build_simultaneous_position_diagnostic,
     build_payment_diagnostic,
     build_reconciliation_metrics,
+    build_repair_baseline_reconciliation,
     calculate_process_capacity,
     enrich_payments,
     validate_reconciliations,
@@ -29,6 +30,9 @@ def main() -> None:
     balances = enrich_balances(data)
     payments = enrich_payments(data)
     process_capacity = calculate_process_capacity(data["process"])
+    repair_reconciliation = build_repair_baseline_reconciliation(
+        payments, process_capacity
+    ).set_index("metric")
     validate_reconciliations(data, balances, payments, process_capacity)
     metrics = build_reconciliation_metrics(
         data, balances, payments, process_capacity
@@ -241,6 +245,50 @@ def main() -> None:
         "every payment row carries extract boundary": payment_diagnostic[
             "decision_boundary"
         ].str.contains("7,600").all(),
+        "process capacity has nine activities": len(process_capacity) == 9,
+        "process capacity sums to 617.72 hours": round(
+            process_capacity["manual_hours_monthly"].sum(), 2
+        )
+        == 617.72,
+        "high-criticality work is 315.48 hours": round(
+            process_capacity.loc[
+                process_capacity["control_criticality"].eq("High"),
+                "manual_hours_monthly",
+            ].sum(),
+            2,
+        )
+        == 315.48,
+        "loaded capacity equivalent is $426,618.90 annual": round(
+            process_capacity["loaded_capacity_usd_annual"].sum(), 2
+        )
+        == 426_618.90,
+        "payment file implies 55.78 repair hours monthly": round(
+            repair_reconciliation.loc[
+                "payment_file_repair_hours_monthly", "value"
+            ],
+            2,
+        )
+        == 55.78,
+        "process file implies 102.60 repair hours monthly": round(
+            repair_reconciliation.loc[
+                "process_file_exception_manual_hours_monthly", "value"
+            ],
+            2,
+        )
+        == 102.60,
+        "process repair hours are 1.84x payment baseline": round(
+            repair_reconciliation.loc[
+                "process_to_payment_repair_hour_ratio", "value"
+            ],
+            2,
+        )
+        == 1.84,
+        "150-hour target is 24.28% of screening baseline": round(
+            100
+            * repair_reconciliation.loc["week2_capacity_target_share", "value"],
+            2,
+        )
+        == 24.28,
     }
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():

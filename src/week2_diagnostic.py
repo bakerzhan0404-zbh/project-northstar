@@ -77,6 +77,103 @@ def calculate_process_capacity(process: pd.DataFrame) -> pd.DataFrame:
     result["loaded_capacity_usd_annual"] = (
         result["loaded_capacity_usd_monthly"] * 12
     )
+    total_hours = result["manual_hours_monthly"].sum()
+    total_cost = result["loaded_capacity_usd_monthly"].sum()
+    result["manual_hour_share_pct"] = (
+        100 * result["manual_hours_monthly"] / total_hours
+    ).round(2)
+    result["loaded_capacity_share_pct"] = (
+        100 * result["loaded_capacity_usd_monthly"] / total_cost
+    ).round(2)
+    result["control_preservation_required"] = result["control_criticality"].eq(
+        "High"
+    )
+    result["evidence_label"] = "ANALYST-CALC"
+    result["decision_boundary"] = (
+        "Management-estimated capacity; not observed labor, headcount, or cashable savings"
+    )
+    return result
+
+
+def build_repair_baseline_reconciliation(
+    payments: pd.DataFrame, process_capacity: pd.DataFrame
+) -> pd.DataFrame:
+    """Keep payment-file and process-file repair baselines visibly separate."""
+    payment_exceptions_monthly = payments["exception_flag"].sum() / 6
+    payment_repair_hours_monthly = payments["repair_minutes"].sum() / 60 / 6
+    process_exception = process_capacity.loc[
+        process_capacity["process"].eq("Payment exception repair")
+    ].iloc[0]
+    process_instances_monthly = process_exception["frequency_per_month"]
+    process_repair_hours_monthly = process_exception["manual_hours_monthly"]
+    rows = [
+        (
+            "payment_file_exception_records_monthly",
+            payment_exceptions_monthly,
+            "records/month",
+            "Six-month supplied payment total divided by six",
+        ),
+        (
+            "payment_file_repair_hours_monthly",
+            payment_repair_hours_monthly,
+            "hours/month",
+            "Six-month supplied repair minutes divided by 60 and six",
+        ),
+        (
+            "process_file_exception_instances_monthly",
+            process_instances_monthly,
+            "instances/month",
+            "Management estimate in process_activity.csv",
+        ),
+        (
+            "process_file_exception_manual_hours_monthly",
+            process_repair_hours_monthly,
+            "hours/month",
+            "Frequency × minutes × manual percentage",
+        ),
+        (
+            "exception_volume_difference_monthly",
+            process_instances_monthly - payment_exceptions_monthly,
+            "instances/month",
+            "Process estimate less payment-file average",
+        ),
+        (
+            "repair_hour_difference_monthly",
+            process_repair_hours_monthly - payment_repair_hours_monthly,
+            "hours/month",
+            "Process estimate less payment-file average",
+        ),
+        (
+            "process_to_payment_exception_volume_ratio",
+            process_instances_monthly / payment_exceptions_monthly,
+            "ratio",
+            "Unreconciled populations; do not combine",
+        ),
+        (
+            "process_to_payment_repair_hour_ratio",
+            process_repair_hours_monthly / payment_repair_hours_monthly,
+            "ratio",
+            "Unreconciled populations; do not combine",
+        ),
+        (
+            "week2_capacity_target_share",
+            150 / process_capacity["manual_hours_monthly"].sum(),
+            "share",
+            "150 hours/month target is an analyst assumption",
+        ),
+        (
+            "week2_capacity_stress_share",
+            50 / process_capacity["manual_hours_monthly"].sum(),
+            "share",
+            "50 hours/month stress case is an analyst assumption",
+        ),
+    ]
+    result = pd.DataFrame(rows, columns=["metric", "value", "unit", "definition"])
+    result["value"] = result["value"].round(4)
+    result["evidence_label"] = "ANALYST-CALC / ANALYST-ASSUMPTION"
+    result["decision_boundary"] = (
+        "Source scope and removability are unresolved; no combined capacity or P&L baseline"
+    )
     return result
 
 
@@ -1047,6 +1144,9 @@ def main() -> None:
     balances = enrich_balances(data)
     payments = enrich_payments(data)
     process_capacity = calculate_process_capacity(data["process"])
+    repair_reconciliation = build_repair_baseline_reconciliation(
+        payments, process_capacity
+    )
     validate_reconciliations(data, balances, payments, process_capacity)
 
     reconciliation = build_reconciliation_metrics(
@@ -1085,6 +1185,10 @@ def main() -> None:
     entity_positions.to_csv(PROCESSED / "W2_entity_positions.csv", index=False)
     account_positions.to_csv(PROCESSED / "W2_account_positions.csv", index=False)
     payment_diagnostic.to_csv(PROCESSED / "W2_payment_diagnostic.csv", index=False)
+    process_capacity.to_csv(PROCESSED / "W2_process_capacity.csv", index=False)
+    repair_reconciliation.to_csv(
+        PROCESSED / "W2_repair_baseline_reconciliation.csv", index=False
+    )
     print(reconciliation.to_string(index=False))
     candidates = account_diagnostic.loc[
         account_diagnostic["closure_validation_candidate"]
@@ -1105,6 +1209,8 @@ def main() -> None:
     print("Wrote data/processed/W2_entity_positions.csv")
     print("Wrote data/processed/W2_account_positions.csv")
     print("Wrote data/processed/W2_payment_diagnostic.csv")
+    print("Wrote data/processed/W2_process_capacity.csv")
+    print("Wrote data/processed/W2_repair_baseline_reconciliation.csv")
 
 
 if __name__ == "__main__":

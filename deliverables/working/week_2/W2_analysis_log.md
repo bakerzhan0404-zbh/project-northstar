@@ -29,7 +29,7 @@
 | A09 | Liquidity and buffer scenarios | What is observed, apparently available, buffer-dependent, or still unvalidated? | Complete | `W2_liquidity_daily.csv`; `W2_liquidity_account_scenarios.csv`; `W2_liquidity_scenarios.csv`; `W2_liquidity_thresholds.csv` |
 | A10 | Simultaneous surplus/deficit | How often do positive and negative positions coexist? | Complete | `W2_simultaneous_positions_daily.csv`; `W2_entity_positions.csv`; `W2_account_positions.csv` |
 | A11 | Payment friction profile | Which supplied-record cohorts drive manual work, exceptions, delay, and repair? | Complete | `W2_payment_diagnostic.csv` |
-| A12 | Process capacity and controls | Which estimated manual activities are material and which controls must be preserved? | Planned | Pending |
+| A12 | Process capacity and controls | Which estimated manual activities are material and which controls must be preserved? | Complete | `W2_process_capacity.csv`; `W2_repair_baseline_reconciliation.csv` |
 | A13 | Targeted operating-model feasibility | Which ownership, handoff, data, and control gaps affect Wave 1 feasibility? | Planned | Pending |
 
 ## A06 — Week 2 analytical contract and baseline
@@ -119,3 +119,18 @@
 - **Code and test:** `build_payment_diagnostic()` in `src/week2_diagnostic.py`; 11 payment assertions in `tests/test_week2_diagnostic.py`.
 - **Output:** `data/processed/W2_payment_diagnostic.csv`.
 - **Finding implication:** Promote one extract-bounded payment finding; keep causal and ACG-wide benefit claims gated.
+
+## A12 — Process capacity and control screen
+
+- **Decision question:** Which estimated manual activities are material enough to shape intervention design, and what prevents them from becoming a funded benefit?
+- **Owner/date:** Baker / 13 August 2026
+- **Inputs:** All nine rows in `process_activity.csv` and the supplied payment-file repair fields.
+- **Population and exclusions:** No process activities or payment exceptions excluded. The sources remain separate because there is no process-to-payment key or common population definition.
+- **Definitions:** Manual hours/month = frequency × minutes per instance × manual percentage / 100 / 60. Loaded capacity is hours × illustrative loaded rate. Neither is observed time, removable work, headcount, or P&L savings.
+- **Reconciliation:** The process file yields 617.72 estimated manual hours/month and $426,618.90 loaded capacity equivalent/year. Six High-criticality activities contribute 315.48 hours/month.
+- **Result:** Receipt reconciliation, payment exception repair, cash forecast preparation, and payment file preparation contribute 439.85 hours/month (71.2% of the screening baseline). The payment file implies 55.78 repair hours/month, while the process file implies 102.60—an 84% gap. The 150-hour target equals 24.28% of the screening baseline; the 50-hour stress equals 8.09%.
+- **Implication:** Process simplification should focus on four material activities, but controls must be preserved and Week 3 cannot fund a 150-hour benefit until scope, observed time, removal rate, and redeployment are validated.
+- **Counterevidence:** High criticality does not require the current manual method, while manual percentage does not prove waste. The repair mismatch may reflect broader scope or multiple process instances per payment.
+- **Code and test:** `calculate_process_capacity()` and `build_repair_baseline_reconciliation()` in `src/week2_diagnostic.py`; eight capacity/reconciliation assertions in `tests/test_week2_diagnostic.py`.
+- **Outputs:** `data/processed/W2_process_capacity.csv` and `W2_repair_baseline_reconciliation.csv`.
+- **Finding implication:** Use capacity as a supporting feasibility finding and evidence gate, not a booked benefit.
