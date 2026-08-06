@@ -644,6 +644,173 @@ def build_liquidity_scenarios(
     return daily, account_scenarios, summary, thresholds
 
 
+def longest_true_run(values: pd.Series) -> int:
+    """Return the longest consecutive run of truthy values."""
+    longest = 0
+    current = 0
+    for value in values:
+        if bool(value):
+            current += 1
+            longest = max(longest, current)
+        else:
+            current = 0
+    return longest
+
+
+def build_simultaneous_position_diagnostic(
+    balances: pd.DataFrame,
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Identify persistent account deficits and concurrent surplus positions."""
+    working = balances.copy().sort_values(["date", "account_id"])
+    working["positive_available_usd"] = working["available_balance_usd"].clip(
+        lower=0
+    )
+    working["negative_available_usd"] = working["available_balance_usd"].clip(
+        upper=0
+    )
+
+    daily_accounts = working.groupby("date", as_index=False).agg(
+        positive_account_count=(
+            "available_balance_usd",
+            lambda series: int(series.gt(0).sum()),
+        ),
+        zero_account_count=(
+            "available_balance_usd",
+            lambda series: int(series.eq(0).sum()),
+        ),
+        negative_account_count=(
+            "available_balance_usd",
+            lambda series: int(series.lt(0).sum()),
+        ),
+        gross_positive_available_usd=("positive_available_usd", "sum"),
+        gross_negative_available_usd=("negative_available_usd", "sum"),
+        net_estimated_available_usd=("available_balance_usd", "sum"),
+    )
+    daily_accounts["simultaneous_account_positions_flag"] = (
+        daily_accounts["positive_account_count"].gt(0)
+        & daily_accounts["negative_account_count"].gt(0)
+    )
+    daily_accounts["gross_positive_to_deficit_ratio"] = (
+        daily_accounts["gross_positive_available_usd"]
+        / daily_accounts["gross_negative_available_usd"].abs()
+    )
+
+    entity_date = working.groupby(
+        ["date", "entity_id", "entity_name", "region"], as_index=False
+    ).agg(
+        account_count=("account_id", "nunique"),
+        positive_account_count=(
+            "available_balance_usd",
+            lambda series: int(series.gt(0).sum()),
+        ),
+        negative_account_count=(
+            "available_balance_usd",
+            lambda series: int(series.lt(0).sum()),
+        ),
+        gross_account_positive_available_usd=("positive_available_usd", "sum"),
+        gross_account_negative_available_usd=("negative_available_usd", "sum"),
+        entity_net_estimated_available_usd=("available_balance_usd", "sum"),
+    )
+    entity_date["within_entity_mixed_sign_flag"] = (
+        entity_date["positive_account_count"].gt(0)
+        & entity_date["negative_account_count"].gt(0)
+    )
+    entity_date["entity_net_deficit_flag"] = entity_date[
+        "entity_net_estimated_available_usd"
+    ].lt(0)
+
+    daily_entities = entity_date.groupby("date", as_index=False).agg(
+        positive_entity_count=(
+            "entity_net_estimated_available_usd",
+            lambda series: int(series.gt(0).sum()),
+        ),
+        zero_entity_count=(
+            "entity_net_estimated_available_usd",
+            lambda series: int(series.eq(0).sum()),
+        ),
+        deficit_entity_count=(
+            "entity_net_estimated_available_usd",
+            lambda series: int(series.lt(0).sum()),
+        ),
+        gross_entity_surplus_usd=(
+            "entity_net_estimated_available_usd",
+            lambda series: series.clip(lower=0).sum(),
+        ),
+        gross_entity_deficit_usd=(
+            "entity_net_estimated_available_usd",
+            lambda series: series.clip(upper=0).sum(),
+        ),
+        entity_net_estimated_available_usd=(
+            "entity_net_estimated_available_usd",
+            "sum",
+        ),
+    )
+    daily_entities["simultaneous_entity_positions_flag"] = (
+        daily_entities["positive_entity_count"].gt(0)
+        & daily_entities["deficit_entity_count"].gt(0)
+    )
+    daily = daily_accounts.merge(
+        daily_entities, on="date", how="left", validate="one_to_one"
+    )
+    if not daily["net_estimated_available_usd"].round(2).eq(
+        daily["entity_net_estimated_available_usd"].round(2)
+    ).all():
+        raise AssertionError("Entity positions do not reconcile to group net availability")
+    daily["evidence_label"] = "ANALYST-CALC"
+    daily["decision_boundary"] = (
+        "Concurrent positions do not prove avoidable borrowing, transferability, or interest cost"
+    )
+    entity_date["evidence_label"] = "ANALYST-CALC"
+    entity_date["decision_boundary"] = (
+        "Entity deficit is an estimated position, not evidence of facility use or avoidable funding cost"
+    )
+
+    account_rows = []
+    account_fields = [
+        "account_id",
+        "entity_id",
+        "entity_name",
+        "region",
+        "country",
+        "purpose",
+        "status",
+        "visibility_method",
+        "restricted_flag",
+        "sweep_structure",
+    ]
+    for account_id, frame in working.groupby("account_id", sort=True):
+        frame = frame.sort_values("date")
+        first = frame.iloc[0]
+        negative = frame["available_balance_usd"].lt(0)
+        account_rows.append(
+            {
+                **{field: first[field] for field in account_fields},
+                "observed_days": len(frame),
+                "negative_position_days": int(negative.sum()),
+                "positive_position_days": int(
+                    frame["available_balance_usd"].gt(0).sum()
+                ),
+                "longest_negative_run_days": longest_true_run(negative),
+                "average_available_usd": round(
+                    frame["available_balance_usd"].mean(), 2
+                ),
+                "minimum_available_usd": round(
+                    frame["available_balance_usd"].min(), 2
+                ),
+                "maximum_available_usd": round(
+                    frame["available_balance_usd"].max(), 2
+                ),
+                "persistent_deficit_flag": bool(negative.all()),
+                "evidence_label": "ANALYST-CALC",
+                "decision_boundary": (
+                    "Negative estimate does not establish borrowing, overdraft, or avoidable interest"
+                ),
+            }
+        )
+    account_summary = pd.DataFrame(account_rows)
+    return daily, entity_date, account_summary
+
+
 def build_reconciliation_metrics(
     data: Dict[str, pd.DataFrame],
     balances: pd.DataFrame,
@@ -760,6 +927,11 @@ def main() -> None:
         liquidity_summary,
         liquidity_thresholds,
     ) = build_liquidity_scenarios(balances, payments)
+    (
+        simultaneous_daily,
+        entity_positions,
+        account_positions,
+    ) = build_simultaneous_position_diagnostic(balances)
     reconciliation.to_csv(PROCESSED / "W2_reconciliation_metrics.csv", index=False)
     account_diagnostic.to_csv(PROCESSED / "W2_account_diagnostic.csv", index=False)
     visibility_diagnostic.to_csv(
@@ -773,6 +945,11 @@ def main() -> None:
     liquidity_thresholds.to_csv(
         PROCESSED / "W2_liquidity_thresholds.csv", index=False
     )
+    simultaneous_daily.to_csv(
+        PROCESSED / "W2_simultaneous_positions_daily.csv", index=False
+    )
+    entity_positions.to_csv(PROCESSED / "W2_entity_positions.csv", index=False)
+    account_positions.to_csv(PROCESSED / "W2_account_positions.csv", index=False)
     print(reconciliation.to_string(index=False))
     candidates = account_diagnostic.loc[
         account_diagnostic["closure_validation_candidate"]
@@ -789,6 +966,9 @@ def main() -> None:
     print("Wrote data/processed/W2_liquidity_account_scenarios.csv")
     print("Wrote data/processed/W2_liquidity_scenarios.csv")
     print("Wrote data/processed/W2_liquidity_thresholds.csv")
+    print("Wrote data/processed/W2_simultaneous_positions_daily.csv")
+    print("Wrote data/processed/W2_entity_positions.csv")
+    print("Wrote data/processed/W2_account_positions.csv")
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@
 | A07 | Account rationalization screen | Which accounts merit local closure validation without weakening required services or controls? | Complete | `W2_account_diagnostic.csv` |
 | A08 | Cash visibility diagnostic | Where is cash reporting insufficiently timely for Group Treasury decisions? | Complete | `W2_visibility_diagnostic.csv` |
 | A09 | Liquidity and buffer scenarios | What is observed, apparently available, buffer-dependent, or still unvalidated? | Complete | `W2_liquidity_daily.csv`; `W2_liquidity_account_scenarios.csv`; `W2_liquidity_scenarios.csv`; `W2_liquidity_thresholds.csv` |
-| A10 | Simultaneous surplus/deficit | How often do positive and negative positions coexist? | Planned | Pending |
+| A10 | Simultaneous surplus/deficit | How often do positive and negative positions coexist? | Complete | `W2_simultaneous_positions_daily.csv`; `W2_entity_positions.csv`; `W2_account_positions.csv` |
 | A11 | Payment friction profile | Which supplied-record cohorts drive manual work, exceptions, delay, and repair? | Planned | Pending |
 | A12 | Process capacity and controls | Which estimated manual activities are material and which controls must be preserved? | Planned | Pending |
 | A13 | Targeted operating-model feasibility | Which ownership, handoff, data, and control gaps affect Wave 1 feasibility? | Planned | Pending |
@@ -89,3 +89,18 @@
 - **Code and test:** `build_liquidity_scenarios()` in `src/week2_diagnostic.py`; 13 liquidity assertions in `tests/test_week2_diagnostic.py`.
 - **Outputs:** `data/processed/W2_liquidity_daily.csv`, `W2_liquidity_account_scenarios.csv`, `W2_liquidity_scenarios.csv`, and `W2_liquidity_thresholds.csv`.
 - **Finding implication:** The screen supports continued liquidity option design, but the Week 3 business case must show zero validated movable cash until account-level transferability and operating-buffer evidence is supplied.
+
+## A10 — Simultaneous positive and negative positions
+
+- **Decision question:** Do positive and negative estimated positions coexist often enough to justify a coordinated cash-positioning intervention?
+- **Owner/date:** Baker / 12 August 2026
+- **Inputs:** All 9,955 enriched account-day balance observations.
+- **Population and exclusions:** All 55 accounts and 16 entities across all 181 dates; no exclusions.
+- **Definitions:** An account deficit is estimated available USD below zero. Entity net equals the sum of its accounts on a date. Simultaneous account positions require at least one positive and one negative account; simultaneous entity positions require at least one positive-net and one negative-net entity.
+- **Reconciliation:** Positive, zero, and negative account counts sum to 55 each day. Entity net positions reconcile to group net estimated availability each day.
+- **Result:** Positive and negative account positions coexist on 181/181 dates, with exactly two negative accounts every day. `AC0025` (E007) and `AC0034` (E010) are active operating accounts with 181-day negative runs. At entity level, at least one net deficit occurs on 45/181 days: E007 on 37 days and E010 on 14 days, including six overlapping dates.
+- **Implication:** Persistent account-level mismatches support daily position coordination and targeted funding-policy validation; they do not establish a large cash-release or interest-saving case.
+- **Counterevidence:** The maximum entity net deficit is small relative to group positive estimates, and the supplied data contains no facility usage, interest rate, transfer timing, legal mobility, or internal-funding evidence.
+- **Code and test:** `build_simultaneous_position_diagnostic()` in `src/week2_diagnostic.py`; nine position assertions in `tests/test_week2_diagnostic.py`.
+- **Outputs:** `data/processed/W2_simultaneous_positions_daily.csv`, `W2_entity_positions.csv`, and `W2_account_positions.csv`.
+- **Finding implication:** Promote as supporting evidence for operating-model coordination, not as a quantified financial benefit.

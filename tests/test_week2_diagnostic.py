@@ -14,6 +14,7 @@ from week2_diagnostic import (  # noqa: E402
     build_account_diagnostic,
     build_visibility_diagnostic,
     build_liquidity_scenarios,
+    build_simultaneous_position_diagnostic,
     build_reconciliation_metrics,
     calculate_process_capacity,
     enrich_payments,
@@ -44,6 +45,12 @@ def main() -> None:
         build_liquidity_scenarios(balances, payments)
     )
     liquidity_metrics = liquidity_summary.set_index("metric")["value_usd"]
+    simultaneous_daily, entity_positions, account_positions = (
+        build_simultaneous_position_diagnostic(balances)
+    )
+    persistent_deficits = account_positions.loc[
+        account_positions["persistent_deficit_flag"]
+    ].set_index("account_id")
 
     checks = {
         "revenue control remains $3.9bn": metrics.loc[
@@ -150,6 +157,38 @@ def main() -> None:
         "validated movable cash remains unestablished": pd.isna(
             liquidity_metrics["validated_movable_cash"]
         ),
+        "simultaneous daily output covers 181 dates": len(simultaneous_daily)
+        == 181,
+        "positive and negative accounts coexist every day": simultaneous_daily[
+            "simultaneous_account_positions_flag"
+        ].all(),
+        "exactly two accounts are negative every day": simultaneous_daily[
+            "negative_account_count"
+        ].eq(2).all(),
+        "two accounts have persistent estimated deficits": set(
+            persistent_deficits.index
+        )
+        == {"AC0025", "AC0034"},
+        "persistent deficit run covers all 181 days": persistent_deficits[
+            "longest_negative_run_days"
+        ].eq(181).all(),
+        "entity net deficits occur on 45 days": simultaneous_daily[
+            "deficit_entity_count"
+        ].gt(0).sum()
+        == 45,
+        "E007 has 37 entity deficit days": entity_positions.loc[
+            entity_positions["entity_id"].eq("E007"), "entity_net_deficit_flag"
+        ].sum()
+        == 37,
+        "E010 has 14 entity deficit days": entity_positions.loc[
+            entity_positions["entity_id"].eq("E010"), "entity_net_deficit_flag"
+        ].sum()
+        == 14,
+        "entity net reconciles to account net": simultaneous_daily[
+            "net_estimated_available_usd"
+        ].round(2).eq(
+            simultaneous_daily["entity_net_estimated_available_usd"].round(2)
+        ).all(),
     }
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():
