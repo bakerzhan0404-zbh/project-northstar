@@ -15,6 +15,7 @@ from week2_diagnostic import (  # noqa: E402
     build_visibility_diagnostic,
     build_liquidity_scenarios,
     build_simultaneous_position_diagnostic,
+    build_payment_diagnostic,
     build_reconciliation_metrics,
     calculate_process_capacity,
     enrich_payments,
@@ -51,6 +52,16 @@ def main() -> None:
     persistent_deficits = account_positions.loc[
         account_positions["persistent_deficit_flag"]
     ].set_index("account_id")
+    payment_diagnostic = build_payment_diagnostic(payments)
+    payment_overall = payment_diagnostic.loc[
+        payment_diagnostic["dimension"].eq("overall")
+    ].iloc[0]
+    payment_manual = payment_diagnostic.loc[
+        payment_diagnostic["dimension"].eq("manual_touch")
+    ].set_index("category")
+    payment_wires = payment_diagnostic.loc[
+        payment_diagnostic["dimension"].eq("wire_geography")
+    ].set_index("category")
 
     checks = {
         "revenue control remains $3.9bn": metrics.loc[
@@ -189,6 +200,47 @@ def main() -> None:
         ].round(2).eq(
             simultaneous_daily["entity_net_estimated_available_usd"].round(2)
         ).all(),
+        "payment diagnostic reconciles to 7,600": payment_overall["records"]
+        == 7_600,
+        "payment exceptions reconcile to 479": payment_overall[
+            "exception_records"
+        ]
+        == 479,
+        "payment late releases reconcile to 380": payment_overall[
+            "late_release_records"
+        ]
+        == 380,
+        "payment fees reconcile to $62,613": payment_overall[
+            "estimated_fees_usd"
+        ]
+        == 62_613,
+        "manual records contribute 63.47% of exceptions": payment_manual.loc[
+            "Manual touch", "exception_contribution_pct"
+        ]
+        == 63.47,
+        "manual records have 12.69% exception rate": payment_manual.loc[
+            "Manual touch", "exception_rate_pct"
+        ]
+        == 12.69,
+        "cross-border wires reconcile to 786": payment_wires.loc[
+            "Cross-border wire", "records"
+        ]
+        == 786,
+        "cross-border wire exception rate is 13.99%": payment_wires.loc[
+            "Cross-border wire", "exception_rate_pct"
+        ]
+        == 13.99,
+        "cross-border wires contribute 24.51% of repair": payment_wires.loc[
+            "Cross-border wire", "repair_contribution_pct"
+        ]
+        == 24.51,
+        "domestic wire exception rate is 4.41%": payment_wires.loc[
+            "Domestic wire", "exception_rate_pct"
+        ]
+        == 4.41,
+        "every payment row carries extract boundary": payment_diagnostic[
+            "decision_boundary"
+        ].str.contains("7,600").all(),
     }
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():

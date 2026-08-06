@@ -811,6 +811,139 @@ def build_simultaneous_position_diagnostic(
     return daily, entity_date, account_summary
 
 
+def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
+    """Profile payment friction by rate and absolute contribution.
+
+    All results remain bounded to the supplied 7,600-record extract. Cohort
+    rates use cohort record counts; contribution shares use the full extract's
+    issue or effort total so that small high-rate cohorts are not overstated.
+    """
+    working = payments.copy()
+    working["amount_band_usd"] = pd.cut(
+        working["amount_usd"],
+        bins=[float("-inf"), 10_000, 25_000, 50_000, 100_000, float("inf")],
+        labels=[
+            "≤$10k",
+            ">$10k–$25k",
+            ">$25k–$50k",
+            ">$50k–$100k",
+            ">$100k",
+        ],
+        ordered=True,
+    )
+    working["manual_touch_cohort"] = working["manual_touch_flag"].map(
+        {True: "Manual touch", False: "No manual touch"}
+    )
+    working["cross_border_cohort"] = working["cross_border_flag"].map(
+        {True: "Cross-border", False: "Domestic"}
+    )
+    working["wire_geography"] = working["cross_border_flag"].map(
+        {True: "Cross-border wire", False: "Domestic wire"}
+    )
+    totals = {
+        "records": len(working),
+        "value_usd": working["amount_usd"].sum(),
+        "exceptions": working["exception_flag"].sum(),
+        "late": working["late_release_flag"].sum(),
+        "repair_minutes": working["repair_minutes"].sum(),
+        "fees": working["fee_usd"].sum(),
+    }
+
+    def summarize(
+        frame: pd.DataFrame,
+        dimension: str,
+        category: str,
+        dimension_population: str,
+    ) -> dict:
+        records = len(frame)
+        return {
+            "dimension": dimension,
+            "category": str(category),
+            "dimension_population": dimension_population,
+            "records": records,
+            "represented_accounts": frame["account_id"].nunique(),
+            "record_share_of_extract_pct": round(
+                100 * records / totals["records"], 2
+            ),
+            "gross_supplied_record_value_usd": round(frame["amount_usd"].sum(), 2),
+            "value_share_of_extract_pct": round(
+                100 * frame["amount_usd"].sum() / totals["value_usd"], 2
+            ),
+            "manual_touch_records": int(frame["manual_touch_flag"].sum()),
+            "manual_touch_rate_pct": round(
+                100 * frame["manual_touch_flag"].mean(), 2
+            ),
+            "exception_records": int(frame["exception_flag"].sum()),
+            "exception_rate_pct": round(100 * frame["exception_flag"].mean(), 2),
+            "exception_contribution_pct": round(
+                100 * frame["exception_flag"].sum() / totals["exceptions"], 2
+            ),
+            "late_release_records": int(frame["late_release_flag"].sum()),
+            "late_release_rate_pct": round(
+                100 * frame["late_release_flag"].mean(), 2
+            ),
+            "late_release_contribution_pct": round(
+                100 * frame["late_release_flag"].sum() / totals["late"], 2
+            ),
+            "rejected_records": int(frame["status"].eq("Rejected").sum()),
+            "rejection_rate_pct": round(
+                100 * frame["status"].eq("Rejected").mean(), 2
+            ),
+            "pending_records": int(frame["status"].eq("Pending").sum()),
+            "pending_rate_pct": round(
+                100 * frame["status"].eq("Pending").mean(), 2
+            ),
+            "repair_minutes": int(frame["repair_minutes"].sum()),
+            "repair_contribution_pct": round(
+                100 * frame["repair_minutes"].sum() / totals["repair_minutes"], 2
+            ),
+            "estimated_fees_usd": round(frame["fee_usd"].sum(), 2),
+            "fee_contribution_pct": round(
+                100 * frame["fee_usd"].sum() / totals["fees"], 2
+            ),
+            "cross_border_records": int(frame["cross_border_flag"].sum()),
+            "cross_border_rate_pct": round(
+                100 * frame["cross_border_flag"].mean(), 2
+            ),
+            "evidence_label": "ANALYST-CALC",
+            "decision_boundary": (
+                "Within supplied 7,600 records only; association does not establish cause or ACG-wide performance"
+            ),
+        }
+
+    rows = [
+        summarize(
+            working,
+            "overall",
+            "All supplied payment records",
+            "All 7,600 supplied records",
+        )
+    ]
+    dimensions = [
+        ("manual_touch", "manual_touch_cohort", "All 7,600 supplied records"),
+        ("payment_type", "payment_type", "All 7,600 supplied records"),
+        ("cross_border", "cross_border_cohort", "All 7,600 supplied records"),
+        ("region", "region", "All 7,600 supplied records"),
+        ("account_purpose", "purpose", "All 7,600 supplied records"),
+        ("visibility_method", "visibility_method", "All 7,600 supplied records"),
+        ("bank", "bank_name", "All 7,600 supplied records"),
+        ("erp_system", "erp_system", "All 7,600 supplied records"),
+        ("status", "status", "All 7,600 supplied records"),
+        ("month", "month", "All 7,600 supplied records"),
+        ("amount_band_usd", "amount_band_usd", "All 7,600 supplied records"),
+    ]
+    for dimension, column, population in dimensions:
+        for category, frame in working.groupby(column, sort=False, observed=True):
+            rows.append(summarize(frame, dimension, category, population))
+
+    wires = working.loc[working["payment_type"].eq("Wire")]
+    for category, frame in wires.groupby("wire_geography", sort=False):
+        rows.append(
+            summarize(frame, "wire_geography", category, "1,398 supplied wire records")
+        )
+    return pd.DataFrame(rows)
+
+
 def build_reconciliation_metrics(
     data: Dict[str, pd.DataFrame],
     balances: pd.DataFrame,
@@ -932,6 +1065,7 @@ def main() -> None:
         entity_positions,
         account_positions,
     ) = build_simultaneous_position_diagnostic(balances)
+    payment_diagnostic = build_payment_diagnostic(payments)
     reconciliation.to_csv(PROCESSED / "W2_reconciliation_metrics.csv", index=False)
     account_diagnostic.to_csv(PROCESSED / "W2_account_diagnostic.csv", index=False)
     visibility_diagnostic.to_csv(
@@ -950,6 +1084,7 @@ def main() -> None:
     )
     entity_positions.to_csv(PROCESSED / "W2_entity_positions.csv", index=False)
     account_positions.to_csv(PROCESSED / "W2_account_positions.csv", index=False)
+    payment_diagnostic.to_csv(PROCESSED / "W2_payment_diagnostic.csv", index=False)
     print(reconciliation.to_string(index=False))
     candidates = account_diagnostic.loc[
         account_diagnostic["closure_validation_candidate"]
@@ -969,6 +1104,7 @@ def main() -> None:
     print("Wrote data/processed/W2_simultaneous_positions_daily.csv")
     print("Wrote data/processed/W2_entity_positions.csv")
     print("Wrote data/processed/W2_account_positions.csv")
+    print("Wrote data/processed/W2_payment_diagnostic.csv")
 
 
 if __name__ == "__main__":

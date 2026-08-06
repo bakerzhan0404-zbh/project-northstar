@@ -28,7 +28,7 @@
 | A08 | Cash visibility diagnostic | Where is cash reporting insufficiently timely for Group Treasury decisions? | Complete | `W2_visibility_diagnostic.csv` |
 | A09 | Liquidity and buffer scenarios | What is observed, apparently available, buffer-dependent, or still unvalidated? | Complete | `W2_liquidity_daily.csv`; `W2_liquidity_account_scenarios.csv`; `W2_liquidity_scenarios.csv`; `W2_liquidity_thresholds.csv` |
 | A10 | Simultaneous surplus/deficit | How often do positive and negative positions coexist? | Complete | `W2_simultaneous_positions_daily.csv`; `W2_entity_positions.csv`; `W2_account_positions.csv` |
-| A11 | Payment friction profile | Which supplied-record cohorts drive manual work, exceptions, delay, and repair? | Planned | Pending |
+| A11 | Payment friction profile | Which supplied-record cohorts drive manual work, exceptions, delay, and repair? | Complete | `W2_payment_diagnostic.csv` |
 | A12 | Process capacity and controls | Which estimated manual activities are material and which controls must be preserved? | Planned | Pending |
 | A13 | Targeted operating-model feasibility | Which ownership, handoff, data, and control gaps affect Wave 1 feasibility? | Planned | Pending |
 
@@ -104,3 +104,18 @@
 - **Code and test:** `build_simultaneous_position_diagnostic()` in `src/week2_diagnostic.py`; nine position assertions in `tests/test_week2_diagnostic.py`.
 - **Outputs:** `data/processed/W2_simultaneous_positions_daily.csv`, `W2_entity_positions.csv`, and `W2_account_positions.csv`.
 - **Finding implication:** Promote as supporting evidence for operating-model coordination, not as a quantified financial benefit.
+
+## A11 — Payment friction profile
+
+- **Decision question:** Within the supplied extract, which cohorts concentrate manual activity, exceptions, late release, repair effort, and estimated fees?
+- **Owner/date:** Baker / 13 August 2026
+- **Inputs:** All 7,600 enriched payment records joined to account, entity, and daily project FX attributes.
+- **Population and exclusions:** No supplied records excluded. Gross value includes all statuses. All results are extract-bounded; wire geography compares only the 1,398 wire records.
+- **Definitions:** Cohort rates use cohort record counts. Contribution shares use 479 total exceptions, 380 late releases, 20,080 repair minutes, or $62,613 estimated fees. USD amount bands prevent mixed-currency comparisons.
+- **Reconciliation:** 7,600 records, $198.14m gross supplied-record value, 2,395 manual touches, 479 exceptions, 380 late releases, 54 rejected, 17 pending, 20,080 repair minutes, and $62,613 estimated fees reproduce.
+- **Result:** Manual-touch records are 31.51% of the extract but contribute 63.47% of exceptions and 63.35% of repair minutes; their exception rate is 12.69% versus 3.36% without manual touch. Cross-border wires are 786 records (10.34%) but contribute 22.96% of exceptions, 24.51% of repair, and 57.24% of estimated fees; their 13.99% exception rate compares with 4.41% for domestic wires.
+- **Implication:** Week 3 options should prioritize targeted payment-intake, cutoff, format, and control interventions for manual-touch and cross-border-wire cohorts rather than assume uniform automation value.
+- **Counterevidence:** 87.31% of manual-touch records and 86.01% of cross-border wires have no exception. The data lacks event sequence, reason code, beneficiary/corridor, criticality, and approval/release timestamps, so it cannot prove manual work or cross-border status caused the friction.
+- **Code and test:** `build_payment_diagnostic()` in `src/week2_diagnostic.py`; 11 payment assertions in `tests/test_week2_diagnostic.py`.
+- **Output:** `data/processed/W2_payment_diagnostic.csv`.
+- **Finding implication:** Promote one extract-bounded payment finding; keep causal and ACG-wide benefit claims gated.
