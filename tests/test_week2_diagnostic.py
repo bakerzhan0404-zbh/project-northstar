@@ -9,6 +9,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from starter_analysis import enrich_balances, load_data, validate_keys  # noqa: E402
 from week2_diagnostic import (  # noqa: E402
+    build_account_diagnostic,
     build_reconciliation_metrics,
     calculate_process_capacity,
     enrich_payments,
@@ -26,6 +27,8 @@ def main() -> None:
     metrics = build_reconciliation_metrics(
         data, balances, payments, process_capacity
     ).set_index("metric")
+    accounts = build_account_diagnostic(data, balances, payments)
+    candidates = accounts.loc[accounts["closure_validation_candidate"]]
 
     checks = {
         "revenue control remains $3.9bn": metrics.loc[
@@ -44,6 +47,16 @@ def main() -> None:
             "estimated_manual_process_hours_monthly", "value"
         ]
         == 617.72,
+        "account diagnostic reconciles to 55": len(accounts) == 55,
+        "four narrow closure-validation candidates": len(candidates) == 4,
+        "candidate fees reconcile to $7,800": candidates["annual_fee_usd"].sum()
+        == 7_800,
+        "all primary candidates have zero supplied payments": candidates[
+            "supplied_payment_records"
+        ].eq(0).all(),
+        "all primary candidates remain locally gated": candidates[
+            "decision_boundary"
+        ].str.contains("not validated").all(),
     }
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():

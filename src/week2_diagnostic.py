@@ -80,6 +80,138 @@ def calculate_process_capacity(process: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+def build_account_diagnostic(
+    data: Dict[str, pd.DataFrame],
+    balances: pd.DataFrame,
+    payments: pd.DataFrame,
+) -> pd.DataFrame:
+    """Screen all accounts for local closure validation and protection needs.
+
+    The primary screen is intentionally narrow: dormant status, legacy purpose,
+    and zero supplied payment records. Every result remains a validation
+    candidate because local legal purpose, service dependencies, and closure
+    economics are not supplied.
+    """
+    accounts = data["accounts"].merge(
+        data["entities"][
+            [
+                "entity_id",
+                "entity_name",
+                "region",
+                "erp_system",
+                "acquisition_origin",
+                "cash_restriction_level",
+            ]
+        ],
+        on="entity_id",
+        how="left",
+        validate="many_to_one",
+    )
+    payment_profile = payments.groupby("account_id", as_index=False).agg(
+        supplied_payment_records=("payment_id", "size"),
+        supplied_payment_value_usd=("amount_usd", "sum"),
+        last_supplied_payment_date=("payment_date", "max"),
+    )
+    balance_profile = balances.groupby("account_id", as_index=False).agg(
+        average_positive_available_usd=(
+            "available_balance_usd",
+            lambda series: series.clip(lower=0).mean(),
+        ),
+        average_absolute_available_usd=(
+            "available_balance_usd",
+            lambda series: series.abs().mean(),
+        ),
+    )
+    latest_date = balances["date"].max()
+    latest_profile = balances.loc[
+        balances["date"].eq(latest_date),
+        ["account_id", "available_balance_usd"],
+    ].rename(columns={"available_balance_usd": "latest_available_usd"})
+
+    result = (
+        accounts.merge(
+            payment_profile, on="account_id", how="left", validate="one_to_one"
+        )
+        .merge(balance_profile, on="account_id", how="left", validate="one_to_one")
+        .merge(latest_profile, on="account_id", how="left", validate="one_to_one")
+    )
+    result["supplied_payment_records"] = result[
+        "supplied_payment_records"
+    ].fillna(0).astype(int)
+    result["supplied_payment_value_usd"] = result[
+        "supplied_payment_value_usd"
+    ].fillna(0.0)
+    result["account_age_years"] = (
+        (latest_date - result["open_date"]).dt.days / 365.25
+    ).round(1)
+    result["closure_validation_candidate"] = (
+        result["status"].eq("Dormant")
+        & result["purpose"].eq("Legacy")
+        & result["supplied_payment_records"].eq(0)
+    )
+
+    def protection_reason(row: pd.Series) -> str:
+        reasons = []
+        if row["purpose"] in {"Payroll", "Tax", "Collection"}:
+            reasons.append(f"{row['purpose'].lower()} purpose")
+        if bool(row["restricted_flag"]):
+            reasons.append("preliminary restriction flag")
+        if row["sweep_structure"] != "None":
+            reasons.append(f"{row['sweep_structure'].lower()} dependency")
+        if row["status"] == "Active" and row["purpose"] == "Operating":
+            reasons.append("active operating purpose")
+        return "; ".join(reasons) if reasons else "local validation required"
+
+    result["protection_or_validation_reason"] = result.apply(
+        protection_reason, axis=1
+    )
+    result["candidate_reason"] = result["closure_validation_candidate"].map(
+        {
+            True: "Dormant + legacy purpose + zero supplied payment records",
+            False: "Does not meet the narrow primary screen",
+        }
+    )
+    result["evidence_label"] = "ANALYST-CALC"
+    result["decision_boundary"] = (
+        "Local purpose, dependencies, signatories, service continuity, closure "
+        "cost, and fee removal are not validated"
+    )
+    output_columns = [
+        "account_id",
+        "entity_id",
+        "entity_name",
+        "region",
+        "country",
+        "bank_name",
+        "currency",
+        "purpose",
+        "status",
+        "account_age_years",
+        "visibility_method",
+        "sweep_structure",
+        "erp_system",
+        "acquisition_origin",
+        "cash_restriction_level",
+        "restricted_flag",
+        "annual_fee_usd",
+        "supplied_payment_records",
+        "supplied_payment_value_usd",
+        "last_supplied_payment_date",
+        "average_positive_available_usd",
+        "average_absolute_available_usd",
+        "latest_available_usd",
+        "closure_validation_candidate",
+        "candidate_reason",
+        "protection_or_validation_reason",
+        "evidence_label",
+        "decision_boundary",
+    ]
+    return result[output_columns].sort_values(
+        ["closure_validation_candidate", "annual_fee_usd", "account_id"],
+        ascending=[False, False, True],
+    )
+
+
 def build_reconciliation_metrics(
     data: Dict[str, pd.DataFrame],
     balances: pd.DataFrame,
@@ -188,9 +320,20 @@ def main() -> None:
     reconciliation = build_reconciliation_metrics(
         data, balances, payments, process_capacity
     )
+    account_diagnostic = build_account_diagnostic(data, balances, payments)
     reconciliation.to_csv(PROCESSED / "W2_reconciliation_metrics.csv", index=False)
+    account_diagnostic.to_csv(PROCESSED / "W2_account_diagnostic.csv", index=False)
     print(reconciliation.to_string(index=False))
-    print("\nWrote data/processed/W2_reconciliation_metrics.csv")
+    candidates = account_diagnostic.loc[
+        account_diagnostic["closure_validation_candidate"]
+    ]
+    print(
+        "\nAccount screen: "
+        f"{len(candidates)} closure-validation candidates; "
+        f"${candidates['annual_fee_usd'].sum():,.0f} gross estimated annual fees"
+    )
+    print("Wrote data/processed/W2_reconciliation_metrics.csv")
+    print("Wrote data/processed/W2_account_diagnostic.csv")
 
 
 if __name__ == "__main__":
