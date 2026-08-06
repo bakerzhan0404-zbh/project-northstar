@@ -252,12 +252,15 @@ def main() -> None:
         == 617.72,
         "high-criticality work is 315.48 hours": round(
             process_capacity.loc[
-                process_capacity["control_criticality"].eq("High"),
+                process_capacity["high_control_criticality_flag"],
                 "manual_hours_monthly",
             ].sum(),
             2,
         )
-        == 315.48,
+        == 315.48
+        and process_capacity["high_control_criticality_flag"].equals(
+            process_capacity["control_criticality"].eq("High")
+        ),
         "loaded capacity equivalent is $426,618.90 annual": round(
             process_capacity["loaded_capacity_usd_annual"].sum(), 2
         )
@@ -282,7 +285,11 @@ def main() -> None:
             ],
             2,
         )
-        == 1.84,
+        == 1.84
+        and repair_reconciliation.loc[
+            "unreconciled_exception_count_difference_monthly", "unit"
+        ]
+        == "mixed records/instances per month",
         "150-hour target is 24.28% of screening baseline": round(
             100
             * repair_reconciliation.loc["week2_capacity_target_share", "value"],

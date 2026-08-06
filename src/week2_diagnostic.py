@@ -85,7 +85,7 @@ def calculate_process_capacity(process: pd.DataFrame) -> pd.DataFrame:
     result["loaded_capacity_share_pct"] = (
         100 * result["loaded_capacity_usd_monthly"] / total_cost
     ).round(2)
-    result["control_preservation_required"] = result["control_criticality"].eq(
+    result["high_control_criticality_flag"] = result["control_criticality"].eq(
         "High"
     )
     result["evidence_label"] = "ANALYST-CALC"
@@ -132,10 +132,10 @@ def build_repair_baseline_reconciliation(
             "Frequency × minutes × manual percentage",
         ),
         (
-            "exception_volume_difference_monthly",
+            "unreconciled_exception_count_difference_monthly",
             process_instances_monthly - payment_exceptions_monthly,
-            "instances/month",
-            "Process estimate less payment-file average",
+            "mixed records/instances per month",
+            "Unreconciled process instances less supplied payment records; directional comparison only",
         ),
         (
             "repair_hour_difference_monthly",
