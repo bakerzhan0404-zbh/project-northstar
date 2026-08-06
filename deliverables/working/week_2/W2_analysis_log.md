@@ -30,7 +30,8 @@
 | A10 | Simultaneous surplus/deficit | How often do positive and negative positions coexist? | Complete | `W2_simultaneous_positions_daily.csv`; `W2_entity_positions.csv`; `W2_account_positions.csv` |
 | A11 | Payment friction profile | Which supplied-record cohorts drive manual work, exceptions, delay, and repair? | Complete | `W2_payment_diagnostic.csv` |
 | A12 | Process capacity and controls | Which estimated manual activities are material and which controls must be preserved? | Complete | `W2_process_capacity.csv`; `W2_repair_baseline_reconciliation.csv` |
-| A13 | Targeted operating-model feasibility | Which ownership, handoff, data, and control gaps affect Wave 1 feasibility? | Planned | Pending |
+| A13 | Targeted operating-model feasibility | Which ownership, handoff, data, and control gaps affect Wave 1 feasibility? | Complete | `W2_current_state_process_map_and_RACI.md`; `W2_maturity_heatmap.md` |
+| A14 | Executive diagnostic synthesis | Which four to six findings materially change the Week 3 decision? | Complete | `W2_findings_log.md`; `W2_diagnostic_report.md`; `W2_checkpoint_deck.md` |
 
 ## A06 — Week 2 analytical contract and baseline
 
@@ -128,9 +129,29 @@
 - **Population and exclusions:** No process activities or payment exceptions excluded. The sources remain separate because there is no process-to-payment key or common population definition.
 - **Definitions:** Manual hours/month = frequency × minutes per instance × manual percentage / 100 / 60. Loaded capacity is hours × illustrative loaded rate. Neither is observed time, removable work, headcount, or P&L savings.
 - **Reconciliation:** The process file yields 617.72 estimated manual hours/month and $426,618.90 loaded capacity equivalent/year. Six High-criticality activities contribute 315.48 hours/month.
-- **Result:** Receipt reconciliation, payment exception repair, cash forecast preparation, and payment file preparation contribute 439.85 hours/month (71.2% of the screening baseline). The payment file implies 55.78 repair hours/month, while the process file implies 102.60—an 84% gap. The 150-hour target equals 24.28% of the screening baseline; the 50-hour stress equals 8.09%.
+- **Result:** Receipt reconciliation, payment exception repair, cash forecast preparation, and payment file preparation contribute 439.85 hours/month (71.2% of the screening baseline). The process file implies 102.60 repair hours/month, 84% above the 55.78-hour payment-file estimate. The 150-hour target equals 24.28% of the screening baseline; the 50-hour stress equals 8.09%.
 - **Implication:** Process simplification should focus on four material activities, but controls must be preserved and Week 3 cannot fund a 150-hour benefit until scope, observed time, removal rate, and redeployment are validated.
 - **Counterevidence:** High criticality does not require the current manual method, while manual percentage does not prove waste. The repair mismatch may reflect broader scope or multiple process instances per payment.
 - **Code and test:** `calculate_process_capacity()` and `build_repair_baseline_reconciliation()` in `src/week2_diagnostic.py`; eight capacity/reconciliation assertions in `tests/test_week2_diagnostic.py`.
 - **Outputs:** `data/processed/W2_process_capacity.csv` and `W2_repair_baseline_reconciliation.csv`.
 - **Finding implication:** Use capacity as a supporting feasibility finding and evidence gate, not a booked benefit.
+
+## A13 — Targeted operating-model feasibility
+
+- **Decision question:** Which handoffs, ownership gaps, data conditions, and controls determine whether ACG can deliver the promoted interventions safely?
+- **Owner/date:** Baker / 14 August 2026
+- **Inputs:** A07–A12 results, client brief, stakeholder evidence, and nine process-activity estimates.
+- **Method:** Map only the cash and payment handoffs needed to explain or implement the promoted findings; draft responsibility at the relevant validation and control decisions; score maturity only against observable 1–5 criteria.
+- **Result:** Data ownership, global/local decision rights, process standards, controls, and performance evidence are all emerging constraints. Connectivity can be staged around existing ERPs only if those capabilities move together.
+- **Boundary:** Maps are analytical, not observed BPMN. Maturity scores are provisional, non-aggregated, and not external benchmarks. Internal Audit is consulted; management owns controls.
+- **Outputs:** `W2_current_state_process_map_and_RACI.md` and `W2_maturity_heatmap.md`.
+
+## A14 — Executive diagnostic synthesis
+
+- **Decision question:** What must the Treasurer believe, decide, and request after Week 2?
+- **Owner/date:** Baker / 15 August 2026
+- **Promotion rule:** Material to Week 3; reconciled; fact–magnitude–implication–mechanism–action; evidence labels visible; counterevidence retained; named decision/evidence gate.
+- **Result:** Five findings promoted. Three drive option design—visibility, liquidity evidence, and payment cohorts. Two constrain value/sequencing—capacity/control and account rationalization.
+- **Executive conclusion:** Proceed to three-option design and two bounded pilot designs; carry $0 validated mobility and exclude unvalidated capacity/fee value from the funded base.
+- **Consistency check:** The findings log, eight-page report, weekly update, and five-slide checkpoint use the same conclusion loop and three evidence requests.
+- **Outputs:** `W2_findings_log.md`, `W2_diagnostic_report.md`, `W2_checkpoint_deck.md`, and `W2_weekly_update.md`.

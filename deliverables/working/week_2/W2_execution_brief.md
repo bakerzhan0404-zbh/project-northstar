@@ -4,11 +4,34 @@
 
 **Working period:** 10–16 August 2026
 
-**Status:** Planned
+**Status:** Executed — outcome recorded; original plan preserved below
 
 **Classification:** Project Northstar simulated client material
 
 ## Executive direction — what matters in 90 seconds
+
+### Execution outcome
+
+Week 2 supports a **targeted, gated transformation**. All 23 delayed accounts use portal or spreadsheet reporting, so ACG can design a focused connectivity/data-owner pilot without assuming ERP replacement. The all-status 14-day payment-intent sensitivity leaves $38.13m net on 30 June, but the $35m threshold survives only 138/168 complete windows and validated movable cash remains unestablished. Within the supplied 7,600 payment records, manual-touch and cross-border-wire cohorts over-index on exception and repair, earning targeted root-cause testing—not an ACG-wide automation claim.
+
+The business case remains constrained: the 150-hour capacity target is not fundable, the 102.60-hour process repair estimate is 84% above the 55.78-hour payment-file estimate, and only four closure-validation candidates with $7,800 of estimated fees are evidenced. The [diagnostic report](W2_diagnostic_report.md), [five-slide checkpoint](W2_checkpoint_deck.md), and [weekly update](W2_weekly_update.md) use the same three-part conclusion.
+
+### Completion against plan
+
+- Completed every P0 analysis, the five-finding synthesis, the report, the five-slide checkpoint, the technical appendix, and the engagement-control updates.
+- Kept receivables and FX data-gated because controlled evidence did not arrive.
+- Passed 57/57 Week 2 assertions, 10/10 supplied data-quality tests, and 52/52 expanded Week 1 controls.
+- Carried $0 validated mobility and excluded unvalidated capacity and account-fee value from the funded base.
+
+### Decisions now requested
+
+1. **Authorize Week 3 option development and comparison:** local stabilization, federated coordination, and globally coordinated alternatives around one data/control foundation, using the $21m / two-closure / 50-hour downside tests.
+2. **Approve design—not execution—of two bounded validation pilots:** delayed balance reporting and manual-touch/cross-border-wire payment cohorts, outside peak season with service, control, and four-hour rollback gates.
+3. **Approve the evidence owners and proposed due dates:** visibility (Group Treasurer, 18 August), payment/process (Shared Services Lead, 19 August), and mobility/economics (Group Treasurer, 21 August); keep related value outside the funded case until certification and Finance approval.
+
+## Original approved Week 2 plan — preserved for auditability
+
+The remainder of this brief retains the future-tense plan used to govern execution. The outcome and deviations are recorded above so the plan itself remains an auditable baseline.
 
 Week 2 will not analyze every treasury topic equally. It will test three executive findings and produce only four to six conclusions that could change the Week 3 recommendation.
 

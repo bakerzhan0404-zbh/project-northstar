@@ -4,7 +4,7 @@
 
 ## Current steering decision
 
-At the Week 2 checkpoint, agree the five diagnostic findings, authorize three-option design, approve two bounded validation pilots for design, and assign the three evidence packages. Do not approve funded mobility, capacity, or fee benefits.
+At the Week 2 checkpoint: authorize comparison of three options under common downside tests; approve design—not execution—of two bounded validation pilots; and approve the three evidence owners and proposed due dates while holding unvalidated value outside the funded case.
 
 ## Milestones
 
@@ -48,11 +48,11 @@ At the Week 2 checkpoint, agree the five diagnostic findings, authorize three-op
 
 ## Evidence-owner action plan
 
-| Gate | Immediate action | Proposed accountable owner | Week 3 use | Status |
-|---|---|---|---|---|
-| Visibility | Supply timestamp/cutoff/balance/source/reconciliation for 55 accounts | Group Treasurer | Pilot scope and architecture | Open |
-| Mobility/economics | Certify restrictions, buffers, funding events, facility use, rates, transfer cost/timing | Group Treasurer | Liquidity range and option scoring | Open |
-| Payment/process | Reconcile extract; supply reason codes, criticality, release timestamps, observed time | Shared Services Lead | Intervention and capacity case | Open |
+| Gate | Immediate action | Proposed accountable owner | Proposed due | Week 3 use | Status |
+|---|---|---|---:|---|---|
+| Visibility | Supply timestamp/cutoff/balance/source/reconciliation for 55 accounts | Group Treasurer | 18 Aug | Pilot scope and architecture | Open |
+| Mobility/economics | Certify restrictions, buffers, funding events, facility use, rates, transfer cost/timing | Group Treasurer | 21 Aug | Liquidity range and option scoring | Open |
+| Payment/process | Reconcile extract; supply reason codes, criticality, release timestamps, observed time | Shared Services Lead | 19 Aug | Intervention and capacity case | Open |
 
 ## Delivery controls
 

@@ -11,7 +11,7 @@
 | DEC-03 | Do not equate positive/available balance with movable cash | Retained; liquidity ladder and $0 validated mobility made explicit |
 | DEC-04 | Use JPMorgan public cases as context only | Retained; no promoted Week 2 finding depends on an external case |
 | DEC-05 | Week 1 status Amber | Superseded by Week 2 Amber: action is supported, value approval remains gated |
-| DEC-07 | Keep payment and process estimates separate | Retained; 84% repair-hour mismatch quantified |
+| DEC-07 | Keep payment and process estimates separate | Retained; the process repair estimate is 84% above the payment-file estimate |
 | DEC-08 | Prioritize three evidence packages | Retained as the Week 3 recommendation gates |
 
 ## Week 2 analyst decisions
@@ -32,12 +32,9 @@
 
 | Decision required | Analyst recommendation | Evidence or condition | Decision owner |
 |---|---|---|---|
-| Accept the five promoted findings | Accept as the current diagnostic, with stated confidence and counterevidence | Confirm stakeholder/process-owner contradictions | Group Treasurer / Steering committee |
-| Authorize Week 3 option design | Approve three coherent ambition levels around one data/control foundation | No selection of preferred option yet | Steering committee |
-| Approve two targeted pilots for design | Delayed balance sources and manual-touch/cross-border-wire cohorts | Peak calendar, service levels, controls, rollback, and owners | Treasurer / CIO / BU Finance |
-| Assign the three evidence packages | Confirm one accountable owner and deadline per package | Visibility, mobility/economics, payment/process control | CFO / Steering committee |
-| Define funded-value rule | Carry $0 validated mobility and exclude unvalidated capacity/fees | Finance approval and evidence completeness required | CFO / Finance |
-| Confirm P1 deferrals | Keep receivables and FX constrained unless controlled data arrives | No substitute benchmark or proxy | CFO / Treasurer |
+| Authorize Week 3 option development and comparison | Compare local stabilization, federated coordination, and globally coordinated alternatives around one data/control foundation | Use the $21m / two-closure / 50-hour downside tests; do not select a preferred option yet | Steering committee |
+| Approve design—not execution—of two bounded validation pilots | Design delayed-balance and manual-touch/cross-border-wire pilots outside peak season | Service, control, four-hour rollback, and owner gates must be approved before execution | Treasurer / CIO / BU Finance |
+| Approve dated evidence ownership and the funded-value rule | Visibility: Group Treasurer, 18 Aug; payment/process: Shared Services Lead, 19 Aug; mobility/economics: Group Treasurer, 21 Aug | Keep related mobility, capacity, and fee value outside the funded case until certification and Finance approval; receivables and FX remain data-gated | CFO / Steering committee |
 
 ## Decision-status convention
 
