@@ -23,7 +23,7 @@
 
 | ID | Module | Decision question | Status | Reproducible outputs |
 |---|---|---|---|---|
-| A06 | Week 2 analytical contract and baseline | Do all later modules use one controlled population and definition set? | Defined | `W2_metric_contract.md` |
+| A06 | Week 2 analytical contract and baseline | Do all later modules use one controlled population and definition set? | Complete | `W2_metric_contract.md`; `W2_reconciliation_metrics.csv` |
 | A07 | Account rationalization screen | Which accounts merit local closure validation without weakening required services or controls? | Planned | Pending |
 | A08 | Cash visibility diagnostic | Where is cash reporting insufficiently timely for Group Treasury decisions? | Planned | Pending |
 | A09 | Liquidity and buffer scenarios | What is observed, apparently available, buffer-dependent, or still unvalidated? | Planned | Pending |
@@ -40,6 +40,8 @@
 - **Population:** All supplied records; domain-specific exclusions must be declared in the relevant module.
 - **Definitions:** See `W2_metric_contract.md`.
 - **Evidence boundary:** Date-level visibility is not start-of-day visibility; estimated availability is not movable cash; the payment file is not a certified ACG-wide population; process hours are capacity estimates.
-- **Reconciliation required:** 16 entities, 55 accounts, 9,955 account-days, 7,600 supplied payment records, $198.14m gross translated supplied-record value, 20,080 repair minutes, and 617.72 estimated manual process hours/month.
+- **Reconciliation result:** 16 entities, 55 accounts, 9,955 account-days, 7,600 supplied payment records, $198.14m gross translated supplied-record value, 20,080 repair minutes, and 617.72 estimated manual process hours/month all reproduce.
+- **Code and test:** `src/week2_diagnostic.py`; `tests/test_week2_diagnostic.py`.
+- **Output:** `data/processed/W2_reconciliation_metrics.csv`.
 - **Executive use:** Only findings meeting the six-part promotion rule enter the main report.
-- **Status:** Defined; executable controls pending A07–A12 code.
+- **Status:** Complete. All four Week 2 baseline assertions and all ten supplied data-quality tests pass.

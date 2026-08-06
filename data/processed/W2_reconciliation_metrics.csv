@@ -1,0 +1,14 @@
+metric,value,unit,evidence_label
+entities,16.0,rows,ACG-DATA
+supplied_revenue,3900.0,USD millions,ACG-DATA
+accounts,55.0,accounts,ACG-DATA
+estimated_annual_account_fees,110100.0,USD/year,ACG-DATA
+balance_observations,9955.0,account-days,ACG-DATA
+balance_dates,181.0,calendar days,ACG-DATA
+payment_records,7600.0,records,ACG-DATA
+gross_supplied_payment_value,198135489.5,USD,ANALYST-CALC
+payment_repair_minutes,20080.0,minutes,ACG-DATA
+fx_rows,1810.0,rows,ACG-DATA
+fx_currencies,10.0,currencies,ACG-DATA
+process_activities,9.0,activities,ACG-DATA
+estimated_manual_process_hours_monthly,617.72,hours/month,ANALYST-CALC
