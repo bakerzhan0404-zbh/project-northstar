@@ -25,7 +25,7 @@
 |---|---|---|---|---|
 | A06 | Week 2 analytical contract and baseline | Do all later modules use one controlled population and definition set? | Complete | `W2_metric_contract.md`; `W2_reconciliation_metrics.csv` |
 | A07 | Account rationalization screen | Which accounts merit local closure validation without weakening required services or controls? | Complete | `W2_account_diagnostic.csv` |
-| A08 | Cash visibility diagnostic | Where is cash reporting insufficiently timely for Group Treasury decisions? | Planned | Pending |
+| A08 | Cash visibility diagnostic | Where is cash reporting insufficiently timely for Group Treasury decisions? | Complete | `W2_visibility_diagnostic.csv` |
 | A09 | Liquidity and buffer scenarios | What is observed, apparently available, buffer-dependent, or still unvalidated? | Planned | Pending |
 | A10 | Simultaneous surplus/deficit | How often do positive and negative positions coexist? | Planned | Pending |
 | A11 | Payment friction profile | Which supplied-record cohorts drive manual work, exceptions, delay, and repair? | Planned | Pending |
@@ -60,3 +60,18 @@
 - **Code and test:** `build_account_diagnostic()` in `src/week2_diagnostic.py`; five domain assertions in `tests/test_week2_diagnostic.py`.
 - **Output:** `data/processed/W2_account_diagnostic.csv`.
 - **Finding implication:** Account rationalization can support Wave 1, but it does not provide a material standalone business case on current evidence.
+
+## A08 — Cash visibility diagnostic
+
+- **Decision question:** Where does Group Treasury lack a timely view of supplied cash balances, and which source methods drive the gap?
+- **Owner/date:** Baker / 11 August 2026
+- **Inputs:** Enriched `daily_balances.csv` joined to account, entity, and daily project FX attributes.
+- **Population and exclusions:** All 9,955 account-days across 55 accounts and 181 calendar days; no exclusions.
+- **Definitions:** Same-day means reporting date equals balance date. Within one day includes zero- and one-calendar-day delay. Positive-value weighting uses positive estimated available USD. None of these definitions proves start-of-day or elapsed-24-hour visibility.
+- **Reconciliation:** Overall and regional/source/month cuts each reconcile to the applicable account-day population. The overall view contains 5,792 same-day observations (32 accounts × 181 days), 1,629 one-day observations, and 2,534 observations delayed at least two days.
+- **Result:** Same-day coverage is 58.18% of account-days; the within-one-calendar-day sensitivity is 74.55%. All 12 API and 20 host-to-host accounts are same-day, all nine portal accounts are one day late, and all 14 spreadsheet accounts are at least two days late.
+- **Implication:** The gap is structurally concentrated in portal/spreadsheet reporting, so a targeted connectivity and data-ownership intervention can be tested without assuming an ERP replacement.
+- **Counterevidence:** Source method and delay move together in the supplied synthetic panel, but timestamps, receipt cutoffs, balance definitions, and funding-decision consequences are absent. The data does not prove a greater-than-$5m cost or decision consequence.
+- **Code and test:** `build_visibility_diagnostic()` in `src/week2_diagnostic.py`; six visibility assertions in `tests/test_week2_diagnostic.py`.
+- **Output:** `data/processed/W2_visibility_diagnostic.csv`.
+- **Finding implication:** Visibility earns promotion as a current-state finding; its value case remains dependent on mobility and funding evidence.

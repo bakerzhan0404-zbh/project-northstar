@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from starter_analysis import enrich_balances, load_data, validate_keys  # noqa: E402
 from week2_diagnostic import (  # noqa: E402
     build_account_diagnostic,
+    build_visibility_diagnostic,
     build_reconciliation_metrics,
     calculate_process_capacity,
     enrich_payments,
@@ -29,6 +30,13 @@ def main() -> None:
     ).set_index("metric")
     accounts = build_account_diagnostic(data, balances, payments)
     candidates = accounts.loc[accounts["closure_validation_candidate"]]
+    visibility = build_visibility_diagnostic(balances)
+    visibility_overall = visibility.loc[
+        visibility["dimension"].eq("overall")
+    ].iloc[0]
+    visibility_source = visibility.loc[
+        visibility["dimension"].eq("visibility_method")
+    ].set_index("category")
 
     checks = {
         "revenue control remains $3.9bn": metrics.loc[
@@ -57,6 +65,30 @@ def main() -> None:
         "all primary candidates remain locally gated": candidates[
             "decision_boundary"
         ].str.contains("not validated").all(),
+        "visibility overall reconciles to 9,955": visibility_overall[
+            "observations"
+        ]
+        == 9_955,
+        "32 accounts have same-day date proxy": visibility_overall[
+            "same_day_observations"
+        ]
+        == 32 * 181,
+        "same-day account-day rate is 58.18%": visibility_overall[
+            "same_day_rate_pct"
+        ]
+        == 58.18,
+        "within-one-day sensitivity is 74.55%": visibility_overall[
+            "within_one_day_rate_pct"
+        ]
+        == 74.55,
+        "all portal observations are one day delayed": visibility_source.loc[
+            "Portal", "one_day_delayed_observations"
+        ]
+        == 9 * 181,
+        "all spreadsheet observations are two-plus days delayed": visibility_source.loc[
+            "Spreadsheet", "two_plus_day_delayed_observations"
+        ]
+        == 14 * 181,
     }
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():

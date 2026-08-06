@@ -212,6 +212,81 @@ def build_account_diagnostic(
     )
 
 
+def build_visibility_diagnostic(balances: pd.DataFrame) -> pd.DataFrame:
+    """Profile date-level reporting timeliness across decision-relevant cuts."""
+    working = balances.copy()
+    working["positive_available_usd"] = working["available_balance_usd"].clip(
+        lower=0
+    )
+    working["same_calendar_day"] = working["reporting_delay_days"].eq(0)
+    working["within_one_calendar_day"] = working["reporting_delay_days"].le(1)
+    working["month"] = working["date"].dt.to_period("M").astype(str)
+
+    def summarize(frame: pd.DataFrame, dimension: str, category: str) -> dict:
+        delayed_daily = (
+            frame.loc[frame["reporting_delay_days"].gt(0)]
+            .groupby("date")["positive_available_usd"]
+            .sum()
+        )
+        two_plus_daily = (
+            frame.loc[frame["reporting_delay_days"].ge(2)]
+            .groupby("date")["positive_available_usd"]
+            .sum()
+        )
+        total_positive = frame["positive_available_usd"].sum()
+        same_day_positive = frame.loc[
+            frame["same_calendar_day"], "positive_available_usd"
+        ].sum()
+        return {
+            "dimension": dimension,
+            "category": str(category),
+            "observations": len(frame),
+            "accounts": frame["account_id"].nunique(),
+            "same_day_observations": int(frame["same_calendar_day"].sum()),
+            "same_day_rate_pct": round(100 * frame["same_calendar_day"].mean(), 2),
+            "within_one_day_observations": int(
+                frame["within_one_calendar_day"].sum()
+            ),
+            "within_one_day_rate_pct": round(
+                100 * frame["within_one_calendar_day"].mean(), 2
+            ),
+            "one_day_delayed_observations": int(
+                frame["reporting_delay_days"].eq(1).sum()
+            ),
+            "two_plus_day_delayed_observations": int(
+                frame["reporting_delay_days"].ge(2).sum()
+            ),
+            "maximum_delay_days": int(frame["reporting_delay_days"].max()),
+            "positive_available_usd": round(total_positive, 2),
+            "same_day_positive_available_usd": round(same_day_positive, 2),
+            "positive_value_weighted_same_day_rate_pct": round(
+                100 * same_day_positive / total_positive, 2
+            )
+            if total_positive
+            else 0.0,
+            "median_daily_delayed_positive_available_usd": round(
+                delayed_daily.median(), 2
+            )
+            if not delayed_daily.empty
+            else 0.0,
+            "median_daily_two_plus_day_positive_available_usd": round(
+                two_plus_daily.median(), 2
+            )
+            if not two_plus_daily.empty
+            else 0.0,
+            "evidence_label": "ANALYST-CALC",
+            "decision_boundary": (
+                "Calendar-date proxy; not start-of-day or elapsed-24-hour visibility"
+            ),
+        }
+
+    rows = [summarize(working, "overall", "All supplied account-days")]
+    for dimension in ["region", "visibility_method", "source_quality", "month"]:
+        for category, frame in working.groupby(dimension, sort=True):
+            rows.append(summarize(frame, dimension, category))
+    return pd.DataFrame(rows)
+
+
 def build_reconciliation_metrics(
     data: Dict[str, pd.DataFrame],
     balances: pd.DataFrame,
@@ -321,8 +396,12 @@ def main() -> None:
         data, balances, payments, process_capacity
     )
     account_diagnostic = build_account_diagnostic(data, balances, payments)
+    visibility_diagnostic = build_visibility_diagnostic(balances)
     reconciliation.to_csv(PROCESSED / "W2_reconciliation_metrics.csv", index=False)
     account_diagnostic.to_csv(PROCESSED / "W2_account_diagnostic.csv", index=False)
+    visibility_diagnostic.to_csv(
+        PROCESSED / "W2_visibility_diagnostic.csv", index=False
+    )
     print(reconciliation.to_string(index=False))
     candidates = account_diagnostic.loc[
         account_diagnostic["closure_validation_candidate"]
@@ -334,6 +413,7 @@ def main() -> None:
     )
     print("Wrote data/processed/W2_reconciliation_metrics.csv")
     print("Wrote data/processed/W2_account_diagnostic.csv")
+    print("Wrote data/processed/W2_visibility_diagnostic.csv")
 
 
 if __name__ == "__main__":
