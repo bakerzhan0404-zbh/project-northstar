@@ -84,7 +84,7 @@ flowchart LR
 | File preparation | Shared Services | 101.89 estimated manual hours/month | Multiple formats and manual touch | Completeness, duplicate check, segregation | Candidate for standardization | Medium |
 | Approval/release | Entity approvers | 380 late releases in supplied extract | Cutoff and approval variation are plausible | Approval authority, dual control, emergency release | Defines service and control design | Low |
 | Bank submission | Shared Services / bank channel | Cross-border wires have 13.99% exceptions vs 4.41% domestic wires | Format/corridor complexity is plausible | Secure transmission, acknowledgement, resilience | Defines targeted cohort | Medium |
-| Exception repair | Shared Services | 20,080 minutes in payment file; 102.60 hours/month in process file | Upstream input, format, policy, or user behavior unresolved | Repair approval, audit trail, resubmission control | Baselines differ by 84%; benefit not fundable | High for mismatch; low for cause |
+| Exception repair | Shared Services | 20,080 minutes in payment file; 102.60 hours/month in process file | Upstream input, format, policy, or user behavior unresolved | Repair approval, audit trail, resubmission control | Process estimate is 84% above payment-file estimate; benefit not fundable | High for numerical discrepancy; low for cause |
 | Performance review | Group Treasury / Shared Services | No controlled population or reason-code KPI | Ownership and feedback loop are not evidenced | KPI definition, data owner, corrective-action log | Required before scale | Low |
 
 ## Draft RACI for validation and Wave 1 readiness

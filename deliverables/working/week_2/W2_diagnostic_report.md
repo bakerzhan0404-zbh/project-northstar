@@ -18,15 +18,15 @@ The diagnostic supports action on **observable reporting and payment gaps**, but
 
 | What the evidence says | Decision consequence now | Evidence required before value approval |
 |---|---|---|
-| All 23 delayed accounts use portal or spreadsheet reporting; median delayed positive estimated availability is $26.01m/day | Pilot the highest-exposure delayed sources and define ownership before selecting a platform | Timestamp, cutoff, balance type, source, and reconciliation for all 55 accounts |
-| The 14-day liquidity screen leaves $38.13m net on 30 June, but the $35m threshold survives only 138/168 complete windows and validated movable cash remains unestablished | Continue liquidity option design; carry $0 validated movable cash in the funded case | Account-level mobility, operating buffers, funding events, facility use, transfer timing, and economics |
+| All 23 delayed accounts use portal or spreadsheet reporting; median delayed positive estimated availability is $26.01m/day | Design a pilot for the highest-exposure delayed sources and define ownership before selecting a platform | Timestamp, cutoff, balance type, source, and reconciliation for all 55 accounts |
+| The all-status 14-day payment-intent sensitivity leaves $38.13m net on 30 June, but the $35m threshold survives only 138/168 complete windows and validated movable cash remains unestablished | Continue liquidity option design; carry $0 validated movable cash in the funded case | Account-level mobility, operating buffers, funding events, facility use, transfer timing, and economics |
 | Within 7,600 supplied records, manual-touch and cross-border-wire cohorts carry disproportionate exception and repair effort | Test targeted intake, cutoff, format, and control interventions—not uniform automation | Controlled population, reason codes, criticality, approval/release timestamps, and observed process time |
 
 ### Three decisions requested
 
-1. **Authorize Week 3 option design** around a common data/control foundation, with local-stabilization, federated, and globally coordinated alternatives.
-2. **Approve two bounded validation pilots:** delayed balance reporting and manual-touch/cross-border-wire payment cohorts.
-3. **Hold unvalidated value outside the funded case:** mobility, 150 hours/month, and account-fee removal remain scenarios until named owners certify the baselines.
+1. **Authorize Week 3 option development and comparison:** local stabilization, federated coordination, and globally coordinated alternatives around one data/control foundation, using the $21m / two-closure / 50-hour downside tests.
+2. **Approve design—not execution—of two bounded validation pilots:** delayed balance reporting and manual-touch/cross-border-wire payment cohorts, outside peak season with service, control, and four-hour rollback gates.
+3. **Approve the evidence owners and proposed due dates:** visibility (Group Treasurer, 18 August), payment/process (Shared Services Lead, 19 August), and mobility/economics (Group Treasurer, 21 August); keep related value outside the funded case until certification and Finance approval.
 
 ### Evidence status
 
@@ -39,9 +39,9 @@ All 57 Week 2 diagnostic assertions and the 10 supplied data-quality tests pass.
 | Rank | Promoted finding | Why it changes the decision | Confidence |
 |---:|---|---|---|
 | 1 | **Reporting delay is source-concentrated:** 23/55 accounts are delayed, all through portal or spreadsheet | A targeted connectivity/data-owner intervention is testable without ERP replacement | High for pattern; low for decision cost |
-| 2 | **Liquidity passes a screen, not a mobility proof:** $38.13m net after a 14-day sensitivity on 30 June; $35m fails on 30/168 complete windows | A liquidity-led option remains viable, but no cash value can be booked yet | High for arithmetic; low for mobility/economics |
+| 2 | **Liquidity passes a screen, not a mobility proof:** $38.13m net after the all-status 14-day payment-intent sensitivity on 30 June; $35m fails on 30/168 complete windows | A liquidity-led option remains viable, but no cash value can be booked yet | High for arithmetic; low for mobility/economics |
 | 3 | **Payment friction is concentrated within the supplied extract:** manual-touch and cross-border-wire cohorts over-index on exception/repair | Options should target defined cohorts and root causes, not automate every flow uniformly | High for extract arithmetic; medium for prioritization |
-| 4 | **Capacity is material but unfundable:** 617.72 estimated hours/month, 315.48 on High-criticality work, and an 84% repair-baseline mismatch | Process redesign must preserve controls and validate observed/removable time before benefits | Medium |
+| 4 | **Capacity is material but unfundable:** 617.72 estimated hours/month, 315.48 on High-criticality work, and a process repair estimate 84% above the payment-file estimate | Process redesign must preserve controls and validate observed/removable time before benefits | Medium |
 | 5 | **The ten-account stretch is unsupported:** four candidates and $7,800 of estimated annual fees survive the narrow screen | Rationalization is Wave 1 housekeeping, not a business-case anchor | High for screen; low for closability |
 
 ### Synthesis—not five separate workstreams
@@ -52,7 +52,7 @@ Source: [Week 2 findings log](W2_findings_log.md).
 
 <div style="page-break-after: always;"></div>
 
-## Page 3 — ACG can fix the visibility gap selectively; account closures are secondary
+## Page 3 — The visibility gap is source-concentrated and selectively testable; account closures are secondary
 
 ### Visibility: 23 delayed sources explain the gap
 
@@ -63,9 +63,9 @@ Source: [Week 2 findings log](W2_findings_log.md).
 | Portal | 9 | 100% one-calendar-day delayed | Candidate for retrieval automation or controlled earlier cutoff |
 | Spreadsheet | 14 | 100% two-to-three days delayed | Highest-priority source and data-ownership remediation |
 
-Overall, 5,792/9,955 account-days (58.18%) are same-day and 7,421 (74.55%) fall within one calendar day. Positive-value-weighted same-day coverage is 55.15%. These are reporting-date proxies—not start-of-day or elapsed-24-hour KPIs.
+Overall, 5,792/9,955 account-days (58.18%) are same-day and 7,421 (74.55%) fall within one calendar day. Across the six-month panel, same-day accounts represent 55.15% of summed positive estimated-available USD across account-days. These are reporting-date proxies—not start-of-day, elapsed-24-hour, or 30 June cash KPIs.
 
-**Implication:** Use a risk/value pilot across the highest-exposure portal/spreadsheet accounts, establish the authoritative source and owner, then scale only after four consecutive weeks of service and control performance.
+**Implication:** Design a risk/value pilot across the highest-exposure portal/spreadsheet accounts, establish the authoritative source and owner, then scale only after four consecutive weeks of service and control performance.
 
 ### Account footprint: validate four, do not promise ten
 
@@ -88,17 +88,19 @@ Sources: `W2_visibility_diagnostic.csv`; `W2_account_diagnostic.csv`.
 | Preliminarily unflagged positive estimate | $49.75m | Unflagged does not mean movable |
 | Add negative account positions | $(2.14)m | Two persistent negative accounts |
 | Apparent net before buffer | $47.61m | Still not movable cash |
-| Net after seven-day supplied-payment buffer | $42.84m | Scenario sensitivity |
-| Net after 14-day supplied-payment buffer | $38.13m | More conservative scenario sensitivity |
+| Net after seven-day all-status payment-intent sensitivity | $42.84m | Account-level floors cap the effective reduction |
+| Net after 14-day all-status payment-intent sensitivity | $38.13m | More conservative scenario; still not a forecast |
 | **Validated movable cash** | **Not established** | Account-level transferability and operating need are absent |
 
 ### Threshold test across complete rolling windows
 
-| Hypothesis | Seven-day screen | 14-day screen | Diagnostic conclusion |
+| Hypothesis | Seven-day all-status screen | 14-day all-status screen | Diagnostic conclusion |
 |---|---:|---:|---|
 | $21m stress | 175/175 days | 168/168 days | Survives modeled downside, not validation |
 | $35m base | 175/175 days | 138/168 days | Viable for option design; not stable enough to book |
 | $46.2m upside | 0/175 days | 0/168 days | Not supported after netting |
+
+Both screens use every supplied payment status as a conservative payment-intent sensitivity; status is not settlement. On 30 June, the raw 14-day window is $12.65m, $10.83m sits on preliminarily unflagged accounts, and $9.48m is absorbed after account-level floors. Restricting the sensitivity to Completed/Repaired records changes the final result only from $38.13m to $38.15m.
 
 Two active operating accounts remain negative on every observed day; entity deficits occur on 45/181 days, but the largest entity net deficit is only $(0.24)m. This is evidence for better daily coordination, not proof of avoidable borrowing cost.
 
@@ -129,7 +131,7 @@ Source: `W2_payment_diagnostic.csv`.
 
 <div style="page-break-after: always;"></div>
 
-## Page 6 — A staged federated capability is the design test because governance, data, process, and controls lag together
+## Page 6 — Governance, data, process, and controls must advance together; Week 3 remains option-neutral
 
 ### Targeted maturity readout
 
@@ -137,18 +139,18 @@ Source: `W2_payment_diagnostic.csv`.
 |---|---|---|
 | Governance / organization | Fragmented local practices and unconfirmed end-to-end accountability | Enterprise policy, confirmed RACI, local-autonomy rules, stage gates, and benefit owners |
 | Cash / payment process | Delayed/manual handoffs, reactive funding, varied formats and approvals | Daily reconciled position, buffer/mobility policy, standard intake/cutoff, reason-coded exceptions |
-| Technology / data | 32 automated same-day accounts; 23 portal/spreadsheet accounts; three ERPs; no enterprise TMS | Staged integration around existing ERPs, named data owners, timestamp/source controls, retirement-aware architecture |
+| Technology / data | 32 automated same-day accounts; 23 portal/spreadsheet accounts; three ERPs | Staged integration around existing ERPs, named data owners, timestamp/source controls, retirement-aware architecture |
 | Controls / performance | 315.48 High-criticality hours; access/emergency concerns; no certified KPI or benefit baselines | Tested SoD/access/emergency/resilience/rollback and owned KPI/benefit governance |
 
 No overall maturity average is used: the dimensions are not equally important to the decision.
 
 ### Process-capacity boundary
 
-Four activities—receipt reconciliation, payment exception repair, cash forecasting, and payment file preparation—contribute 439.85 of 617.72 estimated manual hours/month. Yet the process-file repair estimate is 102.60 hours/month versus 55.78 in the payment file. The 150-hour target equals 24.28% of the screening baseline and is not validated as removable.
+Four activities—receipt reconciliation, payment exception repair, cash forecasting, and payment file preparation—contribute 439.85 of 617.72 estimated manual hours/month. Yet the process-file repair estimate is 102.60 hours/month, 84% above the 55.78-hour payment-file estimate. The 150-hour target equals 24.28% of the screening baseline and is not validated as removable.
 
 ### Design test for Week 3
 
-The preferred option must create one enterprise control/data spine while retaining defined local execution and emergency authority. It must work around existing ERPs, avoid peak-season disruption, prove rollback, and sequence platform choices after—not before—data ownership and control requirements.
+Every option must be tested against the same requirement: one enterprise control/data spine with defined local execution and emergency authority. The comparison remains neutral across local stabilization, federated coordination, and a globally coordinated model; each must work around existing ERPs, avoid peak-season disruption, prove rollback, and sequence platform choices after—not before—data ownership and control requirements.
 
 Sources: [maturity heatmap](W2_maturity_heatmap.md); [process map and RACI](W2_current_state_process_map_and_RACI.md); `W2_process_capacity.csv`.
 
@@ -183,19 +185,17 @@ Sources: [maturity heatmap](W2_maturity_heatmap.md); [process map and RACI](W2_c
 
 ## Page 8 — Three evidence packages now determine the recommendation and funded value range
 
-| Evidence package | Required evidence | Proposed accountable owner | Earliest decision unlocked |
-|---|---|---|---|
-| Visibility and authoritative cash data | Receipt timestamp, cutoff, balance type, source, reconciliation, owner, and service result for all 55 accounts | Group Treasurer, supported by Regional Finance and IT/Data | Pilot scope, target architecture, and 50/55 feasibility |
-| Mobility and funding economics | Legal/local certification, operating buffers, settlement constraints, forecast/funding events, facility use, interest and transfer costs | Group Treasurer, supported by Regional Finance and Legal/Tax | Validated movable-cash range and liquidity business case |
-| Payment/process control | Source population/value totals, sample logic, reason codes, criticality, approval/release timestamps, observed time, removal and redeployment rates | Shared Services Lead, supported by IT/Data and control owners | Targeted intervention, capacity range, and payment benefit case |
+| Evidence package | Required evidence | Proposed accountable owner | Proposed due | Earliest decision unlocked |
+|---|---|---|---:|---|
+| Visibility and authoritative cash data | Receipt timestamp, cutoff, balance type, source, reconciliation, owner, and service result for all 55 accounts | Group Treasurer, supported by Regional Finance and IT/Data | 18 Aug | Pilot scope, target architecture, and 50/55 feasibility |
+| Mobility and funding economics | Legal/local certification, operating buffers, settlement constraints, forecast/funding events, facility use, interest and transfer costs | Group Treasurer, supported by Regional Finance and Legal/Tax | 21 Aug | Validated movable-cash range and liquidity business case |
+| Payment/process control | Source population/value totals, sample logic, reason codes, criticality, approval/release timestamps, observed time, removal and redeployment rates | Shared Services Lead, supported by IT/Data and control owners | 19 Aug | Targeted intervention, capacity range, and payment benefit case |
 
 ### Decisions to record at the diagnostic checkpoint
 
-1. Confirm the five promoted findings and the targeted, gated Week 3 direction.
-2. Approve owners and deadlines for the three evidence packages.
-3. Confirm that receivables and FX remain P1/data-gated; no substitute benchmark will fill missing ACG evidence.
-4. Confirm that no cash, P&L, capacity, or risk benefit enters the funded base without its required evidence and Finance approval.
-5. Approve development of three coherent options and the $21m / two-closure / 50-hour downside test.
+1. **Authorize Week 3 option development and comparison:** local stabilization, federated coordination, and globally coordinated alternatives around one data/control foundation, using the $21m / two-closure / 50-hour downside tests.
+2. **Approve design—not execution—of two bounded validation pilots:** delayed balance reporting and manual-touch/cross-border-wire payment cohorts, outside peak season with service, control, and four-hour rollback gates.
+3. **Approve the evidence owners and proposed due dates:** visibility (Group Treasurer, 18 August), payment/process (Shared Services Lead, 19 August), and mobility/economics (Group Treasurer, 21 August); keep related value outside the funded case until certification and Finance approval.
 
 ### Final diagnostic statement
 

@@ -1,19 +1,19 @@
 # Project Northstar — Week 2 Diagnostic Checkpoint
 
-## Slide 1 — ACG should advance to option design, but only through two targeted pilots and three evidence gates
+## Slide 1 — ACG should advance to option design, but only through two targeted pilot designs and three evidence gates
 
 ### Executive diagnosis
 
 | **ACT NOW** | **DESIGN, DO NOT BOOK** | **CONSTRAIN THE CASE** |
 |---|---|---|
-| All 23 delayed accounts use portal or spreadsheet reporting; payment friction concentrates in two supplied-record cohorts | The 14-day screen leaves $38.13m net on 30 June, but validated movable cash is not established | 150 hours/month and ten closures are unsupported as funded benefits |
-| Pilot delayed balance sources and manual-touch/cross-border-wire flows | Continue liquidity option design with $0 validated mobility until certification | Use 50 hours/month and two closures only as downside tests |
+| All 23 delayed accounts use portal or spreadsheet reporting; payment friction concentrates in two supplied-record cohorts | The all-status 14-day payment-intent sensitivity leaves $38.13m net on 30 June, but validated movable cash is not established | 150 hours/month and ten closures are unsupported as funded benefits |
+| Design pilots for delayed balance sources and manual-touch/cross-border-wire flows | Continue liquidity option design with $0 validated mobility until certification | Use 50 hours/month and two closures only as downside tests |
 
 ### Decisions requested today
 
-1. Authorize three Week 3 operating-model options around one data/control foundation.
-2. Approve two bounded pilots outside peak season, with service, control, and rollback gates.
-3. Assign accountable owners and deadlines to visibility, mobility, and payment/process evidence packages.
+1. **Authorize Week 3 option development and comparison:** local stabilization, federated coordination, and globally coordinated alternatives around one data/control foundation, using the $21m / two-closure / 50-hour downside tests.
+2. **Approve design—not execution—of two bounded validation pilots:** delayed balance reporting and manual-touch/cross-border-wire payment cohorts, outside peak season with service, control, and four-hour rollback gates.
+3. **Approve the evidence owners and proposed due dates:** visibility (Group Treasurer, 18 August), payment/process (Shared Services Lead, 19 August), and mobility/economics (Group Treasurer, 21 August); keep related value outside the funded case until certification and Finance approval.
 
 **Governing message:** ACG has enough evidence to design and test the transformation—not enough to fund the full value claim.
 
@@ -34,7 +34,7 @@ Open with the distinction between action and value approval. The observable gaps
 
 ---
 
-## Slide 2 — Reporting sources are fixable; the liquidity screen is encouraging but validates no movable cash
+## Slide 2 — Reporting delay is source-concentrated and testable; liquidity validates no movable cash
 
 ### Visibility: every delayed account sits in two source methods
 
@@ -43,7 +43,7 @@ Open with the distinction between action and value approval. The observable gaps
 | 12 accounts | 20 accounts | 9 accounts | 14 accounts |
 | Same day | Same day | One day late | Two-to-three days late |
 
-**58.18%** of account-days and **55.15%** of positive estimated availability are same-day under the date proxy. Median delayed positive estimated availability is **$26.01m/day**.
+**58.18%** of account-days are same-day under the date proxy. Across the six-month panel, same-day accounts represent **55.15%** of summed positive estimated-available USD across account-days. Median delayed positive estimated availability is **$26.01m/day**.
 
 ### 30 June liquidity ladder
 
@@ -53,9 +53,9 @@ $57.80m  gross positive estimated availability
  −$2.14m  negative account positions
 ────────
 $47.61m  apparent net before buffer
- −$9.48m  absorbed 14-day supplied-payment buffer
+ −$9.48m  effective reduction after account floors (all statuses)
 ────────
-$38.13m  14-day netting sensitivity
+$38.13m  all-status 14-day payment-intent sensitivity
    N/E    validated movable cash — NOT ESTABLISHED
 ```
 
@@ -65,7 +65,7 @@ $38.13m  14-day netting sensitivity
 | $35m base | 175/175 | 138/168 |
 | $46.2m upside | 0/175 | 0/168 |
 
-**Ask:** Validate timestamps for all 55 accounts and certify mobility, buffers, funding events, facility use, and economics before any liquidity value is funded.
+The all-status 14-day payment-intent window is $12.65m; $10.83m sits on preliminarily unflagged accounts, and account-level floors cap the effective reduction at $9.48m. **Ask:** Validate timestamps for all 55 accounts and certify mobility, buffers, funding events, facility use, and economics before any liquidity value is funded.
 
 <details>
 <summary>Speaker notes</summary>
@@ -124,16 +124,14 @@ Keep the qualifier “within the supplied 7,600 records” in the spoken conclus
 
 ---
 
-## Slide 4 — Governance and evidence—not ERP replacement—constrain Wave 1 feasibility and benefits
+## Slide 4 — A controlled data-to-decision spine—not ERP replacement—constrains Wave 1 sequencing
 
 ### Supporting findings
 
 | Finding | Reconciled evidence | Design consequence |
 |---|---|---|
-| Capacity is material but unvalidated | 617.72 estimated manual hours/month; four activities = 439.85 hours; High-criticality work = 315.48 hours | Preserve/replace controls; validate observed and removable time before funding 150 hours/month |
-| Repair baselines disagree | Process file = 102.60 hours/month vs payment file = 55.78, an 84% gap | Reconcile scope before using a single baseline |
+| Capacity is material but unvalidated | 617.72 estimated manual hours/month; the process repair estimate is 84% above the payment-file estimate; High-criticality work = 315.48 hours | Reconcile scope, preserve/replace controls, and validate observed/removable time before funding 150 hours/month |
 | Ten closures are unsupported | Four candidates; $7,800 estimated annual fees | Treat as controlled housekeeping, not a business-case pillar |
-| Position coordination is persistent but small | Two negative accounts on 181/181 days; entity deficits on 45 days; maximum entity deficit $(0.24)m | Improve daily coordination without claiming avoidable borrowing cost |
 
 ### Targeted maturity readout
 
@@ -168,11 +166,11 @@ Avoid a composite maturity score. The dimensions move together: connectivity wit
 
 ### Evidence-to-decision gates
 
-| Gate | Evidence due | Proposed accountable owner | Decision unlocked |
-|---|---|---|---|
-| **1 · Visibility** | Timestamp, cutoff, balance type, source, reconciliation, owner for 55 accounts | Group Treasurer | Pilot scope, architecture, 50/55 feasibility |
-| **2 · Mobility** | Legal/local certification, buffers, funding events, facility use, interest and transfer costs | Group Treasurer | Validated liquidity range and funded value |
-| **3 · Payment / capacity** | Source control, reason codes, criticality, release timestamps, observed time, removal/redeployment | Shared Services Lead | Targeted intervention and capacity case |
+| Gate | Proposed due | Proposed accountable owner | Decision unlocked |
+|---|---:|---|---|
+| **1 · Visibility** | 18 Aug | Group Treasurer | Pilot scope, architecture, 50/55 feasibility |
+| **2 · Mobility / economics** | 21 Aug | Group Treasurer | Validated liquidity range and funded value |
+| **3 · Payment / process** | 19 Aug | Shared Services Lead | Targeted intervention and capacity case |
 
 ### Every option must survive the same tests
 
@@ -187,7 +185,7 @@ Avoid a composite maturity score. The dimensions move together: connectivity wit
 
 Develop and compare **local stabilization, federated coordination, and globally coordinated** options. The preferred option must create one enterprise data/control spine, preserve defined local autonomy, work around existing ERPs, avoid peak-season disruption, and keep unvalidated value outside the funded base.
 
-**Decision requested:** Approve the option set, three evidence owners, and downside tests.
+**Decision requested:** Approve the three decisions on Slide 1—option comparison, pilot design rather than execution, and dated evidence ownership with unvalidated value held outside the funded case.
 
 <details>
 <summary>Speaker notes</summary>

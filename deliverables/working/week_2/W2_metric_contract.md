@@ -51,7 +51,7 @@ Every segmented output must reconcile to its applicable control before interpret
 |---|---|---|
 | Same-calendar-day visibility | `reported_to_group_date - date = 0` | All 9,955 account-days; not start-of-day visibility |
 | Within-one-calendar-day sensitivity | Reporting delay of zero or one calendar day | Sensitivity only; dates do not prove elapsed 24-hour performance |
-| Positive-value-weighted same-day rate | Positive estimated available USD on same-day observations / all positive estimated available USD | Describes value associated with the proxy, not validated movable cash |
+| Positive-value-weighted same-day rate | Positive estimated-available USD on same-day observations / all positive estimated-available USD across the six-month account-day panel | Describes value associated with the proxy, not point-in-time cash or validated movable cash |
 | Delayed positive availability | Daily positive estimated available USD on accounts with delay above zero | Decision-timeliness exposure, not a loss or funding consequence |
 
 ### Liquidity and mobility
