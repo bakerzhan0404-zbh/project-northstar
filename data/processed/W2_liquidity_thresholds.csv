@@ -1,0 +1,7 @@
+buffer_window_days,threshold_name,threshold_usd,complete_window_days,days_threshold_met,threshold_met_rate_pct,minimum_net_scenario_surplus_usd,median_net_scenario_surplus_usd,evidence_label,decision_boundary
+7,stress,21000000,175,175,100.0,37901838.94,41951646.43,ANALYST-CALC / ANALYST-ASSUMPTION,Scenario screen only; no threshold is validated movable cash
+7,base,35000000,175,175,100.0,37901838.94,41951646.43,ANALYST-CALC / ANALYST-ASSUMPTION,Scenario screen only; no threshold is validated movable cash
+7,upside,46200000,175,0,0.0,37901838.94,41951646.43,ANALYST-CALC / ANALYST-ASSUMPTION,Scenario screen only; no threshold is validated movable cash
+14,stress,21000000,168,168,100.0,31277959.18,36667187.11,ANALYST-CALC / ANALYST-ASSUMPTION,Scenario screen only; no threshold is validated movable cash
+14,base,35000000,168,138,82.14,31277959.18,36667187.11,ANALYST-CALC / ANALYST-ASSUMPTION,Scenario screen only; no threshold is validated movable cash
+14,upside,46200000,168,0,0.0,31277959.18,36667187.11,ANALYST-CALC / ANALYST-ASSUMPTION,Scenario screen only; no threshold is validated movable cash

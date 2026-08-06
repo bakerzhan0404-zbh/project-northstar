@@ -40,7 +40,7 @@ def main() -> None:
     visibility_source = visibility.loc[
         visibility["dimension"].eq("visibility_method")
     ].set_index("category")
-    liquidity_daily, liquidity_accounts, liquidity_summary = (
+    liquidity_daily, liquidity_accounts, liquidity_summary, liquidity_thresholds = (
         build_liquidity_scenarios(balances, payments)
     )
     liquidity_metrics = liquidity_summary.set_index("metric")["value_usd"]
@@ -119,6 +119,34 @@ def main() -> None:
             "unflagged_scenario_surplus_after_14d_buffer"
         ]
         == 40_265_783.82,
+        "seven-day net scenario reconciles": liquidity_metrics[
+            "net_scenario_surplus_after_7d_buffer"
+        ]
+        == 42_844_787.78,
+        "14-day net scenario reconciles": liquidity_metrics[
+            "net_scenario_surplus_after_14d_buffer"
+        ]
+        == 38_127_490.73,
+        "seven-day base threshold survives all complete windows": liquidity_thresholds.loc[
+            (liquidity_thresholds["buffer_window_days"].eq(7))
+            & (liquidity_thresholds["threshold_name"].eq("base")),
+            "days_threshold_met",
+        ].iloc[0]
+        == 175,
+        "14-day base threshold survives 138 complete windows": liquidity_thresholds.loc[
+            (liquidity_thresholds["buffer_window_days"].eq(14))
+            & (liquidity_thresholds["threshold_name"].eq("base")),
+            "days_threshold_met",
+        ].iloc[0]
+        == 138,
+        "completed/repaired status sensitivity is immaterial": liquidity_metrics[
+            "completed_repaired_status_sensitivity_14d_gross_surplus"
+        ]
+        == 40_286_213.98,
+        "upside threshold survives no net scenario window": liquidity_thresholds.loc[
+            liquidity_thresholds["threshold_name"].eq("upside"),
+            "days_threshold_met",
+        ].eq(0).all(),
         "validated movable cash remains unestablished": pd.isna(
             liquidity_metrics["validated_movable_cash"]
         ),

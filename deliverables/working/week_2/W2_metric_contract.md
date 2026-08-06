@@ -75,7 +75,7 @@ Validated movable cash — not established by the supplied data
 | Gross positive estimated availability | Sum of positive `available_balance_usd` | Before negative positions, restrictions, and buffers |
 | Net estimated availability | Sum of positive and negative `available_balance_usd` | Not proof of transferability |
 | Preliminarily unflagged positive availability | Positive estimate on accounts where `restricted_flag = False` | Unflagged does not mean legally or operationally movable |
-| 7-day / 14-day operating buffer | Account-level supplied payment outflow over the trailing 7 / 14 calendar days | `ANALYST-ASSUMPTION`; payment extract is not certified complete |
+| 7-day / 14-day operating buffer | Account-level gross supplied-record value over the trailing 7 / 14 calendar days; Completed/Repaired is shown as a status sensitivity | `ANALYST-ASSUMPTION`; payment extract is not certified complete and status is not settlement evidence |
 | Scenario surplus | Positive estimated availability less the illustrative buffer, floored at zero, then excluding preliminary restricted accounts | Sensitivity only; never labeled movable cash |
 | Simultaneous surplus and deficit | Same date contains at least one positive and one negative estimated available account position | Shows coordination opportunity, not avoidable interest cost |
 
