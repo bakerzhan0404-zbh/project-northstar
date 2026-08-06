@@ -1,0 +1,40 @@
+# Week 2 — Findings Log
+
+**Executive finding set:** F07–F11 are the five findings promoted into the Week 2 diagnostic. F07–F09 drive the Week 3 option design; F10–F11 constrain the business case and sequencing.
+
+**Editorial rule:** Each finding must change a decision. Detailed cuts that do not change value, risk, feasibility, sequencing, or an evidence gate remain in the technical appendix.
+
+## Promoted findings
+
+| ID | Answer-first finding | Fact and magnitude | Executive implication | Likely cause or mechanism | Confidence | Counterevidence / limitation | Decision or action | Reproducible source |
+|---|---|---|---|---|---|---|---|---|
+| F07 | Fix reporting sources first: all 23 delayed accounts rely on portal or spreadsheet reporting | 32/55 accounts are same-day under the date proxy; nine portal accounts are one day late and 14 spreadsheet accounts are two to three days late. Same-day coverage is 58.18% of account-days and 55.15% of positive estimated availability; median delayed positive availability is $26.01m/day. | A targeted connectivity and data-ownership intervention can address the observed gap without assuming an ERP replacement. | Manual/estimated balance sourcing and unclear ownership are the direct supplied-data associations. | High for the date-level pattern; low for decision cost | Dates do not prove start-of-day or elapsed-24-hour performance. No funding consequence, timestamp, cutoff, or reconciliation evidence is supplied. | Validate timestamps for all 55 accounts; pilot the highest-exposure delayed accounts before scaling toward 50/55. | A08; `W2_visibility_diagnostic.csv` |
+| F08 | The liquidity screen supports option design, but it validates no movable cash | On 30 June, $57.80m gross positive estimated availability becomes $47.61m apparent net after preliminary restrictions and deficits. The 14-day screen leaves $38.13m net; the $35m threshold survives 138/168 complete windows and falls to $31.28m at the minimum. The $46.2m upside survives none. Two accounts remain negative on all 181 days; entity deficits occur on 45 days. | Continue a liquidity-led option, but show $0 validated movable cash in the funded case until restrictions, buffers, timing, and transferability are certified. Persistent mismatches support coordination, not a large booked benefit. | Fragmented positioning, reactive funding, and unvalidated operating buffers are plausible mechanisms. | High for arithmetic; low for mobility and economics | The payment extract is not a certified forecast; status is not settlement; legal, tax, facility, rate, and transfer-timing evidence is absent. | Require account-level mobility certification, operating-buffer policy, funding-event history, and borrowing/transfer economics before Week 3 value approval. | A09–A10; `W2_liquidity_*.csv`; `W2_*positions*.csv` |
+| F09 | Within the supplied extract, manual-touch and cross-border-wire cohorts carry disproportionate friction | Manual-touch records are 31.51% of 7,600 records but 63.47% of exceptions and 63.35% of repair. Their exception rate is 12.69% versus 3.36% without manual touch. Cross-border wires are 10.34% of records but 22.96% of exceptions and 24.51% of repair; their exception rate is 13.99% versus 4.41% for domestic wires. | Week 3 should test targeted intake, cutoff, format, and control interventions rather than assume uniform automation value. | Upstream data completeness, cutoff discipline, and format variation are stakeholder-supported hypotheses—not proven causes. | High for within-extract arithmetic; medium for prioritization; low for cause | 87.31% of manual-touch records and 86.01% of cross-border wires have no exception. No reason code, event sequence, criticality, beneficiary/corridor, or release timestamp is supplied. Extract representativeness is unknown. | Reconcile the source population and sample; obtain reason codes and timestamps; test the two cohorts in a controlled root-cause review. | A11; `W2_payment_diagnostic.csv` |
+| F10 | The 150-hour capacity target is not yet fundable because the baseline and required controls are unresolved | Nine management-estimated activities total 617.72 manual hours/month. Four activities contribute 439.85 hours (71.2%); six High-criticality activities contribute 315.48 hours. Process exception repair is 102.60 hours/month versus 55.78 implied by the payment file—an 84% gap. | Process redesign is material, but Week 3 cannot convert 150 hours/month into savings or headcount. Control-preserving redesign and observed-time validation must precede benefits. | High manual percentages, rework, and fragmented handoffs are plausible; source-scope mismatch is proven. | Medium | High criticality does not require the current manual method, and manual work does not automatically mean waste. The two source populations cannot be joined. | Validate process scope and observed time; define removal/redeployment rates; preserve or replace required controls; use 50 hours/month only as a stress case. | A12; `W2_process_capacity.csv`; `W2_repair_baseline_reconciliation.csv` |
+| F11 | The ten-account closure stretch is unsupported; rationalization is a controlled housekeeping action | Only four accounts meet the pre-defined primary screen: dormant + legacy + zero supplied payment records. They carry $7,800 of gross estimated annual fees, 7.08% of the $110,100 footprint total. | Account closure should support Wave 1 simplification but cannot anchor the business case or justify a ten-account commitment. | Acquisition legacy plausibly explains the four candidates; additional redundancy is not evidenced. | High for the screen; low for closability | Debit-payment absence does not prove inactivity. Local purpose, receipts, direct debits, signatories, services, resilience, closure costs, and fee removal remain unknown. | Put four accounts through local closure validation; do not book savings or expand to ten without account-level evidence. | A07; `W2_account_diagnostic.csv` |
+
+## Week 1 finding disposition
+
+| Week 1 ID | Week 2 disposition | Reason |
+|---|---|---|
+| F01 — structurally complete, decision-incomplete data | Retained as technical assurance, not an executive finding | All supplied and Week 2 controls pass, but semantic/source evidence gaps remain decisive |
+| F02 — same-day delay observed | Refined and promoted as F07 | Source concentration and value weighting are now quantified |
+| F03 — availability is not mobility | Refined and promoted as F08 | Buffer and threshold sensitivities now quantify the uncertainty without validating movement |
+| F04 — payment friction in supplied extract | Refined and promoted as F09 | Manual-touch and cross-border-wire cohorts now show both rate and absolute contribution |
+| F05 — ten account closures not evidenced | Narrowed and promoted as F11 | Four candidates survive; the ten-account stretch does not |
+| F06 — receivables and FX data missing | Retained as a scope/evidence gate | No controlled receivables or executed FX exposure/trade data arrived |
+
+## Executive synthesis
+
+The evidence supports a **targeted, gated transformation**, not a broad technology program or a fully funded liquidity case:
+
+1. **Act now on observable operating gaps:** pilot delayed reporting sources and targeted payment cohorts.
+2. **Design liquidity options, but do not book mobility:** the downside screen is encouraging, while transferability and economics remain unproven.
+3. **Constrain the business case:** capacity and account savings remain validation items until controls, source populations, and removal mechanics are confirmed.
+
+## Three Week 3 evidence gates
+
+1. **Visibility:** Timestamp, cutoff, balance type, source, and reconciliation evidence for all 55 accounts.
+2. **Liquidity:** Account-level legal/local transferability, minimum operating cash, funding events, facility use, and borrowing/transfer economics.
+3. **Payments and capacity:** Controlled population totals, sample logic, reason codes, approval/release timestamps, criticality, observed process time, and realistic removal/redeployment rates.
