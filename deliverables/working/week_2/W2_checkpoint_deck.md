@@ -7,7 +7,7 @@
 | **ACT NOW** | **DESIGN, DO NOT BOOK** | **CONSTRAIN THE CASE** |
 |---|---|---|
 | All 23 delayed accounts use portal or spreadsheet reporting; payment friction concentrates in two supplied-record cohorts | The all-status 14-day payment-intent sensitivity leaves $38.13m net on 30 June, but validated movable cash is not established | 150 hours/month and ten closures are unsupported as funded benefits |
-| Design pilots for delayed balance sources and manual-touch/cross-border-wire flows | Continue liquidity option design with $0 validated mobility until certification | Use 50 hours/month and two closures only as downside tests |
+| Design pilots for delayed balance sources and manual-touch/cross-border-wire flows | Continue liquidity option design; book $0 in the funded case until certification | Use 50 hours/month and two closures only as downside tests |
 
 ### Decisions requested today
 
@@ -34,7 +34,7 @@ Open with the distinction between action and value approval. The observable gaps
 
 ---
 
-## Slide 2 — Reporting delay is source-concentrated and testable; liquidity validates no movable cash
+## Slide 2 — Reporting delay is source-concentrated and testable; the analysis does not yet validate a movable-cash amount
 
 ### Visibility: every delayed account sits in two source methods
 
@@ -43,7 +43,7 @@ Open with the distinction between action and value approval. The observable gaps
 | 12 accounts | 20 accounts | 9 accounts | 14 accounts |
 | Same day | Same day | One day late | Two-to-three days late |
 
-**58.18%** of account-days are same-day under the date proxy. Across the six-month panel, same-day accounts represent **55.15%** of summed positive estimated-available USD across account-days. Median delayed positive estimated availability is **$26.01m/day**.
+**58.18%** of account-days are same-day under the date proxy. Across the six-month panel, same-day accounts represent **55.15%** of summed positive estimated-available USD across account-days. Median delayed positive estimated availability is **$26.01m/day**. **The reporting-date proxy is not proof of start-of-day or within-24-hour visibility.**
 
 ### 30 June liquidity ladder
 
@@ -101,6 +101,8 @@ Do not call date equality start-of-day or within 24 hours. Do not call the scena
 | Exception rate | **13.99%** | 4.41% | **+9.58 pts / 3.17×** |
 | Late-release rate | **8.78%** | 4.90% | **+3.88 pts** |
 | Repair contribution | **24.51%** | 5.74% | — |
+
+Repair contribution is each cohort's share of all repair minutes in the extract. The two cohorts overlap and must not be added; findings are descriptive within the supplied records, not causal or ACG-wide.
 
 ### Counterevidence keeps the recommendation targeted
 
@@ -164,13 +166,15 @@ Avoid a composite maturity score. The dimensions move together: connectivity wit
 
 ## Slide 5 — Three validations will determine which Week 3 option survives the downside
 
+**Decision flow:** Evidence gates → common downside tests → three-option comparison.
+
 ### Evidence-to-decision gates
 
 | Gate | Proposed due | Proposed accountable owner | Decision unlocked |
 |---|---:|---|---|
 | **1 · Visibility** | 18 Aug | Group Treasurer | Pilot scope, architecture, 50/55 feasibility |
-| **2 · Mobility / economics** | 21 Aug | Group Treasurer | Validated liquidity range and funded value |
-| **3 · Payment / process** | 19 Aug | Shared Services Lead | Targeted intervention and capacity case |
+| **2 · Payment / process** | 19 Aug | Shared Services Lead | Targeted intervention and capacity case |
+| **3 · Mobility / economics** | 21 Aug | Group Treasurer | Validated liquidity range and funded value |
 
 ### Every option must survive the same tests
 
@@ -185,7 +189,7 @@ Avoid a composite maturity score. The dimensions move together: connectivity wit
 
 Develop and compare **local stabilization, federated coordination, and globally coordinated** options. The preferred option must create one enterprise data/control spine, preserve defined local autonomy, work around existing ERPs, avoid peak-season disruption, and keep unvalidated value outside the funded base.
 
-**Decision requested:** Approve the three decisions on Slide 1—option comparison, pilot design rather than execution, and dated evidence ownership with unvalidated value held outside the funded case.
+**Decision requested:** Authorize the Week 3 three-option comparison; approve design—not execution—of the two validation pilots; approve the dated evidence owners and due dates, with unvalidated value outside the funded case until certification.
 
 <details>
 <summary>Speaker notes</summary>
