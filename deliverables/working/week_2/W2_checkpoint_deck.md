@@ -62,7 +62,7 @@ $38.13m  all-status 14-day payment-intent sensitivity
 | Net threshold | Seven-day windows | 14-day windows |
 |---|---:|---:|
 | $21m stress | 175/175 | 168/168 |
-| $35m base | 175/175 | 138/168 |
+| $35m base | 175/175 | 138/168 = 82%; 30 failures |
 | $46.2m upside | 0/175 | 0/168 |
 
 The all-status 14-day payment-intent window is $12.65m; $10.83m sits on preliminarily unflagged accounts, and account-level floors cap the effective reduction at $9.48m. **Ask:** Validate timestamps for all 55 accounts and certify mobility, buffers, funding events, facility use, and economics before any liquidity value is funded.
@@ -130,16 +130,16 @@ Keep the qualifier “within the supplied 7,600 records” in the spoken conclus
 
 ### Supporting findings
 
-| Finding | Reconciled evidence | Design consequence |
+| Finding | Current evidence | Design consequence |
 |---|---|---|
-| Capacity is material but unvalidated | 617.72 estimated manual hours/month; the process repair estimate is 84% above the payment-file estimate; High-criticality work = 315.48 hours | Reconcile scope, preserve/replace controls, and validate observed/removable time before funding 150 hours/month |
+| Capacity is material but unvalidated | 617.72 estimated manual hours/month; the process repair estimate is 84% above the payment-file estimate (unreconciled source estimates); High-criticality work = 315.48 hours | Reconcile scope, preserve/replace controls, and validate observed/removable time before funding 150 hours/month |
 | Ten closures are unsupported | Four candidates; $7,800 estimated annual fees | Treat as controlled housekeeping, not a business-case pillar |
 
 ### Targeted maturity readout
 
 ```text
 Emerging today                                18-month observable target
-Fragmented ownership ───────────────────────► Confirmed global/local RACI
+End-to-end ownership unconfirmed ──────────► Confirmed global/local RACI
 Manual source and process handoffs ─────────► Owned data, standard intake/cutoff
 Unvalidated controls and KPIs ──────────────► Tested SoD, resilience, rollback, KPI
 Three ERPs + 23 delayed sources ────────────► Staged integration around existing ERPs
