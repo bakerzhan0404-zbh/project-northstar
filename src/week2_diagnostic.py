@@ -914,6 +914,8 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
     All results remain bounded to the supplied 7,600-record extract. Cohort
     rates use cohort record counts; contribution shares use the full extract's
     issue or effort total so that small high-rate cohorts are not overstated.
+    Manual touch and cross-border wire are also split into four mutually
+    exclusive cohorts so their overlap can be shown without double counting.
     """
     working = payments.copy()
     working["amount_band_usd"] = pd.cut(
@@ -934,13 +936,56 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
     working["cross_border_cohort"] = working["cross_border_flag"].map(
         {True: "Cross-border", False: "Domestic"}
     )
-    working["wire_geography"] = working["cross_border_flag"].map(
+    working["cross_border_wire_flag"] = working["payment_type"].eq(
+        "Wire"
+    ) & working["cross_border_flag"]
+    working["wire_geography"] = working["cross_border_wire_flag"].map(
         {True: "Cross-border wire", False: "Domestic wire"}
+    )
+
+    manual_touch = working["manual_touch_flag"]
+    cross_border_wire = working["cross_border_wire_flag"]
+    priority_categories = [
+        "Manual touch only",
+        "Manual touch + cross-border wire",
+        "Cross-border wire only",
+        "Neither priority cohort",
+    ]
+    working["priority_payment_cohort"] = "Neither priority cohort"
+    working.loc[manual_touch & ~cross_border_wire, "priority_payment_cohort"] = (
+        "Manual touch only"
+    )
+    working.loc[manual_touch & cross_border_wire, "priority_payment_cohort"] = (
+        "Manual touch + cross-border wire"
+    )
+    working.loc[~manual_touch & cross_border_wire, "priority_payment_cohort"] = (
+        "Cross-border wire only"
+    )
+    working["priority_payment_cohort"] = pd.Categorical(
+        working["priority_payment_cohort"],
+        categories=priority_categories,
+        ordered=True,
+    )
+    working["priority_union_cohort"] = pd.Categorical(
+        (manual_touch | cross_border_wire).map(
+            {
+                True: "Manual touch or cross-border wire",
+                False: "Outside priority union",
+            }
+        ),
+        categories=[
+            "Manual touch or cross-border wire",
+            "Outside priority union",
+        ],
+        ordered=True,
     )
     totals = {
         "records": len(working),
         "value_usd": working["amount_usd"].sum(),
         "exceptions": working["exception_flag"].sum(),
+        "exception_value_usd": working.loc[
+            working["exception_flag"], "amount_usd"
+        ].sum(),
         "late": working["late_release_flag"].sum(),
         "repair_minutes": working["repair_minutes"].sum(),
         "fees": working["fee_usd"].sum(),
@@ -974,6 +1019,15 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
             "exception_rate_pct": round(100 * frame["exception_flag"].mean(), 2),
             "exception_contribution_pct": round(
                 100 * frame["exception_flag"].sum() / totals["exceptions"], 2
+            ),
+            "exception_record_value_usd": round(
+                frame.loc[frame["exception_flag"], "amount_usd"].sum(), 2
+            ),
+            "exception_value_contribution_pct": round(
+                100
+                * frame.loc[frame["exception_flag"], "amount_usd"].sum()
+                / totals["exception_value_usd"],
+                2,
             ),
             "late_release_records": int(frame["late_release_flag"].sum()),
             "late_release_rate_pct": round(
@@ -1028,6 +1082,16 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
         ("status", "status", "All 7,600 supplied records"),
         ("month", "month", "All 7,600 supplied records"),
         ("amount_band_usd", "amount_band_usd", "All 7,600 supplied records"),
+        (
+            "priority_payment_cohort",
+            "priority_payment_cohort",
+            "All 7,600 supplied records; four mutually exclusive cohorts",
+        ),
+        (
+            "priority_union",
+            "priority_union_cohort",
+            "All 7,600 supplied records; priority cohorts deduplicated",
+        ),
     ]
     for dimension, column, population in dimensions:
         for category, frame in working.groupby(column, sort=False, observed=True):

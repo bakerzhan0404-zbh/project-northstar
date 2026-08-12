@@ -66,6 +66,12 @@ def main() -> None:
     payment_wires = payment_diagnostic.loc[
         payment_diagnostic["dimension"].eq("wire_geography")
     ].set_index("category")
+    payment_priority = payment_diagnostic.loc[
+        payment_diagnostic["dimension"].eq("priority_payment_cohort")
+    ].set_index("category")
+    payment_priority_union = payment_diagnostic.loc[
+        payment_diagnostic["dimension"].eq("priority_union")
+    ].set_index("category")
 
     checks = {
         "revenue control remains $3.9bn": metrics.loc[
@@ -242,6 +248,111 @@ def main() -> None:
             "Domestic wire", "exception_rate_pct"
         ]
         == 4.41,
+        "mutually exclusive payment cohorts reconcile to 7,600": payment_priority[
+            "records"
+        ].sum()
+        == 7_600,
+        "manual-touch-only cohort reconciles": (
+            payment_priority.loc["Manual touch only", "records"] == 2_053
+            and payment_priority.loc[
+                "Manual touch only", "exception_records"
+            ]
+            == 246
+            and payment_priority.loc["Manual touch only", "repair_minutes"]
+            == 10_018
+            and payment_priority.loc[
+                "Manual touch only", "gross_supplied_record_value_usd"
+            ]
+            == 51_983_738.28
+        ),
+        "manual/cross-border overlap reconciles": (
+            payment_priority.loc[
+                "Manual touch + cross-border wire", "records"
+            ]
+            == 342
+            and payment_priority.loc[
+                "Manual touch + cross-border wire", "exception_records"
+            ]
+            == 58
+            and payment_priority.loc[
+                "Manual touch + cross-border wire", "repair_minutes"
+            ]
+            == 2_702
+            and payment_priority.loc[
+                "Manual touch + cross-border wire",
+                "gross_supplied_record_value_usd",
+            ]
+            == 6_846_691.83
+        ),
+        "cross-border-wire-only cohort reconciles": (
+            payment_priority.loc["Cross-border wire only", "records"] == 444
+            and payment_priority.loc[
+                "Cross-border wire only", "exception_records"
+            ]
+            == 52
+            and payment_priority.loc[
+                "Cross-border wire only", "repair_minutes"
+            ]
+            == 2_219
+            and payment_priority.loc[
+                "Cross-border wire only", "gross_supplied_record_value_usd"
+            ]
+            == 7_875_503.53
+        ),
+        "neither-priority cohort reconciles": (
+            payment_priority.loc["Neither priority cohort", "records"] == 4_761
+            and payment_priority.loc[
+                "Neither priority cohort", "exception_records"
+            ]
+            == 123
+            and payment_priority.loc[
+                "Neither priority cohort", "repair_minutes"
+            ]
+            == 5_141
+            and payment_priority.loc[
+                "Neither priority cohort", "gross_supplied_record_value_usd"
+            ]
+            == 131_429_555.87
+        ),
+        "deduplicated priority union reconciles": (
+            payment_priority_union.loc[
+                "Manual touch or cross-border wire", "records"
+            ]
+            == 2_839
+            and payment_priority_union.loc[
+                "Manual touch or cross-border wire", "exception_records"
+            ]
+            == 356
+            and payment_priority_union.loc[
+                "Manual touch or cross-border wire", "repair_minutes"
+            ]
+            == 14_939
+            and payment_priority_union.loc[
+                "Manual touch or cross-border wire",
+                "gross_supplied_record_value_usd",
+            ]
+            == 66_705_933.64
+        ),
+        "overlap magnitude is explicit": (
+            round(
+                100
+                * payment_priority.loc[
+                    "Manual touch + cross-border wire", "records"
+                ]
+                / payment_manual.loc["Manual touch", "records"],
+                2,
+            )
+            == 14.28
+            and round(
+                100
+                * payment_priority.loc[
+                    "Manual touch + cross-border wire", "records"
+                ]
+                / payment_wires.loc["Cross-border wire", "records"],
+                2,
+            )
+            == 43.51
+        ),
         "every payment row carries extract boundary": payment_diagnostic[
             "decision_boundary"
         ].str.contains("7,600").all(),
