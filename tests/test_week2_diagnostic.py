@@ -252,6 +252,16 @@ def main() -> None:
             "records"
         ].sum()
         == 7_600,
+        "priority payment cohorts use declared unique order": (
+            list(payment_priority.index)
+            == [
+                "Manual touch only",
+                "Manual touch + cross-border wire",
+                "Cross-border wire only",
+                "Neither priority cohort",
+            ]
+            and payment_priority.index.is_unique
+        ),
         "manual-touch-only cohort reconciles": (
             payment_priority.loc["Manual touch only", "records"] == 2_053
             and payment_priority.loc[
@@ -314,6 +324,28 @@ def main() -> None:
             ]
             == 131_429_555.87
         ),
+        "priority cohort exception rates reconcile": (
+            payment_priority.loc["Manual touch only", "exception_rate_pct"]
+            == 11.98
+            and payment_priority.loc[
+                "Manual touch + cross-border wire", "exception_rate_pct"
+            ]
+            == 16.96
+            and payment_priority.loc[
+                "Cross-border wire only", "exception_rate_pct"
+            ]
+            == 11.71
+            and payment_priority.loc[
+                "Neither priority cohort", "exception_rate_pct"
+            ]
+            == 2.58
+        ),
+        "priority cohort issue totals reconcile to overall": (
+            payment_priority["exception_records"].sum()
+            == payment_overall["exception_records"]
+            and payment_priority["repair_minutes"].sum()
+            == payment_overall["repair_minutes"]
+        ),
         "deduplicated priority union reconciles": (
             payment_priority_union.loc[
                 "Manual touch or cross-border wire", "records"
@@ -333,25 +365,36 @@ def main() -> None:
             ]
             == 66_705_933.64
         ),
+        "deduplicated priority union rates and contributions reconcile": (
+            payment_priority_union.loc[
+                "Manual touch or cross-border wire", "exception_rate_pct"
+            ]
+            == 12.54
+            and payment_priority_union.loc[
+                "Manual touch or cross-border wire", "exception_contribution_pct"
+            ]
+            == 74.32
+            and payment_priority_union.loc[
+                "Manual touch or cross-border wire", "repair_contribution_pct"
+            ]
+            == 74.4
+        ),
         "overlap magnitude is explicit": (
-            round(
-                100
-                * payment_priority.loc[
-                    "Manual touch + cross-border wire", "records"
-                ]
-                / payment_manual.loc["Manual touch", "records"],
-                2,
-            )
+            payment_priority.loc[
+                "Manual touch + cross-border wire",
+                "overlap_share_of_manual_touch_pct",
+            ]
             == 14.28
-            and round(
-                100
-                * payment_priority.loc[
-                    "Manual touch + cross-border wire", "records"
-                ]
-                / payment_wires.loc["Cross-border wire", "records"],
-                2,
-            )
+            and payment_priority.loc[
+                "Manual touch + cross-border wire",
+                "overlap_share_of_cross_border_wire_pct",
+            ]
             == 43.51
+        ),
+        "wire comparator is a complete 1,398-record partition": (
+            list(payment_wires.index)
+            == ["Cross-border wire", "Domestic wire"]
+            and payment_wires["records"].sum() == 1_398
         ),
         "every payment row carries extract boundary": payment_diagnostic[
             "decision_boundary"

@@ -939,9 +939,6 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
     working["cross_border_wire_flag"] = working["payment_type"].eq(
         "Wire"
     ) & working["cross_border_flag"]
-    working["wire_geography"] = working["cross_border_wire_flag"].map(
-        {True: "Cross-border wire", False: "Domestic wire"}
-    )
 
     manual_touch = working["manual_touch_flag"]
     cross_border_wire = working["cross_border_wire_flag"]
@@ -1056,6 +1053,8 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
             "cross_border_rate_pct": round(
                 100 * frame["cross_border_flag"].mean(), 2
             ),
+            "overlap_share_of_manual_touch_pct": float("nan"),
+            "overlap_share_of_cross_border_wire_pct": float("nan"),
             "evidence_label": "ANALYST-CALC",
             "decision_boundary": (
                 "Within supplied 7,600 records only; association does not establish cause or ACG-wide performance"
@@ -1082,23 +1081,48 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
         ("status", "status", "All 7,600 supplied records"),
         ("month", "month", "All 7,600 supplied records"),
         ("amount_band_usd", "amount_band_usd", "All 7,600 supplied records"),
-        (
-            "priority_payment_cohort",
-            "priority_payment_cohort",
-            "All 7,600 supplied records; four mutually exclusive cohorts",
-        ),
-        (
-            "priority_union",
-            "priority_union_cohort",
-            "All 7,600 supplied records; priority cohorts deduplicated",
-        ),
     ]
     for dimension, column, population in dimensions:
         for category, frame in working.groupby(column, sort=False, observed=True):
             rows.append(summarize(frame, dimension, category, population))
 
-    wires = working.loc[working["payment_type"].eq("Wire")]
-    for category, frame in wires.groupby("wire_geography", sort=False):
+    for category in priority_categories:
+        frame = working.loc[working["priority_payment_cohort"].eq(category)]
+        row = summarize(
+            frame,
+            "priority_payment_cohort",
+            category,
+            "All 7,600 supplied records; four mutually exclusive cohorts",
+        )
+        if category == "Manual touch + cross-border wire":
+            row["overlap_share_of_manual_touch_pct"] = round(
+                100 * len(frame) / int(manual_touch.sum()), 2
+            )
+            row["overlap_share_of_cross_border_wire_pct"] = round(
+                100 * len(frame) / int(cross_border_wire.sum()), 2
+            )
+        rows.append(row)
+
+    for category in [
+        "Manual touch or cross-border wire",
+        "Outside priority union",
+    ]:
+        frame = working.loc[working["priority_union_cohort"].eq(category)]
+        rows.append(
+            summarize(
+                frame,
+                "priority_union",
+                category,
+                "All 7,600 supplied records; priority cohorts deduplicated",
+            )
+        )
+
+    wires = working.loc[working["payment_type"].eq("Wire")].copy()
+    wires["wire_geography"] = wires["cross_border_flag"].map(
+        {True: "Cross-border wire", False: "Domestic wire"}
+    )
+    for category in ["Cross-border wire", "Domestic wire"]:
+        frame = wires.loc[wires["wire_geography"].eq(category)]
         rows.append(
             summarize(frame, "wire_geography", category, "1,398 supplied wire records")
         )
