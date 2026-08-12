@@ -2,27 +2,30 @@
 
 ## Slide 1 — ACG should advance to option design, but only through two targeted pilot designs and three evidence gates
 
-### Executive diagnosis
+### Three findings management needs today
 
-| **ACT NOW** | **DESIGN, DO NOT BOOK** | **CONSTRAIN THE CASE** |
+| **REPORTING** | **LIQUIDITY** | **PAYMENTS** |
 |---|---|---|
-| All 23 delayed accounts use portal or spreadsheet reporting; payment friction concentrates in two supplied-record cohorts | The all-status 14-day payment-intent sensitivity leaves $38.13m net on 30 June, but validated movable cash is not established | 150 hours/month and ten closures are unsupported as funded benefits |
-| Design pilots for delayed balance sources and manual-touch/cross-border-wire flows | Continue liquidity option design; book $0 in the funded case until certification | Use 50 hours/month and two closures only as downside tests |
+| **23/55 delayed**; every delayed account uses portal or spreadsheet | **$38.13m 14-day screening result**; validated movable cash remains $0 established | **2,839-record priority union** contains 356 exceptions and 14,939 repair minutes |
 
 ### Decisions requested today
 
-1. **Authorize Week 3 option development and comparison:** local stabilization, federated coordination, and globally coordinated alternatives around one data/control foundation, using the $21m / two-closure / 50-hour downside tests.
-2. **Approve design—not execution—of two bounded validation pilots:** delayed balance reporting and manual-touch/cross-border-wire payment cohorts, outside peak season with service, control, and four-hour rollback gates.
-3. **Approve the evidence owners and proposed due dates:** visibility (Group Treasurer, 18 August), payment/process (Shared Services Lead, 19 August), and mobility/economics (Group Treasurer, 21 August); keep related value outside the funded case until certification and Finance approval.
+1. **Authorize the Week 3 three-option comparison.**
+2. **Approve design—not execution—of two bounded validation pilots.**
+3. **Confirm evidence owners and the 18 / 19 / 21 August deadlines.**
 
 **Governing message:** ACG has enough evidence to design and test the transformation—not enough to fund the full value claim.
 
-**Source:** Week 2 findings F07–F11; 57/57 Week 2 diagnostic assertions and 10/10 supplied data-quality tests pass.
+**Source:** Week 2 findings F07–F11.
 
 <details>
 <summary>Speaker notes</summary>
 
-Open with the distinction between action and value approval. The observable gaps justify targeted pilots. The liquidity, capacity, and fee outcomes remain conditional. Ask the committee to approve the Week 3 decision process, not a predetermined technology or ambition.
+Open with the distinction between action and value approval. The three options are local stabilization, federated coordination, and a globally coordinated model around one data/control spine. Score them against the same $21m mobility, two-closure, and 50-hour downside tests; do not pre-select an ambition or technology.
+
+The two charters are for delayed-balance reporting and the deduplicated priority-payment population. They are design approvals only. Execution remains gated by named owners, authoritative sources, service/control criteria, peak-season protection, and a tested four-hour rollback.
+
+Evidence packages: visibility—Group Treasurer, 18 August; payment/process—Shared Services Lead, 19 August; mobility/economics—Group Treasurer, 21 August. Keep mobility, capacity, and fee value outside the funded case until certification and Finance approval.
 
 [Sources]
 - `deliverables/working/week_2/W2_findings_log.md`
@@ -36,41 +39,42 @@ Open with the distinction between action and value approval. The observable gaps
 
 ## Slide 2 — Reporting delay is source-concentrated and testable; the analysis does not yet validate a movable-cash amount
 
-### Visibility: every delayed account sits in two source methods
+### Visibility distribution — 55 accounts
 
-| API | Host-to-host | Portal | Spreadsheet |
-|---:|---:|---:|---:|
-| 12 accounts | 20 accounts | 9 accounts | 14 accounts |
-| Same day | Same day | One day late | Two-to-three days late |
+| Same-day date proxy | Delayed date proxy |
+|---|---|
+| API **12** + host-to-host **20** = **32** | Portal **9** + spreadsheet **14** = **23** |
 
-**58.18%** of account-days are same-day under the date proxy. Across the six-month panel, same-day accounts represent **55.15%** of summed positive estimated-available USD across account-days. Median delayed positive estimated availability is **$26.01m/day**. **The reporting-date proxy is not proof of start-of-day or within-24-hour visibility.**
+Use one 100% stacked distribution bar in the presentation: `API 12 | H2H 20 | Portal 9 | Spreadsheet 14`, with a visual bracket for `32 same-day | 23 delayed`.
 
-### 30 June liquidity ladder
+### 30 June liquidity waterfall
 
 ```text
 $57.80m  gross positive estimated availability
- −$8.05m  preliminary restriction flags
+ −$8.05m  preliminary restriction screen
  −$2.14m  negative account positions
 ────────
-$47.61m  apparent net before buffer
- −$9.48m  effective reduction after account floors (all statuses)
+$47.61m  apparent net before screening window
+ −$9.48m  effective 14-day reduction after account floors
 ────────
-$38.13m  all-status 14-day payment-intent sensitivity
-   N/E    validated movable cash — NOT ESTABLISHED
+$38.13m  14-day screening result — NOT MOVABLE CASH
+$0       validated movable cash established by current evidence
 ```
 
-| Net threshold | Seven-day windows | 14-day windows |
-|---|---:|---:|
-| $21m stress | 175/175 | 168/168 |
-| $35m base | 175/175 | 138/168 = 82%; 30 failures |
-| $46.2m upside | 0/175 | 0/168 |
+**Stability callout:** The $35m base passes **138/168 complete 14-day windows (82%)**; the minimum is **$31.28m**. The seven-day reference is **$42.84m** on 30 June; it is an alternative sensitivity, not another waterfall step.
 
-The all-status 14-day payment-intent window is $12.65m; $10.83m sits on preliminarily unflagged accounts, and account-level floors cap the effective reduction at $9.48m. **Ask:** Validate timestamps for all 55 accounts and certify mobility, buffers, funding events, facility use, and economics before any liquidity value is funded.
+**Ask:** Validate timestamps for all 55 accounts and certify every dollar entering funded mobility. The screen does not separately validate complete cash needs.
 
 <details>
 <summary>Speaker notes</summary>
 
-Do not call date equality start-of-day or within 24 hours. Do not call the scenario surplus transferable. The message is that option design remains warranted, while the base case needs account-level proof. The upside is not supported after netting.
+Build the visibility visual as one horizontal 100% stacked bar. API and host-to-host are same-calendar-day in the supplied panel; portal is one day late; spreadsheet is two to three days late. The 58.18% account-day rate is a date proxy—not proof of start-of-day or elapsed-24-hour performance. Across the six-month panel, same-day accounts represent 55.15% of summed positive estimated-available USD; median delayed positive availability is $26.01m/day.
+
+Build the liquidity visual as a true waterfall with only one window: $57.80m → −$8.05m → −$2.14m → $47.61m → −$9.48m → $38.13m. Seven and 14 days are alternatives, so do not deduct both. Seven days is a short-horizon payment-intent reference; 14 days extends the stability test across two weeks. Neither is an approved buffer or forecast.
+
+Full threshold context: $21m passes 175/175 seven-day and 168/168 14-day windows; $35m passes 175/175 and 138/168; $46.2m passes none. The raw 14-day all-status window is $12.65m, of which $10.83m sits on preliminarily unflagged accounts; account floors limit the effective reduction to $9.48m.
+
+The screen does not separately model or validate complete payroll, tax, seasonal or peak expenditure, receipts, settlement-calendar effects, forecast error, or extraordinary funding events. Payroll and tax records exist in the extract, but completeness is not certified. Do not call $38.13m surplus, available, transferable, or movable cash.
 
 [Sources]
 - `data/processed/W2_visibility_diagnostic.csv`
@@ -82,40 +86,31 @@ Do not call date equality start-of-day or within 24 hours. Do not call the scena
 
 ---
 
-## Slide 3 — Within 7,600 supplied records, two cohorts—not the whole payment estate—should anchor root-cause testing
+## Slide 3 — A deduplicated 2,839-record priority union drives about 74% of exceptions and repair effort
 
-### Manual-touch records
+### Within the supplied 7,600 records only
 
-| Metric | Manual touch | No manual touch | Difference |
-|---|---:|---:|---:|
-| Record share | 31.51% | 68.49% | — |
-| Exception rate | **12.69%** | 3.36% | **+9.33 pts / 3.78×** |
-| Late-release rate | **9.48%** | 2.94% | **+6.54 pts / 3.22×** |
-| Repair contribution | **63.35%** | 36.65% | — |
+| Mutually exclusive cohort | Records | Exceptions (rate) | Repair minutes | Gross payment-intent amount |
+|---|---:|---:|---:|---:|
+| Manual touch only | 2,053 | 246 (11.98%) | 10,018 | $51.98m |
+| **Manual touch + cross-border wire** | **342** | **58 (16.96%)** | **2,702** | **$6.85m** |
+| Cross-border wire only | 444 | 52 (11.71%) | 2,219 | $7.88m |
+| Neither priority cohort | 4,761 | 123 (2.58%) | 5,141 | $131.43m |
 
-### Wire geography
+**Deduplicated priority union:** **2,839 records · 356 exceptions · 14,939 repair minutes · $66.71m gross payment-intent amount**. It contains 74.32% of all exceptions and 74.40% of repair minutes.
 
-| Metric | Cross-border wire | Domestic wire | Difference |
-|---|---:|---:|---:|
-| Records | 786 | 612 | — |
-| Exception rate | **13.99%** | 4.41% | **+9.58 pts / 3.17×** |
-| Late-release rate | **8.78%** | 4.90% | **+3.88 pts** |
-| Repair contribution | **24.51%** | 5.74% | — |
+**Overlap:** 342 records = **14.28% of manual-touch records** and **43.51% of cross-border wires**. Do not add the original two cohort totals.
 
-Repair contribution is each cohort's share of all repair minutes in the extract. The two cohorts overlap and must not be added; findings are descriptive within the supplied records, not causal or ACG-wide.
-
-### Counterevidence keeps the recommendation targeted
-
-- **87.31%** of manual-touch records have no exception.
-- **86.01%** of cross-border wires have no exception.
-- Reason codes, event sequence, criticality, corridor, and approval/release timestamps are absent.
-
-**Ask:** Reconcile the source population, then test intake completeness, cutoff discipline, format, and required controls in these two cohorts before sizing automation value.
+**Ask:** Reconcile the source population, then test intake completeness, cutoff discipline, format, and required controls across the four mutually exclusive strata before sizing automation value.
 
 <details>
 <summary>Speaker notes</summary>
 
-Keep the qualifier “within the supplied 7,600 records” in the spoken conclusion. Manual work may cause an error, respond to it, or perform a required control. Cross-border is not proof of FX activity. The evidence earns cohort priority, not a causal conclusion.
+Use a four-quadrant cohort visual or one compact table, with the overlap visually emphasized and the union as the dominant headline. Manual-touch only is the largest absolute workload; the overlap has the highest exception rate. The union is the correct additive population.
+
+Keep “within the supplied 7,600 records” in the spoken conclusion. Gross amount uses payment-date project FX and every status; it is payment initiation/intent value, not confirmed settlement, cash outflow, or loss. The full extract has $198.14m gross amount, 479 exceptions, and 20,080 repair minutes.
+
+Counterevidence: 87.31% of manual-touch records and 86.01% of cross-border wires have no exception. Reason codes, event sequence, criticality, beneficiary/corridor, and approval/release timestamps are absent. Manual work may cause an error, respond to it, or perform a required control; cross-border is not proof of FX activity. The evidence earns priority, not causation.
 
 [Sources]
 - `data/processed/W2_payment_diagnostic.csv`
