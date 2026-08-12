@@ -117,7 +117,7 @@
 - **Result:** Manual touch and cross-border wire overlap on 342 records—14.28% of manual-touch records and 43.51% of cross-border wires. The overlap contains 58 exceptions, 2,702 repair minutes, and $6.85m of gross supplied-record amount. The deduplicated priority union contains 2,839 records, 356 exceptions, 14,939 repair minutes, and $66.71m; it contributes 74.32% of all exceptions and 74.40% of repair minutes. Manual-touch only is the largest absolute workload (246 exceptions; 10,018 minutes), while the overlap has the highest exception rate (16.96%).
 - **Implication:** Week 3 options should prioritize targeted payment-intake, cutoff, format, and control interventions for manual-touch and cross-border-wire cohorts rather than assume uniform automation value.
 - **Counterevidence:** 87.31% of manual-touch records and 86.01% of cross-border wires have no exception. The data lacks event sequence, reason code, beneficiary/corridor, criticality, and approval/release timestamps, so it cannot prove manual work or cross-border status caused the friction.
-- **Code and test:** `build_payment_diagnostic()` in `src/week2_diagnostic.py`; 24 payment assertions in `tests/test_week2_diagnostic.py`.
+- **Code and test:** `build_payment_diagnostic()` in `src/week2_diagnostic.py`; 23 payment assertions in `tests/test_week2_diagnostic.py`.
 - **Output:** `data/processed/W2_payment_diagnostic.csv`.
 - **Finding implication:** Promote one extract-bounded payment finding; keep causal and ACG-wide benefit claims gated.
 
