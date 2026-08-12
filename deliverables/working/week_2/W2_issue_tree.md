@@ -11,10 +11,10 @@
 | V1 | Where and why is cash reporting late? | All 23 delayed accounts use portal or spreadsheet reporting; 58.18% of account-days are same-day | Supported | Design source/owner pilot; obtain timestamps for 55 accounts |
 | R1 | What funding or decision consequence follows from delayed visibility? | Median delayed positive estimate is $26.01m/day; no matched funding/decision event is supplied | Unresolved | Do not quantify visibility value without event/economic evidence |
 | F1 | Can the gap close without ERP replacement? | 32 automated same-day accounts and source-concentrated gaps make staged integration plausible | Unresolved | Test 50/55 delivery path, service, resilience, and retiring-ERP constraints |
-| V2 | How much cash can genuinely move within 24 hours? | All-status 14-day payment-intent sensitivity is $38.13m net on 30 June; $35m survives 138/168 windows; validated mobility is unestablished | Unresolved | Carry $0 funded mobility; certify account-level constraints/economics |
+| V2 | How much cash can genuinely move within 24 hours? | The 14-day screening result is $38.13m on 30 June; $35m survives 138/168 windows; validated mobility is unestablished | Unresolved | Carry $0 funded mobility; certify account-level constraints/economics |
 | F2 | Which restrictions, buffers, and local-service requirements apply? | $8.05m is preliminarily flagged; 7/14-day buffers are analyst sensitivities | Unresolved | Complete legal/local certification and approved buffer policy |
 | V3 | Which accounts create avoidable complexity? | Four narrow candidates with $7,800 estimated fees; ten-account stretch unsupported | Supported | Validate four; use two downside; do not book savings |
-| V4 | Where is payment friction concentrated? | Manual-touch and cross-border-wire cohorts over-index on exception/repair within 7,600 records | Supported | Test targeted root causes; retain extract boundary |
+| V4 | Where is payment friction concentrated? | The deduplicated manual-touch/cross-border-wire union contains 356 exceptions and 14,939 repair minutes; 342 records overlap | Supported | Review four mutually exclusive strata; retain extract boundary |
 | R2 | What supplier, customer, service, or control consequence follows? | 380 late and 54 rejected records exist; criticality and settlement consequence are absent | Unresolved | Obtain criticality, reason codes, and approval/release timestamps |
 | V5 | Where does receivables reconciliation create delay/value? | 133.28 estimated hours/month, but no transaction-level receivables evidence | Unresolved | Keep P1/data-gated; no working-capital claim |
 | R4 | Which FX patterns create avoidable cost or risk? | Cross-border payment records are not trades/exposures; no FX subject data | Unresolved | Keep P1/data-gated; book no FX benefit |
@@ -39,7 +39,7 @@
 
 1. **Visibility:** Timestamp, cutoff, balance type, source, reconciliation, and owner for all 55 accounts.
 2. **Liquidity:** Legal/local transferability, approved buffers, settlement/funding events, facility use, and borrowing/transfer economics.
-3. **Payment/process:** Controlled population, sample logic, reason codes, criticality, release timestamps, observed time, and removal/redeployment evidence.
+3. **Payment/process:** Controlled population, four-stratum sample logic, reason codes, criticality, release timestamps, observed time, and removal/redeployment evidence.
 
 ## Evidence discipline
 

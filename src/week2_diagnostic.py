@@ -387,11 +387,12 @@ def build_visibility_diagnostic(balances: pd.DataFrame) -> pd.DataFrame:
 def build_liquidity_scenarios(
     balances: pd.DataFrame, payments: pd.DataFrame
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Build daily liquidity layers and 7/14-day operating-buffer sensitivities.
+    """Build daily liquidity layers and 7/14-day screening sensitivities.
 
-    The buffers use supplied payment records in the trailing calendar window
-    ending on the latest balance date. They are screening sensitivities, not a
-    certified cash forecast or minimum operating-cash policy.
+    Seven days provides a near-term trailing payment-intent reference; 14 days
+    extends the stability test across two weeks. Both use supplied payment
+    records in the trailing calendar window ending on the latest balance date.
+    Neither is a certified cash forecast or approved operating-cash policy.
     """
     working = balances.copy()
     buffer_payments = payments.copy()
@@ -530,7 +531,7 @@ def build_liquidity_scenarios(
     account_scenarios["scenario_date"] = latest_date
     account_scenarios["evidence_label"] = "ANALYST-CALC / ANALYST-ASSUMPTION"
     account_scenarios["decision_boundary"] = (
-        "Buffers use an uncertified supplied-payment extract; surplus is not movable cash"
+        "Uncertified screening windows do not separately validate complete cash needs; result is not movable cash"
     )
     account_columns = [
         "scenario_date",
@@ -631,8 +632,8 @@ def build_liquidity_scenarios(
             account_scenarios[
                 "scenario_surplus_after_7d_buffer_usd"
             ].sum(),
-            "Scenario surplus",
-            "Not validated movable cash",
+            "Seven-day screening result",
+            "Short-horizon payment-intent sensitivity; not validated movable cash",
             "ANALYST-CALC / ANALYST-ASSUMPTION",
         ),
         (
@@ -641,8 +642,8 @@ def build_liquidity_scenarios(
                 daily["date"].eq(latest_date),
                 "net_scenario_surplus_after_7d_buffer_usd",
             ].iloc[0],
-            "Scenario surplus after netting",
-            "Includes negative account positions; not validated movable cash",
+            "Seven-day screening result after netting",
+            "Includes negative positions; not an approved buffer, forecast, or movable cash",
             "ANALYST-CALC / ANALYST-ASSUMPTION",
         ),
         (
@@ -657,8 +658,8 @@ def build_liquidity_scenarios(
             account_scenarios[
                 "scenario_surplus_after_14d_buffer_usd"
             ].sum(),
-            "Scenario surplus",
-            "Not validated movable cash",
+            "14-day screening result",
+            "Two-week stability sensitivity; not validated movable cash",
             "ANALYST-CALC / ANALYST-ASSUMPTION",
         ),
         (
@@ -667,8 +668,8 @@ def build_liquidity_scenarios(
                 daily["date"].eq(latest_date),
                 "net_scenario_surplus_after_14d_buffer_usd",
             ].iloc[0],
-            "Scenario surplus after netting",
-            "Includes negative account positions; not validated movable cash",
+            "14-day screening result after netting",
+            "Includes negative positions; not an approved buffer, forecast, or movable cash",
             "ANALYST-CALC / ANALYST-ASSUMPTION",
         ),
         (

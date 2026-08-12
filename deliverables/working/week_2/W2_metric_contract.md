@@ -65,7 +65,7 @@ Estimated available balance
         ↓
 Apparently available after preliminary restriction flags
         ↓
-Scenario surplus after an assumed operating buffer
+Screening result after an illustrative payment-intent window
         ↓
 Validated movable cash — not established by the supplied data
 ```
@@ -75,7 +75,7 @@ Validated movable cash — not established by the supplied data
 | Gross positive estimated availability | Sum of positive `available_balance_usd` | Before negative positions, restrictions, and buffers |
 | Net estimated availability | Sum of positive and negative `available_balance_usd` | Not proof of transferability |
 | Preliminarily unflagged positive availability | Positive estimate on accounts where `restricted_flag = False` | Unflagged does not mean legally or operationally movable |
-| 7-day / 14-day operating buffer | Account-level gross supplied-record value over the trailing 7 / 14 calendar days; Completed/Repaired is shown as a status sensitivity | `ANALYST-ASSUMPTION`; payment extract is not certified complete and status is not settlement evidence |
+| 7-day / 14-day screening window | Seven days provides a short-horizon payment-intent reference; 14 days extends the stability test across two weeks. Each uses account-level gross supplied-record value over the trailing calendar window; Completed/Repaired is shown as a status sensitivity. | `ANALYST-ASSUMPTION`; neither is an approved buffer or forecast. The screen does not separately model or validate complete payroll, tax, seasonal/peak expenditure, receipts, settlement calendars, forecast error, or extraordinary funding events. |
 | Scenario surplus | Positive estimated availability less the illustrative buffer, floored at zero, then excluding preliminary restricted accounts | Sensitivity only; never labeled movable cash |
 | Simultaneous surplus and deficit | Same date contains at least one positive and one negative estimated available account position | Shows coordination opportunity, not avoidable interest cost |
 
@@ -91,6 +91,11 @@ All rates below use the 7,600 supplied records as the denominator unless the coh
 | Rejection / pending rate | Status count divided by supplied records | Status-as-of timing and settlement are unknown |
 | Repair effort | Sum of `repair_minutes`; monthly equivalent divides the six-month extract by six | Management-estimated capacity, not headcount or cashable savings |
 | Concentration contribution | Cohort issue count or repair minutes / total issue count or repair minutes | Must be shown with cohort size to prevent small-denominator distortion |
+| Gross supplied-record amount | Sum of payment-date FX-translated `amount_local` for all statuses in the named cohort | Payment intent/initiation value; not confirmed settlement or cash outflow |
+| Priority payment cohort | Four mutually exclusive categories: manual touch only; manual touch + cross-border wire; cross-border wire only; neither | The explicit overlap prevents double counting; association does not establish cause |
+| Priority union | Manual touch OR cross-border wire, deduplicated | Report records, exceptions, repair minutes, and gross amount together; retain the 7,600-record boundary |
+| Exception-linked gross payment-intent amount | Sum of payment-date FX-translated amount where `exception_flag = True` | $12.48m across the extract; not settlement, loss, or confirmed outflow |
+| Repair minutes per 100 records | `repair_minutes / eligible records × 100` | Use a reconciled, like-for-like population; current extract proxy is 264.21 |
 
 ### Process capacity and controls
 

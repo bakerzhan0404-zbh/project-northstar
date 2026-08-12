@@ -25,7 +25,7 @@ The governing definitions and evidence labels are in the [Week 2 metric contract
 | FX panel | 1,810 = 10 × 181 | Pass | Project translation rates only |
 | Process activities | 9 | Pass | Management estimates; population undefined |
 | Estimated process capacity | 617.72 hours/month | Pass | Not observed time, headcount, or savings |
-| Week 2 assertions | 57/57 | Pass | Tests arithmetic, joins, definitions, and selected outputs |
+| Week 2 assertions | 69/69 | Pass | Tests arithmetic, joins, definitions, and selected outputs |
 | Supplied data-quality tests | 10/10 | Pass | Tests structural properties only |
 | Week 1 expanded controls | 52/52 | Pass | Structural/logic controls; not semantic source certification |
 
@@ -103,7 +103,9 @@ netting_sensitivity[d,N] =
     gross_scenario_surplus[d,N] + gross_negative_available[d]
 ```
 
-The first six seven-day rows and first 13 fourteen-day rows remain null because they lack complete windows. The primary buffer conservatively includes all supplied statuses; Completed/Repaired-only treatment is shown as a status sensitivity and changes the 30 June 14-day gross result by only $0.02m.
+The first six seven-day rows and first 13 fourteen-day rows remain null because they lack complete windows. Seven days provides a short-horizon payment-intent reference; 14 days extends the stability test across two weeks. Neither is an approved operating-buffer policy or cash forecast. The primary screen conservatively includes all supplied statuses; Completed/Repaired-only treatment is shown as a status sensitivity and changes the 30 June 14-day gross result by only $0.02m.
+
+The screen does not separately model or validate complete payroll, tax, seasonal or peak expenditure, receipts, settlement-calendar effects, forecast error, or extraordinary funding events. Payroll and tax records exist in the extract, but completeness is not certified. Every output remains a screening result—not surplus cash or transfer authorization.
 
 ### Rolling threshold results
 
@@ -144,6 +146,17 @@ fee contribution = cohort estimated fees / $62,613
 ```
 
 Wire geography compares cross-border wires with domestic wires—not cross-border wires with every domestic payment. USD amount bands are `≤$10k`, `>$10k–$25k`, `>$25k–$50k`, `>$50k–$100k`, and `>$100k`.
+
+### Mutually exclusive priority cohorts
+
+| Cohort | Records | Exceptions | Exception rate | Repair minutes | Gross supplied-record amount |
+|---|---:|---:|---:|---:|---:|
+| Manual touch only | 2,053 | 246 | 11.98% | 10,018 | $51,983,738.28 |
+| Manual touch + cross-border wire | 342 | 58 | 16.96% | 2,702 | $6,846,691.83 |
+| Cross-border wire only | 444 | 52 | 11.71% | 2,219 | $7,875,503.53 |
+| Neither priority cohort | 4,761 | 123 | 2.58% | 5,141 | $131,429,555.87 |
+
+The overlap is 14.28% of manual-touch records and 43.51% of cross-border wires. The deduplicated priority union contains 2,839 records, 356 exceptions, 14,939 repair minutes, and $66,705,933.64 of gross supplied-record amount; it contributes 74.32% of all exceptions and 74.40% of all repair minutes. Gross amount includes all statuses and is payment intent, not confirmed settlement or cash outflow.
 
 ### Counterevidence retained
 

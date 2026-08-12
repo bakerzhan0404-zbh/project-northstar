@@ -74,7 +74,7 @@ flowchart LR
     class A,I missing;
 ```
 
-**Decision readout:** Manual-touch and cross-border-wire records deserve targeted root-cause testing, but the supplied file cannot tell whether manual work caused an exception, responded to it, or performed a required control.
+**Decision readout:** The deduplicated manual-touch/cross-border-wire priority union contains 356 exceptions and 14,939 repair minutes (74.32% and 74.40% of extract totals). Manual-touch only is the largest absolute workload; the 342-record overlap has the highest exception rate. The supplied file still cannot tell whether manual work caused an exception, responded to it, or performed a required control.
 
 ### Control and rework points
 
@@ -83,7 +83,7 @@ flowchart LR
 | Request intake | Business unit / local finance | No invoice, beneficiary, urgency, or criticality fields supplied | Incomplete/late input is a stakeholder claim | Authorized request and required master data | Gates root-cause diagnosis | Low |
 | File preparation | Shared Services | 101.89 estimated manual hours/month | Multiple formats and manual touch | Completeness, duplicate check, segregation | Candidate for standardization | Medium |
 | Approval/release | Entity approvers | 380 late releases in supplied extract | Cutoff and approval variation are plausible | Approval authority, dual control, emergency release | Defines service and control design | Low |
-| Bank submission | Shared Services / bank channel | Cross-border wires have 13.99% exceptions vs 4.41% domestic wires | Format/corridor complexity is plausible | Secure transmission, acknowledgement, resilience | Defines targeted cohort | Medium |
+| Bank submission | Shared Services / bank channel | Cross-border-wire-only has 52 exceptions; the 342-record manual/cross-border overlap has 58 | Format/corridor complexity is plausible | Secure transmission, acknowledgement, resilience | Defines mutually exclusive root-cause strata | Medium |
 | Exception repair | Shared Services | 20,080 minutes in payment file; 102.60 hours/month in process file | Upstream input, format, policy, or user behavior unresolved | Repair approval, audit trail, resubmission control | Process estimate is 84% above payment-file estimate; benefit not fundable | High for numerical discrepancy; low for cause |
 | Performance review | Group Treasury / Shared Services | No controlled population or reason-code KPI | Ownership and feedback loop are not evidenced | KPI definition, data owner, corrective-action log | Required before scale | Low |
 
@@ -99,6 +99,7 @@ flowchart LR
 | Certify account-level mobility and operating buffers | I | A | R | I | C | C | R | C |
 | Validate four closure candidates | I | A | R | I | C | C | R | C |
 | Reconcile payment extract to controlled source population | I | A | C | R | R | C | I | I |
+| Approve four-stratum payment sample and matching exceptions | I | C | C | A/R | R | C | I | C |
 | Own exception reason taxonomy and corrective actions | I | C | C | A/R | R | C | I | R |
 | Approve payment control and emergency-procedure requirements | I | A | C | R | C | C | I | C |
 | Approve cybersecurity, access, resilience, and rollback gates | I | C | I | C | A/R | C | I | I |
@@ -112,6 +113,6 @@ All owners are proposed until confirmed by the steering group. Internal Audit is
 
 1. **Data gate:** Each pilot account has an authoritative source, named data owner, timestamp, cutoff, balance definition, and reconciliation rule.
 2. **Mobility gate:** No cash enters the value case without legal/local certification, operating buffer, settlement constraints, transfer timing, and economics.
-3. **Payment gate:** The extract reconciles to source totals; reason codes, criticality, and approval/release timestamps allow a causal test.
+3. **Payment gate:** The extract reconciles to source totals; the four-stratum case-control sample links to reason codes, source documents, criticality, and approval/release timestamps.
 4. **Control gate:** Segregation, access, audit trail, emergency payment, service continuity, cybersecurity, resilience, and four-hour rollback are designed before go-live.
 5. **Service gate:** The pilot avoids peak season and meets agreed cash-reporting and critical-payment service levels for four consecutive weeks before scale.

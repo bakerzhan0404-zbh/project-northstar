@@ -12,7 +12,7 @@
 
 ### Execution outcome
 
-Week 2 supports a **targeted, gated transformation**. All 23 delayed accounts use portal or spreadsheet reporting, so ACG can design a focused connectivity/data-owner pilot without assuming ERP replacement. The all-status 14-day payment-intent sensitivity leaves $38.13m net on 30 June, but the $35m threshold survives only 138/168 complete windows and validated movable cash remains unestablished. Within the supplied 7,600 payment records, manual-touch and cross-border-wire cohorts over-index on exception and repair, earning targeted root-cause testing—not an ACG-wide automation claim.
+Week 2 supports a **targeted, gated transformation**. All 23 delayed accounts use portal or spreadsheet reporting, so ACG can design a focused connectivity/data-owner pilot without assuming ERP replacement. The 14-day screening result is $38.13m on 30 June, but the $35m threshold survives only 138/168 complete windows and validated movable cash remains unestablished. Within the supplied 7,600 payment records, the deduplicated priority union contains 356 exceptions and 14,939 repair minutes; its 342-record overlap must not be double-counted. This earns targeted root-cause testing—not an ACG-wide automation claim.
 
 The business case remains constrained: the 150-hour capacity target is not fundable, the 102.60-hour process repair estimate is 84% above the 55.78-hour payment-file estimate, and only four closure-validation candidates with $7,800 of estimated fees are evidenced. The [diagnostic report](W2_diagnostic_report.md), [five-slide checkpoint](W2_checkpoint_deck.md), and [weekly update](W2_weekly_update.md) use the same three-part conclusion.
 
@@ -20,7 +20,7 @@ The business case remains constrained: the 150-hour capacity target is not funda
 
 - Completed every P0 analysis, the five-finding synthesis, the report, the five-slide checkpoint, the technical appendix, and the engagement-control updates.
 - Kept receivables and FX data-gated because controlled evidence did not arrive.
-- Passed 57/57 Week 2 assertions, 10/10 supplied data-quality tests, and 52/52 expanded Week 1 controls.
+- Passed 69/69 Week 2 assertions, 10/10 supplied data-quality tests, and 52/52 expanded Week 1 controls.
 - Carried $0 validated mobility and excluded unvalidated capacity and account-fee value from the funded base.
 
 ### Decisions now requested
@@ -75,8 +75,9 @@ Only four to six findings may enter the main report. A finding is promoted only 
 6. I will describe account records as closure-validation candidates, not approved closures.
 7. I will treat manual hours as capacity unless a validated removal rate and financial baseline support cashable savings.
 8. I will identify associations in the payment data without claiming root causes that the supplied fields cannot prove.
-9. I will add code, generated outputs, tests, and the related analysis-log update to the same logical analytical commit.
-10. I will stage explicit file paths, review the staged diff, commit locally, and avoid including `.DS_Store` files.
+9. I will use mutually exclusive priority-payment strata or a deduplicated union whenever manual touch and cross-border wire appear together.
+10. I will add code, generated outputs, tests, and the related analysis-log update to the same logical analytical commit.
+11. I will stage explicit file paths, review the staged diff, commit locally, and avoid including `.DS_Store` files.
 
 ## Week 1 hypothesis thresholds I will carry forward
 

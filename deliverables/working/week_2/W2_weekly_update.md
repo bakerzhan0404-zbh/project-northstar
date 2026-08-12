@@ -11,8 +11,8 @@
 ### Three executive findings
 
 1. **Reporting delay is source-concentrated.** All 23 delayed accounts use portal or spreadsheet reporting. Same-day coverage is 58.18% of account-days; across the six-month panel, same-day accounts represent 55.15% of summed positive estimated-available USD across account-days. This makes a targeted pilot testable; it does not prove technical feasibility or justify ERP replacement.
-2. **Liquidity passes a screen, not a mobility proof.** The all-status 14-day payment-intent sensitivity leaves $38.13m net on 30 June, but the $35m threshold survives only 138/168 complete windows and validated movable cash remains unestablished.
-3. **Payment friction concentrates in two supplied-record cohorts.** Within the 7,600 records only, manual-touch records contribute 63.47% of exceptions; cross-border wires show a 13.99% exception rate versus 4.41% for domestic wires. These associations set root-cause priorities, not causes or ACG-wide rates.
+2. **Liquidity passes a screen, not a mobility proof.** The 14-day screening result is $38.13m on 30 June, but the $35m threshold survives only 138/168 complete windows and validated movable cash remains unestablished.
+3. **Payment friction concentrates in a deduplicated priority population.** Within the 7,600 records only, 2,839 manual-touch or cross-border-wire records contain 356 exceptions and 14,939 repair minutes—74.32% and 74.40% of the extract totals. The 342-record overlap must not be double-counted; these associations set priorities, not causes or ACG-wide rates.
 
 **Two supporting constraints:** The 102.60-hour process repair estimate is 84% above the 55.78-hour payment-file estimate, so the 150-hour capacity target is not fundable. Only four closure-validation candidates and $7,800 of estimated fees are evidenced, so the ten-account stretch is unsupported.
 
@@ -25,7 +25,7 @@
 ## What I completed
 
 - Built one reconciled analytical layer across accounts, visibility, liquidity, positions, payments, and process capacity.
-- Passed 57/57 Week 2 assertions, 10/10 supplied data-quality tests, and 52/52 expanded Week 1 controls.
+- Passed 69/69 Week 2 assertions, 10/10 supplied data-quality tests, and 52/52 expanded Week 1 controls.
 - Promoted five findings with confidence, counterevidence, action, and traceable evidence.
 - Produced the eight-page diagnostic, five-slide checkpoint, technical appendix, targeted process/RACI views, maturity heatmap, and updated engagement-control logs.
 
