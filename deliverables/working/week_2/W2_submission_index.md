@@ -14,10 +14,10 @@
 
 1. [Weekly update](W2_weekly_update.md) — the 90-second recommendation, three findings, three decisions, and three requests
 2. [Current-state diagnostic](W2_diagnostic_report.md) — the answer-first eight-page management report
-3. [Five-slide diagnostic checkpoint](W2_checkpoint_deck.md) — exactly five core slides with speaker-note provenance
+3. [Five-slide diagnostic checkpoint PDF](W2_checkpoint_5-slidesdeck.pdf) — final rendered management deck; [speaker-note and provenance source](W2_checkpoint_deck.md)
 4. [Findings log](W2_findings_log.md) — five promoted findings with confidence, counterevidence, and decision consequence
 
-The executive spine is consistent across the Markdown sources: **act on source-concentrated reporting and the deduplicated priority-payment gap; treat $38.13m as a 14-day screening result, not movable cash; constrain capacity and account value until evidence gates are satisfied.** The existing rendered five-page checkpoint remains a production artifact for the separate Claude redesign.
+The executive spine is consistent across the rendered checkpoint and Markdown sources: **act on source-concentrated reporting and the deduplicated priority-payment gap; treat $38.13m as a 14-day screening result, not movable cash; constrain capacity and account value until evidence gates are satisfied.** The rendered five-page checkpoint is aligned to these sources and ready for mentor/client review.
 
 ## Operating-model and feasibility artifacts
 
@@ -27,7 +27,6 @@ The executive spine is consistent across the Markdown sources: **act on source-c
 | [Targeted maturity heatmap](W2_maturity_heatmap.md) | Observable current/target capability by dimension; no composite average | Provisional; process-owner validation required |
 | [Updated issue tree](W2_issue_tree.md) | Supported, weakened, rejected, and unresolved hypotheses | Current through Week 2 |
 | [Week 3 readiness workplan](W2_workplan.md) | Completed Week 2 tasks, Week 3 sequence, dependencies, and owners | Current; client decisions pending |
-| [Claude checkpoint-deck handoff](W2_checkpoint_deck_claude_handoff.md) | Exact five-slide redesign copy, visual specification, notes, and QA checks | Ready for presentation production |
 
 ## Technical assurance and appendix
 
