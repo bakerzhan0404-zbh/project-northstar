@@ -1,6 +1,6 @@
 # Dashboard V2 Design Specification
 
-**Prepared by:** Baker | **Date:** 16 August 2026 | **Status:** Concise content locked; Figma build in progress
+**Prepared by:** Baker | **Date:** 16 August 2026 | **Status:** Closed-state Figma view complete; evidence view in progress
 
 **Artifact scope:** This is the second visual-design iteration of the Version 1 dashboard. It does not replace the validated and repeatable pipeline described as Version 2 in the development plan.
 
@@ -86,3 +86,11 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, or
 - Capacity and closure figures are rejected as funded benefits.
 - Evidence details remain reachable without crowding the closed state.
 
+## Figma build record
+
+- File: `Project Northstar — Dashboard V1`
+- Page: `Dashboard V2 — Executive View`
+- Closed-state frame: `Project Northstar — Dashboard V2` (`11:3`)
+- Canvas: 1440 × 900, with the original Version 1 frame preserved unchanged.
+- Visual QA: 49 text layers use Inter; no zero-size text, overflow, placeholder layers, or missing required evidence language remain.
+- Next build step: add and validate the open `Evidence & definitions` state without increasing the closed-state density.
