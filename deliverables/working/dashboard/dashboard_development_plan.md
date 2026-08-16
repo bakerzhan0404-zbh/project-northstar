@@ -1,6 +1,6 @@
 # Dashboard Development Plan
 
-**Prepared by:** Baker | **Date:** 16 August 2026 | **Status:** Development plan
+**Prepared by:** Baker | **Date:** 16 August 2026 | **Status:** Version 1 prototype complete; user review pending
 
 **Scope:** Three staged versions using the existing Week 1 and Week 2 evidence base
 
@@ -31,6 +31,8 @@ Use only committed processed CSVs and definitions already reconciled in the Week
 ### Expected output
 
 A one-page prototype, a chart-to-decision map, a short review log, and an explicit `Go`, `Rework`, or `Stop` decision for Version 2.
+
+The editable [Project Northstar — Dashboard V1](https://www.figma.com/design/A9ShhpMFBsXCyrCDbQXY5K) prototype is complete. It presents the three decision views and two validation guardrails on one page, keeps evidence limitations beside each result, and has passed internal layout and reconciliation checks. User decision walkthroughs remain the exit gate before Version 2.
 
 ### Risks
 
