@@ -1,6 +1,6 @@
 # Dashboard V2 Design Specification
 
-**Prepared by:** Baker | **Date:** 16 August 2026 | **Status:** Closed-state Figma view complete; evidence view in progress
+**Prepared by:** Baker | **Date:** 18 August 2026 | **Status:** Interactive local dashboard implemented and validated
 
 **Artifact scope:** This is the second visual-design iteration of the Version 1 dashboard. It does not replace the validated and repeatable pipeline described as Version 2 in the development plan.
 
@@ -93,4 +93,15 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, or
 - Closed-state frame: `Project Northstar — Dashboard V2` (`11:3`)
 - Canvas: 1440 × 900, with the original Version 1 frame preserved unchanged.
 - Visual QA: 49 text layers use Inter; no zero-size text, overflow, placeholder layers, or missing required evidence language remain.
-- Next build step: add and validate the open `Evidence & definitions` state without increasing the closed-state density.
+- Implementation: the Figma frame is now the visual reference for the local browser dashboard in `dashboard/`.
+
+## Implemented interaction model
+
+The browser implementation adds only controls that change a decision-relevant interpretation:
+
+- **Liquidity horizon:** switches the governed 7-day and 14-day screening evidence. The screen, buffer, complete-window evidence, threshold table, boundary, and accessible announcement update together. Validated mobility remains `not established`, and the funded case remains `$0`.
+- **Payment measure:** switches the same four mutually exclusive cohorts between records, exceptions, and repair minutes. The numerator, denominator, unit, cohort bars, union share, and explanation update together; the 342-record overlap remains counted once.
+- **Evidence inspection:** opens a keyboard-accessible right-side drawer to the relevant domain. Reporting-source selection changes only the inspected source evidence and never the global 55-account denominator.
+- **Reset:** restores the 14-day screen, payment-record basis, and all-source visibility state.
+
+These interactions make the artifact analytical rather than slide-like while preserving the concise closed state. Arbitrary date filters, free-form thresholds, recommendation scores, funding controls, and execution actions remain intentionally excluded.

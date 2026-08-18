@@ -58,3 +58,13 @@ deliverables/working/week_4/
 
 Follow `program/ONE_MONTH_PLAYBOOK.md`. Submit one integrated assignment and one weekly update at the end of each week. Commit your work regularly with clear messages so that your analysis and decisions remain traceable.
 
+## 5. Open the interactive diagnostic dashboard
+
+Build the governed dashboard data and start a local server from the repository root:
+
+```bash
+python3 src/build_dashboard_data.py
+python3 -m http.server 8000 --bind 127.0.0.1
+```
+
+Open `http://127.0.0.1:8000/dashboard/`. The dashboard supports decision-focused liquidity and payment comparisons plus an evidence drawer; it is a local Week 1–2 diagnostic snapshot, not a live operational system. See `dashboard/README.md` for the interaction, evidence, refresh, and test details.
