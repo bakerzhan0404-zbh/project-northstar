@@ -6,11 +6,11 @@
 
 ## Objective
 
-Turn the evidence-complete Version 1 reference into a user-facing executive dashboard that can be understood in ten seconds and explored without a presenter.
+Turn the evidence-complete Version 1 reference into a menu-first analytical application: the first viewport asks which decision, operating scope, or evidence question to inspect, then reveals only the selected governed content without requiring a presenter.
 
-## Closed-state executive view
+## Menu-first application shell
 
-### Header
+### Persistent header
 
 - `Project Northstar`
 - `Treasury decision dashboard`
@@ -19,61 +19,63 @@ Turn the evidence-complete Version 1 reference into a user-facing executive dash
 - Control: `Filters` with date, currency, region, entity, and bank
 - Control: `Metric guide`
 
-### Portfolio decision disclosure
+### Initial menu-only state
 
-Always visible:
+The main region initially shows only:
 
-- Label: `Decision`
-- Headline: `Design and test; do not fund or execute yet.`
-- Status: `Portfolio-wide · Validation required`
-- Direction: prioritize delayed reporting sources and payment root causes; certify mobility before booking value
+- Eyebrow: `Dashboard menu`
+- Heading: `Choose a dashboard view`
+- Support: `Start with one decision, operating scope, or evidence question.`
+- The six choices below
 
-The expanded panel explains why the portfolio-wide stance does not change with filters and identifies the evidence needed before funding or execution.
+No KPI, accordion, analytical chart, warning, or evidence table is visible until a view is selected.
 
-### Decision-signal disclosures
+| Menu view | Supporting copy | Content | Applicability |
+|---|---|---|---|
+| Executive Overview | `Portfolio decision and the validation needed before funding or execution.` | Portfolio decision | `Portfolio-wide · filters do not apply` |
+| Cash Visibility & Liquidity | `Reporting delays and governed 7-day and 14-day screening sensitivities.` | Reporting visibility; Liquidity | `Date + dimensions` |
+| Bank Account Footprint | `Regional account coverage and closure-validation candidates.` | Regional footprint; Closure evidence | `Mixed date rules` |
+| Payment Operations | `Deduplicated payment cohorts, exceptions, and repair time.` | Payment friction | `Date + dimensions` |
+| Process Workload | `Independent management and payment-file workload estimates.` | Capacity evidence | `Global · filters do not apply` |
+| Data Quality & Evidence | `Structural checks, reconciliation controls, source artifacts, and open certification limits.` | Governed quality-evidence landing | `Governed contract · filters do not apply` |
 
-| Section | Always-visible result | Supporting boundary |
-|---|---|---|
-| Reporting visibility | `23 / 55` · `accounts delayed` | `Calendar-date proxy · not start-of-day or elapsed-24-hour visibility` |
-| Liquidity | `$0` · `funded case` | `14-day screen: $38.13m` · `Validated mobility: not established` · not surplus cash or transfer authority |
-| Payment friction | `37.36%` · `2,839 of 7,600 records` | Supplied records only · association, not causation |
+### Selected-view state
 
-Expanded signal panels contain:
+A selected view replaces the menu in the main region and begins with `All views`, the exact menu title, its supporting copy, and its applicability label. Only mapped content is exposed. A normal menu selection leaves all mapped analytical sections collapsed; search may route to a view and open one exact section. Switching views closes the prior section without changing filters, the 7/14-day choice, or the Records/Exceptions/Repair time choice.
 
-- Current-scope evidence and visual
-- Interpretation
-- Decision boundary
-- Next action
-- Link to the full Metric guide
+Within a selected analytical view, only one of its visible sections may be open at a time. `All views` preserves data scope and returns focus to the menu choice just left. `Reset dashboard` clears filters/search, restores full-period/14-day/Records defaults, closes transient panels, and returns to the initial menu.
 
-The 7/14-day control lives inside the expanded Liquidity section. The Records/Exceptions/Repair time control lives inside the expanded Payment friction section.
+### Governed Data Quality & Evidence landing
 
-### Scope-lens disclosure
+This view is a result landing rather than an eighth accordion. It displays:
 
-| Section | Always-visible result | Supporting boundary |
-|---|---|---|
-| Regional footprint | `3 regions represented` · `55 selected accounts` | Schematic account coverage · supplied diagnostics · not a live cash map |
+- `Reconciled to supplied controls`
+- `Source certification open`
+- `52 / 52` Week 1 structural checks passed
+- `13 / 13` Week 2 reconciliation controls reconciled
+- `12` governed source artifacts
+- Population controls: 16 entities; 55 accounts; 9,955 account-days; 7,600 payment records; 1,810 FX rows; 9 process activities
+- Boundary: `Passing internal checks establishes structural consistency and reconciliation only; it does not certify source completeness, semantic accuracy, operational timing, causation, or decision authority`
+- Next action: complete source-owner certification and resolve semantic or operational gaps before treating consistency as decision authority
+- Action: `Open data-quality method`
 
-The regional footprint is a scope lens, not a fourth decision signal. The collapsed row reports the actually applied dashboard scope. Its expanded map and table expose governed NA, EMEA, and APAC alternatives while keeping the region-override basis explicit and preserving other filters and the selected liquidity/payment controls.
+The quality result is full-contract and filter-independent. The browser validates the exact governed counts, labels, population controls, provenance, source count, and boundary before rendering it. Do not derive a score, grade, completeness claim, certification, confidence label, or approval from passing controls.
 
-### Evidence-gate disclosures
+### Analytical disclosures after view selection
 
-| Section | Always-visible result | Supporting boundary |
-|---|---|---|
-| Capacity evidence | `102.6 h/month vs 55.8 h/month` · process estimate 84% higher | Enterprise-global management estimate · filters do not apply · not a combined capacity or P&L baseline |
-| Closure evidence | `4 validation candidates` · `$7.8k estimated annual fees` · no approved closures | 30 Jun 2026 snapshot · date filter does not apply · dimension filters apply |
-
-Capacity detail remains enterprise-global. Closure detail follows selected currency, region, entity, and bank values. Neither section presents an approved or fundable benefit.
-
-### Accordion behavior
-
-All seven primary sections are collapsed by default. Only one section may be open at a time across Decision, Reporting visibility, Liquidity, Payment friction, Regional footprint, Capacity evidence, and Closure evidence. Opening another section closes the previous one; clicking the open header collapses it.
-
-Applying filters preserves the open section and updates its summary and detail together. Reset collapses all sections. Empty scopes show `No matching data` and `—`, never a false zero percentage or retained portfolio value. Regional footprint may continue to show explicitly labelled alternative facet rows when the applied region itself has no matches under the other filters; this is a region override, not a portfolio fallback.
+| Menu view | Section | Always-visible result | Supporting boundary |
+|---|---|---|---|
+| Executive Overview | Portfolio decision | `Design and test; do not fund or execute yet.` | Portfolio-wide; separate signals, not a composite score |
+| Cash Visibility & Liquidity | Reporting visibility | `23 / 55 accounts delayed` at baseline | Calendar-date proxy; not start-of-day or elapsed-24-hour visibility |
+| Cash Visibility & Liquidity | Liquidity | `$0 funded case`; 14-day screen `$38.13m` at baseline | Mobility not established; screen is not surplus cash or transfer authority |
+| Bank Account Footprint | Regional footprint | `3 regions represented`; `55 selected accounts` at baseline | Schematic supplied classification; not a live or precise location map |
+| Bank Account Footprint | Closure evidence | `4 validation candidates`; `$7.8k` estimated annual fees | Fixed 30 Jun snapshot; not approved closures or booked savings |
+| Payment Operations | Payment friction | `37.36%`; `2,839 / 7,600` records at baseline | Supplied records; overlap counted once; association is not causation |
+| Process Workload | Capacity evidence | `102.6 h/month vs 55.8 h/month` | Global estimates; filters do not apply; independent, non-additive, not fundable |
 
 ## Expanded analytical-view specification
 
-The visual language takes the useful hierarchy and density of the supplied dashboard references while preserving the limits of the Week 1–2 evidence. Visuals appear only inside the open accordion section; the fully collapsed executive view remains concise.
+The visual language takes the useful hierarchy and density of the supplied dashboard references while preserving the limits of the Week 1–2 evidence. Visuals appear only after a menu view is selected and its analytical section is opened; the initial menu remains free of results.
 
 | Section | Expanded visual and role | Interaction and scope | Required evidence boundary |
 |---|---|---|---|
@@ -90,12 +92,14 @@ The visual language takes the useful hierarchy and density of the supplied dashb
 - The local 1,280 × 650 map is a decorative rasterization of a CC0 Robinson-projection map; its source, author, geography, license, retrieval date, dimensions, and SHA-256 are recorded in `dashboard/assets/README.md`.
 - Each facet row removes only the active region constraint, retains From/To, currency, entity, and bank, and recomputes the governed NA, EMEA, or APAC summary. The interface labels this as `Comparison basis: each row overrides region`.
 - Desktop marker size represents matching account count and always shows the raw count. Unavailable anchors use a fixed size plus `Unavailable` or `Applied · no matches`, so size never invents a value.
-- Marker or table selection applies the region atomically, preserves all other filters and analytical controls, keeps Regional footprint open, synchronizes the region chip and filter form, and restores focus. Selecting an unavailable or already-applied region produces an explanatory announcement; `All regions` clears only region.
+- Marker or table selection applies the region atomically, preserves all other filters and analytical controls, keeps Bank Account Footprint selected and Regional footprint open, synchronizes the region chip and filter form, and restores focus. Selecting an unavailable or already-applied region produces an explanatory announcement; `All regions` clears only region.
 - Liquidity remains outside the map and table. A region selection scopes the separate Liquidity section, where the as-of date, trailing horizon, `$0` funded case, and mobility `not established` remain visible.
 
 ### Visual and interaction behavior
 
-- Keep the one-open-at-a-time accordion rule. Metric search opens and focuses the inline section; methodology search opens the Metric guide.
+- First load exposes only the six-option menu; a normal view selection reveals its mapped content without automatically opening an analytical section.
+- `All views` returns to the menu without changing filters or analytical toggles. `Reset dashboard` restores all data/control defaults and the initial menu state.
+- Keep the one-open-at-a-time rule among the analytical sections visible in the selected view. Metric search routes to the owning view and opens its section; an exact menu-title search selects that view; methodology search opens the Metric guide without changing views.
 - Apply a valid filter atomically to the collapsed summary, expanded visual, legend or table, interpretation, and scope. An invalid range leaves the last valid view unchanged.
 - Empty scopes show `No matching data` and `—`. Incomplete liquidity windows show gaps and unavailable values; neither state may retain a portfolio value or substitute `0%`.
 - Use a restrained light application shell and dark navy analytical cards with purple, teal, blue, orange, and neutral accents. These colors separate categories and horizons; they do not grade performance.
@@ -103,9 +107,12 @@ The visual language takes the useful hierarchy and density of the supplied dashb
 - On desktop, keep the regional map spatial and the comparison table full width. At mobile widths, hide the decorative silhouette and convert the same region controls to a two-column, then one-column, selector-card layout without dropping counts or selected/unavailable states.
 - Treat Regional footprint as a scope-selection surface, not a ranked signal: no choropleth, performance heat, pulsing live marker, route arc, cash-sized bubble, or transfer-flow animation is permitted.
 - Exact region-code search (`NA`, `EMEA`, `APAC`) presents the dimension action first. `Regional footprint`, `region overview`, and `map` open the scope lens; methodology terms open its Metric guide topic.
+- At 1,120 px and above, the menu is a compact dark navigation surface. At 760 px and below, menu choices remain a single readable column; descriptions and applicability text may wrap without hiding meaning. Hidden views use the native `hidden` state.
 
 ### Accessible evidence rendering
 
+- Implement the view chooser as `<nav aria-label="Dashboard views">` with ordinary buttons, not `role="menu"`, menuitems, or a listbox. The selected destination uses `aria-current="page"`.
+- View selection focuses its heading; `All views` restores focus to the menu choice just left. The skip link follows the currently visible menu/view target, and view/filter changes are announced through the polite live region.
 - Keep every section summary and control keyboard-operable with a minimum 44 px target and visible focus.
 - Give each composition ring and chart an accessible name containing the current numerator, denominator, unit, and scope. Repeat essential values visibly.
 - Keep legends persistent with labels, values, and shares; color alone does not encode cohort, horizon, or status.
@@ -128,13 +135,17 @@ The guide does not repeat current values, interpretations, decision boundaries, 
 
 The Regional footprint topic defines the governed classifications, facet-override calculation, source files, mixed date applicability, and schematic/non-live method limit. It does not repeat current marker/table values or selected-region actions.
 
+The Data Quality & Evidence landing owns the current 52/52, 13/13, 12-source, population-control, status, evidence-limit, and next-action result. Its `quality` guide topic explains the stable definition, formula/calculation, sources, and method limit without duplicating the current result.
+
 Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$0 funded case`, or `not established` in hover-only help.
 
 ## User-facing design rules
 
-- Fit the fully collapsed default view in one 1440 × 900 desktop frame.
-- Use table-like summary rows instead of fixed-height presentation cards.
-- Keep all details collapsed by default and permit only one open section.
+- Fit the complete six-option initial menu in one 1440 × 900 desktop frame.
+- Keep the initial view free of result values, analytical disclosures, charts, warnings, and evidence tables.
+- Give each menu choice only its number, exact title, one-sentence purpose, and a navigation arrow; selected-view applicability appears in the view header.
+- Expose only the selected view. Keep its analytical details collapsed by default and permit only one visible section to open at a time.
+- Keep `Reconciled to supplied controls` beside `Source certification open`; never visualize quality checks as a score, gauge, grade, or performance color.
 - Keep the decision answer, KPI meaning, essential evidence boundary, and chevron visible in every collapsed row.
 - On desktop, use one-line summary rows and full-width detail content. On tablet and mobile, allow summaries and details to stack without clipping.
 - Keep all toggle targets at least 44 px and use direct text; do not depend on color, hover, or icons alone.
@@ -147,17 +158,22 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$
 
 ## Acceptance criteria
 
-- A reviewer can state `design and test—not fund or execute` within ten seconds.
-- A reviewer can scan all six signal/scope/gate summaries without opening a section.
-- No chart, detailed control, warning block, or evidence table is expanded by default.
-- Opening one primary section closes the previously open section.
-- Search expands and focuses the correct section; methodology search opens the Metric guide.
+- First load exposes exactly the six named view choices and no result accordion, chart, KPI, warning, or evidence table.
+- Selecting each choice reveals only its mapped sections or the quality landing; a normal menu selection opens no accordion.
+- Executive Overview makes `design and test—not fund or execute` clear after one navigation action.
+- `All views` preserves filters and toggles; `Reset dashboard` restores all defaults and the initial menu.
+- Exact menu-title search routes to the matching view; metric search routes to the owning view/section; methodology search opens the guide; dimension/account search applies scope without forcing navigation.
+- Applied filters persist across view changes and every selected view states whether dates/dimensions apply.
+- Opening one visible analytical section closes the previously open section.
 - Applying filters updates the collapsed summary and open detail together without auto-opening another section.
+- The quality landing renders 52/52, 13/13, 12 source artifacts, and all six population controls from the governed contract.
+- Quality controls remain unchanged under filters and retain `Source certification open`, the full evidence limit, and the governed next action.
+- Missing, contradictory, or falsely certified quality evidence fails closed; no quality score, grade, completeness claim, or decision approval is shown.
 - `$38.13m` remains a screen; `$0` remains the funded case; mobility remains `not established`.
 - Payment evidence remains deduplicated and limited to matching supplied records.
 - Capacity remains visibly global and closure/capacity figures remain non-fundable.
 - Empty or incomplete scopes show `No matching data` or `—`, never stale portfolio values or false zero percentages.
-- Keyboard navigation supports Enter/Space, arrow keys, Home/End, and Escape.
+- Menu/All views focus, native Tab order, `aria-current`, Enter/Space, accordion arrow keys, Home/End, Escape, and polite announcements remain coherent.
 - Decision chips remain separate evidence signals and never resolve to a composite score.
 - Visibility ring values and source bars reconcile to the selected account population, and action copy follows the delayed methods actually present.
 - The selected liquidity waterfall reconciles to the modeled screen, uses the effective post-floor buffer deduction, and never converts the screen into validated mobility.
@@ -175,24 +191,26 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$
 
 - File: `Project Northstar — Dashboard V1`
 - Page: `Dashboard V2 — Executive View`
-- Closed-state frame: `Project Northstar — Dashboard V2` (`11:3`)
+- Reference frame: `Project Northstar — Dashboard V2` (`11:3`)
 - Canvas: 1440 × 900, with the original Version 1 frame preserved unchanged.
 - Visual QA: 49 text layers use Inter; no zero-size text, overflow, placeholder layers, or missing required evidence language remain.
-- Implementation: the Figma frame remains the palette and typography reference; the browser dashboard extends it with inline progressive disclosure and reference-inspired analytical forms whose labels, interactions, and empty states are governed by this specification.
+- Implementation: the Figma frame remains the palette and typography reference. The browser dashboard adds the six-view menu-first shell, governed quality landing, inline progressive disclosure, and reference-inspired analytical forms described here; the existing Figma frame is not claimed to contain that routing layer.
 
 ## Implemented interaction model
 
 The browser implementation adds only interactions that support a decision or reveal its evidence:
 
-- **Inline progressive disclosure:** seven summary rows expose current evidence in place; one-open-at-a-time behavior keeps the page concise.
+- **Menu-first routing:** six ordinary navigation choices expose only the relevant subset of seven analytical sections or the governed quality landing. A normal selection leaves analytical sections collapsed.
+- **Inline progressive disclosure:** one-open-at-a-time behavior reveals current evidence inside the selected view while keeping other views out of the accessibility tree.
 - **Reference-inspired analytics:** expanded sections add separate decision chips, visibility composition/source exposure, liquidity construction and date sensitivity, payment cohort composition, a regional scope map/table, independent capacity comparison, and row-level closure evidence. Each form explains a supported relationship without implying performance, certainty, or fundable value.
-- **Dashboard search:** expands metric sections, applies explicit dimension/account context, and routes methodology queries to the Metric guide.
+- **Dashboard search:** routes exact menu titles to views, metrics to their owning view/section, explicit dimensions/accounts to filter state, and methodology queries to the Metric guide.
 - **Governed filters:** applies an inclusive date range plus single-select currency, region, entity, and bank. Visibility and payments use the selected period; liquidity uses the period end date; closures use account dimensions; capacity remains global. Regional comparison rows explicitly override only region while retaining other filters and their measure-specific date rules.
+- **Governed quality landing:** renders the exact internal controls, population counts, source count, open-certification status, evidence limit, and next action; adversarial or incomplete quality contracts fail closed.
 - **Liquidity horizon:** switches governed 7-day and 14-day evidence inside the open Liquidity section. Validated mobility remains `not established`, and the funded case remains `$0`.
 - **Payment measure:** switches records, exceptions, and repair minutes inside the open Payment friction section while preserving the deduplicated cohort union.
 - **Regional scope lens:** applies a governed NA, EMEA, or APAC filter from either the schematic map or exact table while preserving all other control state. Each comparison row overrides region only, so alternate regional scopes remain inspectable.
 - **Metric guide:** provides definition, formula, source, and method-limit reference without duplicating current evidence or actions.
-- **Reset:** clears search and filters, restores the full-period/14-day/payment-record baseline, and collapses all sections.
-- **Accessible navigation:** native disclosure behavior handles Enter/Space; section arrow keys, Home/End, and Escape provide fast movement and collapse with focus return. Regional markers add arrow/Home/End focus movement, pressed/disabled state, live announcements, equivalent table actions, and post-filter focus restoration.
+- **All views and reset:** All views navigates without changing scope or analytical toggles; Reset clears search/filters, restores full-period/14-day/Records defaults, closes transient UI, and returns to the menu.
+- **Accessible navigation:** menu buttons use native semantics and `aria-current`; selection and Back restore predictable focus. Disclosures retain Enter/Space, arrow, Home/End, and Escape behavior. Regional markers add pressed/disabled state, live announcements, equivalent table actions, and post-filter focus restoration.
 
 These interactions make the artifact behave like an analytical application rather than a static slide. Free-form thresholds, recommendation scores, funding controls, and execution actions remain intentionally excluded.
