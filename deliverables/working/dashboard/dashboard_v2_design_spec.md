@@ -16,7 +16,9 @@ Turn the evidence-complete Version 1 reference into a user-facing executive dash
 - `Treasury decision dashboard`
 - `Week 1–2 diagnostic snapshot · 1 Jan–30 Jun 2026 · supplied data, not live operations`
 - Status: `Reconciled to supplied controls · source certification open`
-- Control: `Evidence & definitions`
+- Search: `Search metrics, entities, banks…`
+- Control: `Filters` with date, currency, region, entity, and bank
+- Control: `Metric guide`
 
 ### Decision banner
 
@@ -54,16 +56,16 @@ Prioritize delayed reporting sources and payment root causes; certify mobility b
 - `Capacity not fundable · 102.60 h process estimate is 84% above the 55.78 h payment-file estimate`
 - `Closure value not fundable · 4 validation candidates · $7.8k estimated fees · no approved closures`
 
-## Evidence and definitions drawer
+## Metric guide
 
-The main-screen control opens an accessible right-side drawer. It contains five sections: `What this means`, `Evidence`, `Decision boundary`, `Next action`, and `Definition & source`.
+The main-screen control opens an accessible right-side dialog. It contains five sections: `Definition`, `Calculation`, `Data source`, `Interpretation limit`, and `Next action`.
 
-Move the following detail out of the executive view and into the drawer:
+Move the following detail out of the executive view and into the dialog:
 
-- Full reporting-source breakdown and the 9,955 account-day measures.
-- Liquidity waterfall, 7-day reference, threshold survival table, and excluded buffer inputs.
-- Four mutually exclusive payment cohorts, the 342-record overlap control, and exact exception and repair shares.
-- Process-capacity detail, closure candidate dependencies, formulas, lineage, file names, and test counts.
+- Current selected-account and account-day visibility measures.
+- Liquidity components, selected 7/14-day reference, as-of date, formula, and interpretation limits.
+- Payment-union numerator, matching denominator, selected share, deduplication rule, and overlap boundary.
+- Process-capacity and closure-candidate definitions, formulas, sources, and interpretation limits.
 
 Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, or `$0 validated` in hover-only help.
 
@@ -85,6 +87,10 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, or
 - The 2,839 payment union is understood as deduplicated and limited to 7,600 supplied records.
 - Capacity and closure figures are rejected as funded benefits.
 - Evidence details remain reachable without crowding the closed state.
+- Applying date, currency, region, entity, or bank updates the relevant numerator and denominator together.
+- Invalid and empty scopes retain no stale portfolio metric and never imply a false zero percentage.
+- The Metric guide exposes definitions, formulas, sources, interpretation limits, and next actions for the current scope.
+- Capacity remains labelled as an enterprise-global baseline when account filters are active.
 
 ## Figma build record
 
@@ -99,9 +105,11 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, or
 
 The browser implementation adds only controls that change a decision-relevant interpretation:
 
-- **Liquidity horizon:** switches the governed 7-day and 14-day screening evidence. The screen, buffer, complete-window evidence, threshold table, boundary, and accessible announcement update together. Validated mobility remains `not established`, and the funded case remains `$0`.
+- **Liquidity horizon:** switches the governed 7-day and 14-day screening evidence. The screen, buffer, as-of evidence, boundary, and accessible announcement update together. Validated mobility remains `not established`, and the funded case remains `$0`.
 - **Payment measure:** switches the same four mutually exclusive cohorts between records, exceptions, and repair minutes. The numerator, denominator, unit, cohort bars, union share, and explanation update together; the 342-record overlap remains counted once.
-- **Evidence inspection:** opens a keyboard-accessible right-side drawer to the relevant domain. Reporting-source selection changes only the inspected source evidence and never the global 55-account denominator.
-- **Reset:** restores the 14-day screen, payment-record basis, and all-source visibility state.
+- **Dashboard search:** locates metrics and applies explicit entity, bank, region, currency, or account context without silently hiding cards.
+- **Governed filters:** applies an inclusive date range plus single-select currency, region, entity, and bank. Visibility and payments use the selected period; liquidity uses the period end date; closures use account dimensions; capacity remains visibly global.
+- **Metric guide:** opens a keyboard-accessible right-side dialog to the relevant definition, formula, source, interpretation limit, and next action for the current scope.
+- **Reset:** clears search and filters and restores the full-period, 14-day, payment-record baseline.
 
-These interactions make the artifact analytical rather than slide-like while preserving the concise closed state. Arbitrary date filters, free-form thresholds, recommendation scores, funding controls, and execution actions remain intentionally excluded.
+These interactions make the artifact analytical rather than slide-like while preserving the concise closed state. Free-form thresholds, recommendation scores, funding controls, and execution actions remain intentionally excluded.

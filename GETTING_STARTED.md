@@ -67,4 +67,4 @@ python3 src/build_dashboard_data.py
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open `http://127.0.0.1:8000/dashboard/`. The dashboard supports decision-focused liquidity and payment comparisons plus an evidence drawer; it is a local Week 1–2 diagnostic snapshot, not a live operational system. See `dashboard/README.md` for the interaction, evidence, refresh, and test details.
+Open `http://127.0.0.1:8000/dashboard/`. The dashboard supports metric search, governed date/currency/region/entity/bank filters, decision-focused liquidity and payment comparisons, and a Metric guide with definitions, formulas, and sources. It is a local Week 1–2 diagnostic snapshot, not a live operational system. See `dashboard/README.md` for the interaction, evidence, refresh, and test details.
