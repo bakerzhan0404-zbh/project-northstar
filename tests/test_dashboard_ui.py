@@ -29,6 +29,12 @@ class StructureParser(HTMLParser):
         self.html_attrs = {}
         self.details = []
         self.summaries = []
+        self.inline_details = []
+        self.inline_summaries = []
+        self.detail_topic_stack = []
+        self.ids_by_inline_detail = {}
+        self.figures = []
+        self.canvases = []
         self.summary_depth = 0
         self.ids_in_summaries = set()
 
@@ -39,17 +45,35 @@ class StructureParser(HTMLParser):
             self.html_attrs = values
         if tag == "details":
             self.details.append(values)
+            topic = values.get("data-inline-detail")
+            inherited_topic = self.detail_topic_stack[-1] if self.detail_topic_stack else None
+            self.detail_topic_stack.append(topic or inherited_topic)
+            if topic:
+                self.inline_details.append(values)
+                self.ids_by_inline_detail.setdefault(topic, set())
         if tag == "summary":
             self.summaries.append(values)
+            if "data-detail-summary" in values:
+                self.inline_summaries.append(values)
             self.summary_depth += 1
+        if tag == "figure":
+            self.figures.append(values)
+        if tag == "canvas":
+            self.canvases.append(values)
         if "id" in values:
             self.ids.append(values["id"])
             if self.summary_depth:
                 self.ids_in_summaries.add(values["id"])
+            if self.detail_topic_stack and self.detail_topic_stack[-1]:
+                self.ids_by_inline_detail.setdefault(
+                    self.detail_topic_stack[-1], set()
+                ).add(values["id"])
 
     def handle_endtag(self, tag):
         if tag == "summary":
             self.summary_depth -= 1
+        if tag == "details":
+            self.detail_topic_stack.pop()
 
 
 class DashboardUiTest(unittest.TestCase):
@@ -121,6 +145,21 @@ class DashboardUiTest(unittest.TestCase):
             "liquidity-summary-screen",
             "payment-summary-boundary",
             "closure-summary-boundary",
+            "decision-evidence-chips",
+            "decision-composite-note",
+            "visibility-ring",
+            "visibility-source-bars",
+            "visibility-action-insight",
+            "liquidity-waterfall",
+            "liquidity-trend-canvas",
+            "liquidity-trend-table",
+            "liquidity-trend-table-body",
+            "payment-ring",
+            "payment-cohort-stack",
+            "payment-cohort-legend",
+            "capacity-comparison-bars",
+            "closure-candidate-table",
+            "closure-candidate-table-body",
         }
         self.assertTrue(required_ids.issubset(self.parser.ids))
         self.assertIn('name="viewport"', self.index)
@@ -171,23 +210,23 @@ class DashboardUiTest(unittest.TestCase):
             "capacity",
             "closures",
         }
-        self.assertEqual(len(self.parser.details), 6)
-        self.assertEqual(len(self.parser.summaries), 6)
+        self.assertEqual(len(self.parser.inline_details), 6)
+        self.assertEqual(len(self.parser.inline_summaries), 6)
         self.assertEqual(
-            {details.get("data-inline-detail") for details in self.parser.details},
+            {details.get("data-inline-detail") for details in self.parser.inline_details},
             expected_topics,
         )
         self.assertTrue(
-            all(details.get("name") == "dashboard-detail" for details in self.parser.details)
+            all(details.get("name") == "dashboard-detail" for details in self.parser.inline_details)
         )
-        self.assertTrue(all("open" not in details for details in self.parser.details))
+        self.assertTrue(all("open" not in details for details in self.parser.inline_details))
         self.assertEqual(
-            {summary.get("data-detail-summary") for summary in self.parser.summaries},
+            {summary.get("data-detail-summary") for summary in self.parser.inline_summaries},
             expected_topics,
         )
-        self.assertTrue(all("role" not in summary for summary in self.parser.summaries))
+        self.assertTrue(all("role" not in summary for summary in self.parser.inline_summaries))
         self.assertTrue(
-            all("aria-expanded" not in summary for summary in self.parser.summaries)
+            all("aria-expanded" not in summary for summary in self.parser.inline_summaries)
         )
         visible_qualifier_ids = {
             "decision-title",
@@ -238,6 +277,61 @@ class DashboardUiTest(unittest.TestCase):
         self.assertIn("FilterModel.validateState", self.script)
         self.assertIn("FilterModel.summarize", self.script)
 
+    def test_reference_visuals_live_only_in_expanded_sections(self) -> None:
+        expected_hooks = {
+            "decision": {
+                "decision-evidence-chips",
+                "decision-visibility-chip",
+                "decision-liquidity-chip",
+                "decision-payments-chip",
+                "decision-composite-note",
+            },
+            "visibility": {
+                "visibility-ring",
+                "visibility-ring-value",
+                "visibility-source-bars",
+                "visibility-source-empty",
+            },
+            "liquidity": {
+                "liquidity-waterfall",
+                "liquidity-waterfall-empty",
+                "liquidity-trend-canvas",
+                "liquidity-trend-table",
+                "liquidity-trend-table-body",
+            },
+            "payments": {
+                "payment-ring",
+                "payment-ring-value",
+                "payment-cohort-stack",
+                "payment-cohort-legend",
+                "payment-cohort-empty",
+            },
+            "capacity": {"capacity-comparison-bars"},
+            "closures": {
+                "closure-candidate-table",
+                "closure-candidate-table-body",
+                "closure-candidate-empty",
+            },
+        }
+        for topic, hooks in expected_hooks.items():
+            self.assertTrue(hooks.issubset(self.parser.ids_by_inline_detail[topic]))
+            self.assertTrue(hooks.isdisjoint(self.parser.ids_in_summaries))
+
+        self.assertEqual(len(self.parser.canvases), 1)
+        canvas = self.parser.canvases[0]
+        self.assertEqual(canvas.get("id"), "liquidity-trend-canvas")
+        self.assertEqual(canvas.get("role"), "img")
+        self.assertTrue(canvas.get("aria-label"))
+        self.assertIn("View trend data table", self.index)
+        self.assertIn("<caption>", self.index)
+        self.assertEqual(self.index.count("Definition, formula &amp; source"), 6)
+        self.assertIn("Separate signals—not a composite score.", self.index)
+        self.assertIn(".analytics-card", self.styles)
+        self.assertIn("background: var(--analytics);", self.styles)
+        self.assertIn(".composition-ring", self.styles)
+        self.assertIn(".cohort-stack", self.styles)
+        self.assertIn(".waterfall-list", self.styles)
+
     def test_disclosure_keyboard_search_reset_and_failure_behaviors_are_explicit(self) -> None:
         required = (
             'detail.addEventListener("toggle"',
@@ -256,8 +350,52 @@ class DashboardUiTest(unittest.TestCase):
         )
         for token in required:
             self.assertIn(token, self.script)
+        self.assertIn("const nestedDetailOpen", self.script)
+        self.assertIn('getAll(".trend-data-disclosure")', self.script)
+        self.assertIn(".trend-data-disclosure > summary:focus-visible", self.styles)
         self.assertNotIn('summary.setAttribute("aria-expanded"', self.script)
         self.assertNotIn('summary.addEventListener("click"', self.script)
+
+    def test_visual_renderers_update_with_existing_state_and_fail_closed(self) -> None:
+        required = (
+            "renderDecisionEvidence();",
+            "renderVisibilityAnalytics(visibility, hasData);",
+            "renderLiquidityWaterfall(liquidity);",
+            "renderLiquidityTrend(liquidity);",
+            "renderPaymentAnalytics({ config, unionValue, totalValue, share });",
+            "renderCapacityComparison(capacity);",
+            "renderClosureCandidateTable(closures);",
+            "currentSummary.visibility",
+            "visibility.by_method.forEach",
+            "currentSummary.liquidity.trend",
+            "payments.cohort_order",
+            "closures.candidate_accounts",
+            "clearVisualizationOutputs();",
+            "replaceChildren()",
+            'detail.dataset.inlineDetail === "liquidity"',
+        )
+        for token in required:
+            self.assertIn(token, self.script)
+
+        self.assertIn("drawing = false", self.script)
+        self.assertIn("if (!isFiniteNumber(value))", self.script)
+        self.assertIn("context.setLineDash(days === 14 ? [6, 4] : [])", self.script)
+        self.assertIn("border-top-style: dashed", self.styles)
+        self.assertNotIn("context.fill()", self.script)
+        self.assertNotIn("target", self.index.lower())
+        self.assertIn(
+            "Dormant + legacy purpose + zero supplied payment records",
+            self.script,
+        )
+        self.assertIn("Validation required · not approved", self.script)
+        self.assertIn("Shared scale · never additive", self.index)
+        self.assertIn("visibilityActionText(visibility, hasData)", self.script)
+        self.assertIn("No visibility action is derived for an empty scope.", self.script)
+        self.assertIn("No delayed reporting method is evidenced in the selected scope", self.script)
+        self.assertIn("Priority-union share and cohort composition", self.index)
+        self.assertIn("Share of all matching ${config.label}", self.script)
+        self.assertIn("supplied payment-file monthly average", self.index)
+        self.assertIn("Estimated annual fee (USD)", self.index)
 
     def test_filters_fail_closed_and_empty_scopes_do_not_fake_rates(self) -> None:
         required = (
@@ -292,6 +430,90 @@ process.stdout.write(JSON.stringify(values.map(formatUsdCompact)));
         formatted = json.loads(completed.stdout)
         self.assertEqual(formatted, ["$1.6k", "$944", "−$944", "$0.5", "−$0.5", "$0", "$38.13m"])
         self.assertNotIn("$0.00m", formatted)
+
+    def test_visual_runtime_helpers_use_filtered_summaries_and_preserve_nulls(self) -> None:
+        node_script = """
+const fs = require('node:fs');
+const model = require('./dashboard/filter_model.js');
+const visual = require('./dashboard/app.js');
+const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const defaults = model.createDefaultState(data);
+const base = model.summarize(data, defaults);
+const filtered = model.summarize(data, {
+  ...defaults,
+  region: 'EMEA',
+  currency: 'EUR',
+  bank: 'Pacific Crown',
+});
+const zeroPayments = model.summarize(data, {
+  ...defaults,
+  entity: 'E006',
+  bank: 'Pacific Crown',
+});
+const empty = model.summarize(data, {
+  ...defaults,
+  region: 'EMEA',
+  currency: 'JPY',
+});
+const jan7 = model.summarize(data, {
+  ...defaults,
+  dateFrom: '2026-01-07',
+  dateTo: '2026-01-07',
+});
+const paymentRows = visual.paymentCohortVisualRows(base.payments, 'records');
+process.stdout.write(JSON.stringify({
+  visibilityOrder: filtered.visibility.by_method.map(row => row.method),
+  visibilityAccounts: filtered.visibility.by_method.map(row => row.accounts_total),
+  paymentValues: paymentRows.map(row => row.value),
+  paymentShareTotal: paymentRows.reduce((sum, row) => sum + row.contribution, 0),
+  zeroPaymentRows: visual.paymentCohortVisualRows(zeroPayments.payments, 'records').length,
+  waterfallGeometry: visual.waterfallBarGeometry(filtered.liquidity.waterfalls['14'].steps),
+  closureIds: filtered.closures.candidate_accounts.map(row => row.account_id),
+  jan7Seven: visual.liquidityTrendValue(jan7.liquidity.trend[0], 7),
+  jan7Fourteen: visual.liquidityTrendValue(jan7.liquidity.trend[0], 14),
+  trendStart: filtered.liquidity.trend[0].date,
+  trendEnd: filtered.liquidity.trend.at(-1).date,
+  baseVisibilityAction: visual.visibilityActionText(base.visibility, true),
+  filteredVisibilityAction: visual.visibilityActionText(filtered.visibility, true),
+  emptyVisibilityAction: visual.visibilityActionText(empty.visibility, false),
+}));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        result = json.loads(completed.stdout)
+        self.assertEqual(
+            result["visibilityOrder"],
+            ["API", "Host-to-host", "Portal", "Spreadsheet"],
+        )
+        self.assertEqual(result["visibilityAccounts"], [1, 1, 0, 0])
+        self.assertEqual(result["paymentValues"], [2053, 342, 444, 4761])
+        self.assertAlmostEqual(result["paymentShareTotal"], 100, delta=0.02)
+        self.assertEqual(result["zeroPaymentRows"], 0)
+        self.assertEqual(len(result["waterfallGeometry"]), 6)
+        self.assertTrue(
+            all(
+                geometry is not None
+                and 0 <= geometry["bottom"] <= 100
+                and 0 <= geometry["height"] <= 100
+                for geometry in result["waterfallGeometry"]
+            )
+        )
+        self.assertEqual(result["closureIds"], ["AC0024"])
+        self.assertIsNotNone(result["jan7Seven"])
+        self.assertIsNone(result["jan7Fourteen"])
+        self.assertEqual(result["trendStart"], "2026-01-01")
+        self.assertEqual(result["trendEnd"], "2026-06-30")
+        self.assertIn("Portal and Spreadsheet", result["baseVisibilityAction"])
+        self.assertIn("No delayed reporting method is evidenced", result["filteredVisibilityAction"])
+        self.assertEqual(
+            result["emptyVisibilityAction"],
+            "No visibility action is derived for an empty scope.",
+        )
 
     def test_search_uses_model_index_and_complete_keyboard_controls(self) -> None:
         required = (
@@ -393,8 +615,15 @@ const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8
 const defaults = model.createDefaultState(data);
 const fullPeriod = model.summarize(data, defaults);
 const sameEndSingleDay = model.summarize(data, { ...defaults, dateFrom: defaults.dateTo });
+const { trend: fullTrend, ...fullSnapshot } = fullPeriod.liquidity;
+const { trend: singleDayTrend, ...singleDaySnapshot } = sameEndSingleDay.liquidity;
 process.stdout.write(JSON.stringify({
-  sameLiquidity: JSON.stringify(fullPeriod.liquidity) === JSON.stringify(sameEndSingleDay.liquidity),
+  sameSnapshot: JSON.stringify(fullSnapshot) === JSON.stringify(singleDaySnapshot),
+  fullTrendStart: fullTrend[0].date,
+  singleDayTrendStart: singleDayTrend[0].date,
+  singleDayTrendEnd: singleDayTrend.at(-1).date,
+  fullTrendLength: fullTrend.length,
+  singleDayTrendLength: singleDayTrend.length,
   fullPayments: fullPeriod.payments.overall.records,
   singleDayPayments: sameEndSingleDay.payments.overall.records,
 }));
@@ -407,7 +636,12 @@ process.stdout.write(JSON.stringify({
             text=True,
         )
         result = json.loads(completed.stdout)
-        self.assertTrue(result["sameLiquidity"])
+        self.assertTrue(result["sameSnapshot"])
+        self.assertEqual(result["fullTrendStart"], "2026-01-01")
+        self.assertEqual(result["singleDayTrendStart"], "2026-06-30")
+        self.assertEqual(result["singleDayTrendEnd"], "2026-06-30")
+        self.assertEqual(result["fullTrendLength"], 181)
+        self.assertEqual(result["singleDayTrendLength"], 1)
         self.assertNotEqual(result["fullPayments"], result["singleDayPayments"])
 
     def test_claims_keep_evidence_boundaries_visible(self) -> None:

@@ -12,19 +12,25 @@ const PAYMENT_MEASURES = Object.freeze({
   records: {
     valueKey: "records",
     shareKey: "record_share_pct",
+    contributionKey: "record_contribution_pct",
     label: "records",
+    displayLabel: "Records",
     headline: "of matching records in the priority union",
   },
   exceptions: {
     valueKey: "exceptions",
     shareKey: "exception_share_pct",
+    contributionKey: "exception_contribution_pct",
     label: "exceptions",
+    displayLabel: "Exceptions",
     headline: "of matching exceptions in the priority union",
   },
   repair_minutes: {
     valueKey: "repair_minutes",
     shareKey: "repair_share_pct",
+    contributionKey: "repair_contribution_pct",
     label: "repair minutes",
+    displayLabel: "Repair time",
     headline: "of matching repair effort in the priority union",
   },
 });
@@ -40,6 +46,25 @@ const INLINE_GUIDE_TOPIC = Object.freeze({
   closures: "gates",
 });
 const SEARCH_RESULT_LIMIT = 8;
+const CLOSURE_CANDIDATE_RULE = "Dormant + legacy purpose + zero supplied payment records";
+const VISUAL_COLORS = Object.freeze({
+  purple: "#8474f5",
+  teal: "#35b9ad",
+  blue: "#6ca6e8",
+  orange: "#ef8d61",
+});
+const COHORT_COLORS = Object.freeze([
+  VISUAL_COLORS.purple,
+  VISUAL_COLORS.teal,
+  VISUAL_COLORS.blue,
+  VISUAL_COLORS.orange,
+]);
+const METHOD_COLORS = Object.freeze([
+  VISUAL_COLORS.blue,
+  VISUAL_COLORS.teal,
+  VISUAL_COLORS.purple,
+  VISUAL_COLORS.orange,
+]);
 
 const state = { ...DEFAULT_VIEW };
 let dashboardData = null;
@@ -53,6 +78,8 @@ let searchResults = [];
 let activeSearchIndex = -1;
 let lastDrawerOpener = null;
 let lastFilterOpener = null;
+let trendResizeObserver = null;
+let trendAnimationFrame = null;
 
 const get = (selector, root = document) => root.querySelector(selector);
 const getAll = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -85,6 +112,11 @@ function formatPercent(value) {
 function safePercentage(numerator, denominator) {
   if (!isFiniteNumber(numerator) || !isFiniteNumber(denominator) || denominator === 0) return null;
   return Math.round((numerator / denominator) * 10000) / 100;
+}
+
+function clampedPercentage(value) {
+  if (!isFiniteNumber(value)) return null;
+  return Math.min(100, Math.max(0, value));
 }
 
 function formatUsdCompact(value) {
@@ -182,6 +214,7 @@ function showDataFailure() {
   document.body.classList.add("data-unavailable");
   get("#data-error").hidden = false;
   setDataControlsDisabled(true);
+  clearVisualizationOutputs();
   closeSearch();
   closeFilterPanel({ restoreFocus: false });
   setText("#dashboard-scope", "Week 1–2 diagnostic snapshot · supplied data unavailable");
@@ -275,6 +308,81 @@ function openInlineDetail(topic, { focusSummary = true } = {}) {
   return true;
 }
 
+function setCompositionRing(ringSelector, valueSelector, share, valueLabel, ariaLabel) {
+  const ring = get(ringSelector);
+  const boundedShare = clampedPercentage(share);
+  if (!ring) return;
+  ring.classList.toggle("is-empty", boundedShare === null);
+  ring.style.setProperty("--ring-share", `${boundedShare ?? 0}%`);
+  ring.setAttribute("aria-label", ariaLabel);
+  setText(valueSelector, boundedShare === null ? "—" : valueLabel);
+}
+
+function visualTrack(fillClass, width, colorProperty, color) {
+  const track = make("span", fillClass.includes("capacity") ? "capacity-bar-track" : "source-bar-track");
+  track.setAttribute("aria-hidden", "true");
+  const fill = make("span", fillClass);
+  fill.style.setProperty("--bar-width", `${clampedPercentage(width) ?? 0}%`);
+  if (colorProperty && color) fill.style.setProperty(colorProperty, color);
+  track.append(fill);
+  return track;
+}
+
+function renderDecisionEvidence() {
+  const visibility = dashboardData.visibility;
+  const payments = dashboardData.payments;
+  const paymentShare = safePercentage(payments.priority_union.records, payments.overall.records);
+  setText("#decision-visibility-chip", `${formatNumber(visibility.delayed_accounts)} / ${formatNumber(visibility.accounts_total)} accounts delayed`);
+  setText("#decision-liquidity-chip", `${dashboardData.liquidity.funded_case.display} funded case · mobility not established`);
+  setText("#decision-payments-chip", `${formatPercent(paymentShare)} of supplied records in the priority union`);
+  setText("#decision-composite-note", "Separate signals—not a composite score.");
+}
+
+function renderVisibilityAnalytics(visibility, hasData) {
+  const delayedShare = hasData ? visibility.delayed_account_share_pct : null;
+  setCompositionRing(
+    "#visibility-ring",
+    "#visibility-ring-value",
+    delayedShare,
+    formatPercent(delayedShare),
+    hasData
+      ? `${plural(visibility.delayed_accounts, "account")} delayed and ${plural(visibility.same_day_accounts, "account")} same-day in the selected scope.`
+      : "No matching selected-account visibility composition.",
+  );
+
+  const list = get("#visibility-source-bars");
+  const empty = get("#visibility-source-empty");
+  list.replaceChildren();
+  list.hidden = !hasData;
+  empty.hidden = hasData;
+  if (!hasData) return;
+
+  visibility.by_method.forEach((method, index) => {
+    const row = make("li", "source-bar-row");
+    const copy = make("span", "source-bar-copy");
+    const delayText = method.accounts_total === 0
+      ? "No selected accounts"
+      : `${plural(method.delayed_accounts, "delayed account")} · max ${formatNumber(method.maximum_delay_days)} calendar ${method.maximum_delay_days === 1 ? "day" : "days"}`;
+    copy.append(make("strong", "", method.method), make("span", "", delayText));
+    const track = visualTrack("source-bar-fill", method.account_share_pct, "--bar-color", METHOD_COLORS[index % METHOD_COLORS.length]);
+    const value = make("span", "source-bar-value", `${formatNumber(method.accounts_total)} · ${formatPercent(method.account_share_pct)}`);
+    row.append(copy, track, value);
+    list.append(row);
+  });
+}
+
+function visibilityActionText(visibility, hasData) {
+  if (!hasData) return "No visibility action is derived for an empty scope.";
+  const delayedMethods = visibility.by_method
+    .filter((method) => method.delayed_accounts > 0)
+    .map((method) => method.method);
+  if (delayedMethods.length === 0) {
+    return "No delayed reporting method is evidenced in the selected scope; validate timestamps before changing the pilot population.";
+  }
+  const methods = new Intl.ListFormat("en-US", { style: "long", type: "conjunction" }).format(delayedMethods);
+  return `Prioritize ${methods} reporting exposure in the selected scope; validate timestamps, cutoffs, and ownership.`;
+}
+
 function renderHeader() {
   const scopeState = currentSummary.scope.has_matches
     ? plural(currentSummary.scope.account_count, "account")
@@ -286,6 +394,7 @@ function renderHeader() {
   setText("#data-status", "Reconciled to supplied controls · source certification open");
   setText("#decision-title", dashboardData.decision.headline);
   setText("#decision-support", dashboardData.decision.next_step);
+  renderDecisionEvidence();
   renderInlineDetail("decision", {
     scope: `Portfolio-wide decision; filters do not change it. Diagnostic scope: ${currentScopeText()}`,
     evidence: dashboardData.definitions.overview.meaning,
@@ -333,27 +442,24 @@ function renderVisibility() {
     setText("#visibility-kpi", "No matching data");
     setText("#same-day-label", "—");
     setText("#delayed-label", "—");
-    get("#same-day-segment").style.width = "0%";
-    get("#delayed-segment").style.width = "0%";
     setText("#visibility-interpretation", "No account-day evidence matches the selected scope.");
   } else {
-    const sameDayShare = (visibility.same_day_accounts / visibility.accounts_total) * 100;
-    const delayedShare = 100 - sameDayShare;
     setText("#visibility-kpi", `${visibility.delayed_accounts} / ${visibility.accounts_total}`);
     setText("#same-day-label", `${visibility.same_day_accounts} same-day`);
     setText("#delayed-label", `${visibility.delayed_accounts} delayed`);
-    get("#same-day-segment").style.width = `${sameDayShare}%`;
-    get("#delayed-segment").style.width = `${delayedShare}%`;
     setText(
       "#visibility-interpretation",
       `${plural(visibility.delayed_accounts, "selected account")} show at least one calendar-date reporting delay.`,
     );
   }
+  renderVisibilityAnalytics(visibility, hasData);
+  const selectedAction = visibilityActionText(visibility, hasData);
+  setText("#visibility-action-insight", selectedAction);
   setText("#visibility-summary-boundary", "Calendar-date proxy · not start-of-day or elapsed-24-hour visibility");
   setText("#visibility-boundary", "Reporting-date proxy—not start-of-day or elapsed-24-hour performance.");
   renderInlineDetail("visibility", {
     scope: currentScopeText(),
-    nextAction: dashboardData.definitions.visibility.next_action,
+    nextAction: selectedAction,
   });
 }
 
@@ -364,6 +470,235 @@ function liquidityScenario(days) {
 function liquidityScenarioAvailable(days) {
   const scenario = liquidityScenario(days);
   return Boolean(currentSummary.scope.has_matches && scenario && isFiniteNumber(scenario.screen_usd));
+}
+
+function waterfallBarGeometry(steps) {
+  const bounds = [0];
+  const spans = steps.map((step) => {
+    if (!isFiniteNumber(step.total_usd)) return null;
+    if (step.role === "deduction" && isFiniteNumber(step.delta_usd)) {
+      const before = step.total_usd - step.delta_usd;
+      const low = Math.min(before, step.total_usd);
+      const high = Math.max(before, step.total_usd);
+      bounds.push(low, high);
+      return { low, high };
+    }
+    const low = Math.min(0, step.total_usd);
+    const high = Math.max(0, step.total_usd);
+    bounds.push(low, high);
+    return { low, high };
+  });
+  const minimum = Math.min(...bounds);
+  const maximum = Math.max(...bounds);
+  const range = maximum - minimum || 1;
+  return spans.map((span) => span && ({
+    bottom: ((span.low - minimum) / range) * 100,
+    height: ((span.high - span.low) / range) * 100,
+  }));
+}
+
+function renderLiquidityWaterfall(liquidity) {
+  const waterfall = liquidity.waterfalls[String(state.liquidityDays)];
+  const list = get("#liquidity-waterfall");
+  const empty = get("#liquidity-waterfall-empty");
+  list.replaceChildren();
+  setText("#liquidity-analytics-period", `${state.liquidityDays}-day screen · as of ${formatIsoDate(liquidity.as_of_date)}`);
+
+  const available = Boolean(currentSummary.scope.has_matches && waterfall && waterfall.complete);
+  list.hidden = !available;
+  empty.hidden = available;
+  if (!available) {
+    setText("#liquidity-waterfall-note", `No complete ${state.liquidityDays}-day account panel is available; no waterfall is drawn.`);
+    return;
+  }
+
+  const geometry = waterfallBarGeometry(waterfall.steps);
+  waterfall.steps.forEach((step, index) => {
+    const item = make("li", "waterfall-step");
+    item.dataset.role = step.role;
+    const plot = make("span", "waterfall-plot");
+    plot.setAttribute("aria-hidden", "true");
+    const bar = make("span", "waterfall-bar");
+    bar.style.setProperty("--bar-bottom", `${geometry[index].bottom}%`);
+    bar.style.setProperty("--bar-height", `${geometry[index].height}%`);
+    plot.append(bar);
+    const label = make("span", "waterfall-label", step.label);
+    const shownValue = step.role === "deduction" ? step.delta_usd : step.total_usd;
+    const value = make("strong", "waterfall-value", formatUsdCompact(shownValue));
+    item.append(plot, label, value);
+    list.append(item);
+  });
+  setText(
+    "#liquidity-waterfall-note",
+    `Raw ${state.liquidityDays}-day buffer ${formatUsdCompact(waterfall.raw_buffer_usd)} · effective deduction after account-level floors ${formatUsdCompact(waterfall.effective_buffer_deduction_usd)} · unapplied because of floors ${formatUsdCompact(waterfall.unapplied_buffer_due_to_floor_usd)}.`,
+  );
+}
+
+function liquidityTrendValue(point, days) {
+  const scenario = point && point.scenarios && point.scenarios[String(days)];
+  return scenario && scenario.complete && isFiniteNumber(scenario.screen_usd) ? scenario.screen_usd : null;
+}
+
+function lastFiniteTrendValue(trend, days) {
+  for (let index = trend.length - 1; index >= 0; index -= 1) {
+    const value = liquidityTrendValue(trend[index], days);
+    if (isFiniteNumber(value)) return value;
+  }
+  return null;
+}
+
+function renderLiquidityTrendTable(trend) {
+  const body = get("#liquidity-trend-table-body");
+  body.replaceChildren();
+  trend.forEach((point) => {
+    const row = make("tr");
+    const date = make("th", "", formatIsoDate(point.date));
+    date.scope = "row";
+    const seven = make("td", "numeric", formatUsdCompact(liquidityTrendValue(point, 7)));
+    const fourteen = make("td", "numeric", formatUsdCompact(liquidityTrendValue(point, 14)));
+    row.append(date, seven, fourteen);
+    body.append(row);
+  });
+}
+
+function canvasThemeColor(name, fallback) {
+  if (typeof window === "undefined") return fallback;
+  const value = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+function drawLiquidityTrendCanvas() {
+  trendAnimationFrame = null;
+  const canvas = get("#liquidity-trend-canvas");
+  const frame = get("#liquidity-trend-frame");
+  if (!canvas || !frame || !currentSummary) return;
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  const trend = currentSummary.liquidity.trend;
+  const cssWidth = Math.max(280, Math.floor(frame.getBoundingClientRect().width - 16) || 720);
+  const cssHeight = Math.max(160, Math.floor(canvas.getBoundingClientRect().height) || 220);
+  const ratio = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+  canvas.width = Math.round(cssWidth * ratio);
+  canvas.height = Math.round(cssHeight * ratio);
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  context.clearRect(0, 0, cssWidth, cssHeight);
+
+  const series = [
+    { days: 7, color: canvasThemeColor("--purple", VISUAL_COLORS.purple) },
+    { days: 14, color: canvasThemeColor("--aqua", VISUAL_COLORS.teal) },
+  ];
+  const values = series.flatMap(({ days }) => trend.map((point) => liquidityTrendValue(point, days))).filter(isFiniteNumber);
+  const foreground = "#f7fbff";
+  const muted = canvasThemeColor("--analytics-muted", "#b8c8d8");
+  const grid = canvasThemeColor("--analytics-border", "#2b435d");
+  context.font = "11px Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+
+  if (trend.length === 0 || values.length === 0) {
+    context.fillStyle = muted;
+    context.textAlign = "center";
+    context.fillText("No complete liquidity trend is available for this scope.", cssWidth / 2, cssHeight / 2);
+    return;
+  }
+
+  const margin = { top: 16, right: 14, bottom: 28, left: 58 };
+  const plotWidth = Math.max(1, cssWidth - margin.left - margin.right);
+  const plotHeight = Math.max(1, cssHeight - margin.top - margin.bottom);
+  let minimum = Math.min(...values);
+  let maximum = Math.max(...values);
+  const valueSpan = maximum - minimum;
+  const padding = valueSpan === 0 ? Math.max(Math.abs(maximum) * 0.08, 1) : valueSpan * 0.08;
+  minimum = minimum >= 0 ? Math.max(0, minimum - padding) : minimum - padding;
+  maximum += padding;
+  if (maximum === minimum) maximum = minimum + 1;
+  const x = (index) => margin.left + (trend.length === 1 ? plotWidth / 2 : (index / (trend.length - 1)) * plotWidth);
+  const y = (value) => margin.top + ((maximum - value) / (maximum - minimum)) * plotHeight;
+
+  context.strokeStyle = grid;
+  context.fillStyle = muted;
+  context.lineWidth = 1;
+  context.textAlign = "right";
+  context.textBaseline = "middle";
+  for (let tick = 0; tick <= 3; tick += 1) {
+    const value = minimum + ((maximum - minimum) * tick) / 3;
+    const position = y(value);
+    context.beginPath();
+    context.moveTo(margin.left, position);
+    context.lineTo(cssWidth - margin.right, position);
+    context.stroke();
+    context.fillText(formatUsdCompact(value), margin.left - 8, position);
+  }
+
+  context.textBaseline = "alphabetic";
+  context.textAlign = "left";
+  context.fillText(formatIsoDate(trend[0].date, { includeYear: false }), margin.left, cssHeight - 7);
+  context.textAlign = "right";
+  context.fillText(formatIsoDate(trend[trend.length - 1].date), cssWidth - margin.right, cssHeight - 7);
+
+  series.forEach(({ days, color }) => {
+    context.beginPath();
+    context.strokeStyle = color;
+    context.lineWidth = 2.25;
+    context.lineJoin = "round";
+    context.lineCap = "round";
+    context.setLineDash(days === 14 ? [6, 4] : []);
+    let drawing = false;
+    let lastPoint = null;
+    trend.forEach((point, index) => {
+      const value = liquidityTrendValue(point, days);
+      if (!isFiniteNumber(value)) {
+        drawing = false;
+        return;
+      }
+      const pointX = x(index);
+      const pointY = y(value);
+      if (!drawing) context.moveTo(pointX, pointY);
+      else context.lineTo(pointX, pointY);
+      drawing = true;
+      lastPoint = { x: pointX, y: pointY };
+    });
+    context.stroke();
+    if (lastPoint) {
+      context.beginPath();
+      context.arc(lastPoint.x, lastPoint.y, 3.5, 0, Math.PI * 2);
+      context.strokeStyle = color;
+      context.lineWidth = 2;
+      context.stroke();
+    }
+  });
+  context.setLineDash([]);
+  context.fillStyle = foreground;
+}
+
+function scheduleLiquidityTrendDraw() {
+  if (typeof window === "undefined" || trendAnimationFrame !== null) return;
+  trendAnimationFrame = window.requestAnimationFrame(drawLiquidityTrendCanvas);
+}
+
+function setupLiquidityTrendResizeHandling() {
+  const frame = get("#liquidity-trend-frame");
+  if (typeof window.ResizeObserver === "function" && frame) {
+    trendResizeObserver = new window.ResizeObserver(() => scheduleLiquidityTrendDraw());
+    trendResizeObserver.observe(frame);
+  }
+  window.addEventListener("resize", scheduleLiquidityTrendDraw);
+}
+
+function renderLiquidityTrend(liquidity) {
+  const trend = Array.isArray(liquidity.trend) ? liquidity.trend : [];
+  const sevenEndpoint = lastFiniteTrendValue(trend, 7);
+  const fourteenEndpoint = lastFiniteTrendValue(trend, 14);
+  setText("#trend-7-endpoint", formatUsdCompact(sevenEndpoint));
+  setText("#trend-14-endpoint", formatUsdCompact(fourteenEndpoint));
+  renderLiquidityTrendTable(trend);
+  const canvas = get("#liquidity-trend-canvas");
+  const start = trend.length ? formatIsoDate(trend[0].date) : "the selected start";
+  const end = trend.length ? formatIsoDate(trend[trend.length - 1].date) : "the selected end";
+  canvas.setAttribute(
+    "aria-label",
+    `Unfilled 7-day and 14-day modeled screen lines from ${start} to ${end}. Current endpoints: 7-day ${formatUsdCompact(sevenEndpoint)}; 14-day ${formatUsdCompact(fourteenEndpoint)}. Missing complete windows are shown as gaps.`,
+  );
+  scheduleLiquidityTrendDraw();
 }
 
 function renderLiquidity({ shouldAnnounce = false } = {}) {
@@ -405,6 +740,8 @@ function renderLiquidity({ shouldAnnounce = false } = {}) {
   getAll('input[name="liquidity-days"]').forEach((input) => {
     input.checked = Number(input.value) === state.liquidityDays;
   });
+  renderLiquidityWaterfall(liquidity);
+  renderLiquidityTrend(liquidity);
   renderInlineDetail("liquidity", {
     scope: `As of ${formatIsoDate(liquidity.as_of_date)} · trailing ${state.liquidityDays} calendar days · From date does not constrain this screen · ${dimensionFilterContext(appliedFilters)} · ${plural(currentSummary.scope.account_count, "account")}`,
     nextAction: dashboardData.definitions.liquidity.next_action,
@@ -434,6 +771,77 @@ function paymentMeasureData() {
   };
 }
 
+function paymentCohortVisualRows(payments, measureKey) {
+  const config = PAYMENT_MEASURES[measureKey];
+  if (!config || !payments || !Array.isArray(payments.cohort_order)) return [];
+  const totalValue = payments.overall[config.valueKey];
+  if (!isFiniteNumber(totalValue) || totalValue <= 0) return [];
+  return payments.cohort_order.map((label, index) => {
+    const cohort = payments.cohorts[label];
+    const value = cohort[config.valueKey];
+    const suppliedContribution = cohort[config.contributionKey];
+    const contribution = isFiniteNumber(suppliedContribution)
+      ? suppliedContribution
+      : safePercentage(value, totalValue);
+    return {
+      label,
+      value,
+      contribution,
+      color: COHORT_COLORS[index % COHORT_COLORS.length],
+    };
+  });
+}
+
+function renderPaymentAnalytics({ config, unionValue, totalValue, share }) {
+  const hasComparableMeasure = totalValue > 0 && isFiniteNumber(share);
+  setText("#payment-visual-measure", config.displayLabel);
+  setText("#payment-stack-title", `Share of all matching ${config.label}`);
+  setCompositionRing(
+    "#payment-ring",
+    "#payment-ring-value",
+    hasComparableMeasure ? share : null,
+    formatPercent(share),
+    hasComparableMeasure
+      ? `The priority union contains ${formatNumber(unionValue)} of ${formatNumber(totalValue)} ${config.label}, ${formatPercent(share)}.`
+      : `No matching ${config.label}; no percentage is calculated.`,
+  );
+
+  const stack = get("#payment-cohort-stack");
+  const legend = get("#payment-cohort-legend");
+  const empty = get("#payment-cohort-empty");
+  stack.replaceChildren();
+  legend.replaceChildren();
+  stack.hidden = !hasComparableMeasure;
+  legend.hidden = !hasComparableMeasure;
+  empty.hidden = hasComparableMeasure;
+  if (!hasComparableMeasure) {
+    stack.setAttribute("aria-label", `No matching ${config.label}; no cohort composition is drawn.`);
+    return;
+  }
+
+  const descriptions = [];
+  paymentCohortVisualRows(currentSummary.payments, state.paymentMeasure).forEach((row) => {
+    const segment = make("span", "cohort-segment");
+    segment.style.setProperty("--segment-width", `${clampedPercentage(row.contribution) ?? 0}%`);
+    segment.style.setProperty("--segment-color", row.color);
+    segment.setAttribute("aria-hidden", "true");
+    stack.append(segment);
+
+    const item = make("li");
+    const swatch = make("i", "legend-swatch");
+    swatch.style.backgroundColor = row.color;
+    swatch.setAttribute("aria-hidden", "true");
+    item.append(
+      swatch,
+      make("span", "", row.label),
+      make("strong", "", `${formatNumber(row.value)} · ${formatPercent(row.contribution)}`),
+    );
+    legend.append(item);
+    descriptions.push(`${row.label}: ${formatNumber(row.value)} ${config.label}, ${formatPercent(row.contribution)}`);
+  });
+  stack.setAttribute("aria-label", `${config.displayLabel} composition. ${descriptions.join("; ")}.`);
+}
+
 function renderPayments({ shouldAnnounce = false } = {}) {
   const { config, unionValue, totalValue, share } = paymentMeasureData();
   const overlap = currentSummary.payments.cohorts["Manual touch + cross-border wire"];
@@ -443,7 +851,6 @@ function renderPayments({ shouldAnnounce = false } = {}) {
   if (hasComparableMeasure) {
     setText("#payment-kpi", formatPercent(share));
     setText("#payment-kpi-label", `${formatNumber(unionValue)} of ${formatNumber(totalValue)} ${config.label}`);
-    get("#payment-union-bar").style.width = `${share}%`;
     setText(
       "#payment-union-label",
       `${formatNumber(unionValue)} of ${formatNumber(totalValue)} ${config.label} · ${formatPercent(share)}`,
@@ -451,9 +858,9 @@ function renderPayments({ shouldAnnounce = false } = {}) {
   } else {
     setText("#payment-kpi", "—");
     setText("#payment-kpi-label", "No matching data for the selected measure");
-    get("#payment-union-bar").style.width = "0%";
     setText("#payment-union-label", `No matching ${config.label}; no percentage is calculated.`);
   }
+  renderPaymentAnalytics({ config, unionValue, totalValue, share });
 
   if (currentSummary.payments.overall.records > 0) {
     setText("#payment-overlap", `${formatNumber(overlap.records)} overlap records are counted once.`);
@@ -484,6 +891,103 @@ function renderPayments({ shouldAnnounce = false } = {}) {
   }
 }
 
+function renderCapacityComparison(capacity) {
+  const rows = [
+    {
+      label: "Process-file exception repair",
+      note: "Management process estimate",
+      value: capacity.process_file_exception_repair_hours_monthly,
+    },
+    {
+      label: "Payment-file repair",
+      note: "Supplied payment-file estimate",
+      value: capacity.payment_file_repair_hours_monthly,
+    },
+  ];
+  const maximum = Math.max(...rows.map((row) => row.value));
+  const list = get("#capacity-comparison-bars");
+  list.replaceChildren();
+  rows.forEach((row) => {
+    const item = make("li", "capacity-bar-row");
+    const copy = make("span", "capacity-bar-copy");
+    copy.append(make("strong", "", row.label), make("span", "", row.note));
+    const track = visualTrack("capacity-bar-fill", safePercentage(row.value, maximum));
+    const value = make("span", "capacity-bar-value", `${formatNumber(row.value, 1)} h/month`);
+    item.append(copy, track, value);
+    list.append(item);
+  });
+}
+
+function appendTableCell(row, tag, text, className = "") {
+  const cell = make(tag, className, text);
+  row.append(cell);
+  return cell;
+}
+
+function renderClosureCandidateTable(closures) {
+  const table = get("#closure-candidate-table");
+  const body = get("#closure-candidate-table-body");
+  const empty = get("#closure-candidate-empty");
+  const candidates = Array.isArray(closures.candidate_accounts) ? closures.candidate_accounts : [];
+  body.replaceChildren();
+  table.hidden = candidates.length === 0;
+  empty.hidden = candidates.length > 0;
+  if (candidates.length === 0) {
+    setText(
+      empty,
+      currentSummary.scope.has_matches
+        ? "No closure-validation candidates match the selected dimensions; no closure value is calculated."
+        : "No matching accounts; no closure-validation candidate table is shown.",
+    );
+    return;
+  }
+  candidates.forEach((candidate) => {
+    const row = make("tr");
+    const account = appendTableCell(row, "th", candidate.account_id);
+    account.scope = "row";
+    appendTableCell(row, "td", `${candidate.entity_id} — ${candidate.entity_name}`);
+    appendTableCell(row, "td", candidate.bank_name);
+    appendTableCell(row, "td", candidate.currency);
+    appendTableCell(row, "td", formatUsdCompact(candidate.annual_fee_usd), "numeric");
+    appendTableCell(row, "td", CLOSURE_CANDIDATE_RULE);
+    appendTableCell(row, "td", "Validation required · not approved", "closure-status");
+    body.append(row);
+  });
+}
+
+function clearVisualizationOutputs(message = "Data unavailable — validation did not complete.") {
+  [
+    "#visibility-source-bars",
+    "#liquidity-waterfall",
+    "#payment-cohort-stack",
+    "#payment-cohort-legend",
+    "#capacity-comparison-bars",
+    "#liquidity-trend-table-body",
+    "#closure-candidate-table-body",
+  ].forEach((selector) => {
+    const node = get(selector);
+    if (node) node.replaceChildren();
+  });
+  setCompositionRing("#visibility-ring", "#visibility-ring-value", null, "—", message);
+  setCompositionRing("#payment-ring", "#payment-ring-value", null, "—", message);
+  setText("#decision-visibility-chip", "Unavailable");
+  setText("#decision-liquidity-chip", "Unavailable");
+  setText("#decision-payments-chip", "Unavailable");
+  setText("#trend-7-endpoint", "—");
+  setText("#trend-14-endpoint", "—");
+  const canvas = get("#liquidity-trend-canvas");
+  if (canvas) {
+    canvas.setAttribute("aria-label", message);
+    const context = canvas.getContext("2d");
+    if (context) context.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  const closureTable = get("#closure-candidate-table");
+  if (closureTable) closureTable.hidden = true;
+  getAll(".trend-data-disclosure").forEach((detail) => {
+    detail.open = false;
+  });
+}
+
 function renderGuardrails() {
   const capacity = dashboardData.guardrails.capacity;
   const closures = currentSummary.closures;
@@ -494,6 +998,7 @@ function renderGuardrails() {
     "#capacity-summary",
     `${capacity.process_file_exception_repair_hours_monthly.toFixed(1)} h/month vs ${capacity.payment_file_repair_hours_monthly.toFixed(1)} h/month · process estimate ${variance.toFixed(0)}% higher.`,
   );
+  renderCapacityComparison(capacity);
   renderInlineDetail("capacity", {
     scope: capacityScope,
     evidence: "Management-estimated capacity is not observed labor, headcount, cashable savings, or a combined P&L baseline.",
@@ -514,6 +1019,7 @@ function renderGuardrails() {
       : "No matching accounts; no closure value is calculated.",
     nextAction: "Complete local account validation before approving a closure or booking fee removal.",
   });
+  renderClosureCandidateTable(closures);
 }
 
 function evidenceSection(title, children, extraClass = "") {
@@ -744,6 +1250,9 @@ function resetView({ shouldAnnounce = true } = {}) {
   state.liquidityDays = DEFAULT_VIEW.liquidityDays;
   state.paymentMeasure = DEFAULT_VIEW.paymentMeasure;
   closeAllInlineDetails();
+  getAll(".trend-data-disclosure").forEach((detail) => {
+    detail.open = false;
+  });
   clearSearch();
   closeFilterPanel({ restoreFocus: false });
   const validated = FilterModel.validateState(dashboardData, defaultFilters);
@@ -913,12 +1422,14 @@ function chooseSearchResult(index) {
 
 function updateResetState() {
   const inlineDetailOpen = getAll("[data-inline-detail]").some((detail) => detail.open);
+  const nestedDetailOpen = getAll(".trend-data-disclosure").some((detail) => detail.open);
   const viewIsDefault =
     state.liquidityDays === DEFAULT_VIEW.liquidityDays &&
     state.paymentMeasure === DEFAULT_VIEW.paymentMeasure &&
     (!appliedFilters || isDefaultFilterState(appliedFilters)) &&
     !(get("#dashboard-search") && get("#dashboard-search").value.trim()) &&
-    !inlineDetailOpen;
+    !inlineDetailOpen &&
+    !nestedDetailOpen;
   getAll("[data-reset]").forEach((button) => {
     button.disabled = !dashboardData || viewIsDefault;
   });
@@ -930,12 +1441,14 @@ function bindEvents() {
   });
   getAll("[data-close-drawer]").forEach((button) => button.addEventListener("click", closeDrawer));
   getAll("[data-reset]").forEach((button) => button.addEventListener("click", () => resetView()));
+  setupLiquidityTrendResizeHandling();
 
   const inlineDetails = getAll("[data-inline-detail]");
   const detailSummaries = getAll("[data-detail-summary]");
   inlineDetails.forEach((detail) => {
     detail.addEventListener("toggle", () => {
       if (detail.open) closeAllInlineDetails({ except: detail });
+      if (detail.open && detail.dataset.inlineDetail === "liquidity") scheduleLiquidityTrendDraw();
       updateResetState();
     });
   });
@@ -959,6 +1472,18 @@ function bindEvents() {
           summary.focus();
         }
       }
+    });
+  });
+  getAll(".trend-data-disclosure").forEach((detail) => {
+    const summary = detail.querySelector("summary");
+    detail.addEventListener("toggle", updateResetState);
+    if (!summary) return;
+    summary.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !detail.open) return;
+      event.preventDefault();
+      event.stopPropagation();
+      detail.open = false;
+      summary.focus();
     });
   });
 
@@ -1112,7 +1637,14 @@ async function initializeDashboard() {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = Object.freeze({ formatUsdCompact });
+  module.exports = Object.freeze({
+    formatUsdCompact,
+    waterfallBarGeometry,
+    liquidityTrendValue,
+    lastFiniteTrendValue,
+    paymentCohortVisualRows,
+    visibilityActionText,
+  });
 }
 
 if (typeof window !== "undefined" && typeof document !== "undefined") initializeDashboard();

@@ -201,11 +201,22 @@
               <span class="operation-status decision-badge">Portfolio-wide · Validation required</span>
               <span class="summary-marker" aria-hidden="true">⌄</span>
             </summary>
-            <div class="operation-detail">
+            <div class="operation-detail decision-detail">
+              <section class="analytics-card decision-evidence-card" aria-labelledby="decision-evidence-title">
+                <div class="analytics-heading">
+                  <div><span class="analytics-eyebrow">Portfolio evidence</span><h3 id="decision-evidence-title">Three signals remain separate</h3></div>
+                  <p id="decision-composite-note">Separate signals—not a composite score.</p>
+                </div>
+                <ul id="decision-evidence-chips" class="decision-evidence-chips" aria-label="Portfolio evidence signals">
+                  <li><span>Reporting visibility</span><strong id="decision-visibility-chip">Loading…</strong></li>
+                  <li><span>Liquidity decision</span><strong id="decision-liquidity-chip">Loading…</strong></li>
+                  <li><span>Payment friction</span><strong id="decision-payments-chip">Loading…</strong></li>
+                </ul>
+              </section>
               <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="decision">Loading current scope…</p></div>
               <div class="detail-block"><span class="detail-label">Why this decision</span><p data-detail-evidence="decision">Loading decision evidence…</p></div>
               <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="decision">Loading next action…</p></div>
-              <button class="detail-guide-button" type="button" data-open-drawer="overview" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+              <button class="detail-guide-button" type="button" data-open-drawer="overview" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
             </div>
           </details>
 
@@ -218,17 +229,34 @@
             </summary>
             <div class="operation-detail signal-detail">
               <div class="detail-main">
-                <div class="account-split" aria-label="Same-day and delayed account split">
-                  <div class="split-bar"><span id="same-day-segment" class="split-segment same-day"><b id="same-day-label">—</b></span><span id="delayed-segment" class="split-segment delayed"><b id="delayed-label">—</b></span></div>
-                  <p id="visibility-interpretation">Loading reporting-source evidence…</p>
-                </div>
-                <p class="interpretation">Focus the pilot on the highest-exposure portal and spreadsheet sources.</p>
+                <section class="analytics-card visibility-analytics" aria-labelledby="visibility-analytics-title">
+                  <div class="analytics-heading"><div><span class="analytics-eyebrow">Selected scope</span><h3 id="visibility-analytics-title">Account visibility composition</h3></div><p>Filtered period and dimensions</p></div>
+                  <div class="visibility-visual-grid">
+                    <figure class="composition-figure" aria-labelledby="visibility-ring-caption">
+                      <div id="visibility-ring" class="composition-ring" role="img" aria-label="Loading selected-account visibility composition">
+                        <span class="composition-ring-center"><strong id="visibility-ring-value">—</strong><small>delayed</small></span>
+                      </div>
+                      <figcaption id="visibility-ring-caption">Selected accounts</figcaption>
+                      <div class="composition-legend" aria-label="Visibility composition legend">
+                        <span><i class="legend-swatch swatch-purple" aria-hidden="true"></i><b id="delayed-label">—</b></span>
+                        <span><i class="legend-swatch swatch-teal" aria-hidden="true"></i><b id="same-day-label">—</b></span>
+                      </div>
+                    </figure>
+                    <figure class="source-bars-figure" aria-labelledby="visibility-source-title">
+                      <figcaption id="visibility-source-title">Reporting method exposure</figcaption>
+                      <ul id="visibility-source-bars" class="source-bar-list"></ul>
+                      <p id="visibility-source-empty" class="visual-empty" role="status" hidden>No matching source evidence.</p>
+                    </figure>
+                  </div>
+                </section>
+                <p id="visibility-interpretation" class="interpretation">Loading reporting-source evidence…</p>
+                <p id="visibility-action-insight" class="interpretation">Loading selected-scope visibility action…</p>
                 <p id="visibility-boundary" class="boundary">Reporting evidence boundary is loading.</p>
               </div>
               <aside class="detail-aside">
                 <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="visibility">Loading current scope…</p></div>
                 <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="visibility">Loading next action…</p></div>
-                <button class="detail-guide-button" type="button" data-open-drawer="visibility" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+                <button class="detail-guide-button" type="button" data-open-drawer="visibility" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
               </aside>
             </div>
           </details>
@@ -248,13 +276,43 @@
                   <label><input type="radio" name="liquidity-days" value="7"><span>7-day · <b id="screen-7-value">—</b></span></label>
                   <label><input type="radio" name="liquidity-days" value="14" checked><span>14-day · <b id="screen-14-value">—</b></span></label>
                 </fieldset>
+                <section class="analytics-card liquidity-analytics" aria-labelledby="liquidity-analytics-title">
+                  <div class="analytics-heading"><div><span class="analytics-eyebrow">Governed construction</span><h3 id="liquidity-analytics-title">Selected-horizon screen</h3></div><p id="liquidity-analytics-period">Loading horizon…</p></div>
+                  <figure class="waterfall-figure" aria-labelledby="liquidity-waterfall-caption">
+                    <figcaption id="liquidity-waterfall-caption">Account-floor waterfall</figcaption>
+                    <div class="waterfall-scroll"><ol id="liquidity-waterfall" class="waterfall-list"></ol></div>
+                    <p id="liquidity-waterfall-note" class="chart-note">Loading waterfall evidence…</p>
+                    <p id="liquidity-waterfall-empty" class="visual-empty" role="status" hidden>Selected-horizon waterfall unavailable.</p>
+                  </figure>
+                  <figure class="trend-figure" aria-labelledby="liquidity-trend-title">
+                    <figcaption id="liquidity-trend-title">Daily modeled screens across the selected range</figcaption>
+                    <div class="trend-legend" aria-label="Liquidity trend legend and current endpoints">
+                      <span><i class="legend-line trend-seven" aria-hidden="true"></i>7-day <strong id="trend-7-endpoint">—</strong></span>
+                      <span><i class="legend-line trend-fourteen" aria-hidden="true"></i>14-day <strong id="trend-14-endpoint">—</strong></span>
+                    </div>
+                    <div id="liquidity-trend-frame" class="trend-frame">
+                      <canvas id="liquidity-trend-canvas" role="img" aria-label="Loading 7-day and 14-day modeled screen trend">Use the trend data table below for exact daily values.</canvas>
+                    </div>
+                    <p id="liquidity-trend-boundary" class="chart-boundary">Unfilled lines show screening sensitivities; gaps mean an incomplete trailing window. They do not establish mobility or transfer authority.</p>
+                  </figure>
+                  <details class="trend-data-disclosure">
+                    <summary>View trend data table</summary>
+                    <div class="responsive-table-wrap">
+                      <table id="liquidity-trend-table" class="analytics-table">
+                        <caption>Daily 7-day and 14-day modeled screens for the selected inclusive date range</caption>
+                        <thead><tr><th scope="col">Date</th><th scope="col">7-day screen</th><th scope="col">14-day screen</th></tr></thead>
+                        <tbody id="liquidity-trend-table-body"></tbody>
+                      </table>
+                    </div>
+                  </details>
+                </section>
                 <p id="liquidity-interpretation" class="interpretation">Loading liquidity interpretation…</p>
                 <p id="liquidity-boundary" class="boundary" aria-live="polite">Liquidity evidence boundary is loading.</p>
               </div>
               <aside class="detail-aside">
                 <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="liquidity">Loading current scope…</p></div>
                 <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="liquidity">Loading next action…</p></div>
-                <button class="detail-guide-button" type="button" data-open-drawer="liquidity" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+                <button class="detail-guide-button" type="button" data-open-drawer="liquidity" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
               </aside>
             </div>
           </details>
@@ -274,14 +332,30 @@
                   <label><input type="radio" name="payment-measure" value="exceptions"><span>Exceptions</span></label>
                   <label><input type="radio" name="payment-measure" value="repair_minutes"><span>Repair time</span></label>
                 </fieldset>
-                <div class="union-share" aria-label="Priority union share of selected measure"><span id="payment-union-bar" class="union-fill"></span><span id="payment-union-label" class="union-label">Loading payment evidence…</span></div>
+                <section class="analytics-card payments-analytics" aria-labelledby="payments-analytics-title">
+                  <div class="analytics-heading"><div><span class="analytics-eyebrow">Selected measure</span><h3 id="payments-analytics-title">Priority-union share and cohort composition</h3></div><p id="payment-visual-measure">Records</p></div>
+                  <div class="payments-visual-grid">
+                    <figure class="composition-figure" aria-labelledby="payment-ring-caption">
+                      <div id="payment-ring" class="composition-ring payment-ring" role="img" aria-label="Loading priority-union composition">
+                        <span class="composition-ring-center"><strong id="payment-ring-value">—</strong><small>priority union</small></span>
+                      </div>
+                      <figcaption id="payment-ring-caption"><span id="payment-union-label">Loading payment evidence…</span></figcaption>
+                    </figure>
+                    <figure class="payment-stack-figure" aria-labelledby="payment-stack-title">
+                      <figcaption id="payment-stack-title">Share of all matching records</figcaption>
+                      <div id="payment-cohort-stack" class="cohort-stack" role="img" aria-label="Loading payment cohort composition"></div>
+                      <ul id="payment-cohort-legend" class="cohort-legend"></ul>
+                      <p id="payment-cohort-empty" class="visual-empty" role="status" hidden>No matching data for the selected measure.</p>
+                    </figure>
+                  </div>
+                </section>
                 <p id="payment-overlap" class="overlap-note">Overlap control is loading.</p>
                 <p id="payment-boundary" class="boundary">Payment evidence boundary is loading.</p>
               </div>
               <aside class="detail-aside">
                 <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="payments">Loading current scope…</p></div>
                 <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="payments">Loading next action…</p></div>
-                <button class="detail-guide-button" type="button" data-open-drawer="payments" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+                <button class="detail-guide-button" type="button" data-open-drawer="payments" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
               </aside>
             </div>
           </details>
@@ -295,11 +369,16 @@
               <span class="operation-status gate-status" id="capacity-filter-note">Enterprise-global management estimate · filters do not apply · not a combined capacity or P&amp;L baseline</span>
               <span class="summary-marker" aria-hidden="true">⌄</span>
             </summary>
-            <div class="operation-detail">
+            <div class="operation-detail gate-detail">
+              <figure class="analytics-card gate-analytics-card" aria-labelledby="capacity-compare-title">
+                <div class="analytics-heading"><div><span class="analytics-eyebrow">Independent baselines</span><h3 id="capacity-compare-title">Repair-effort comparison</h3></div><p>Shared scale · never additive</p></div>
+                <ul id="capacity-comparison-bars" class="capacity-comparison-bars"></ul>
+                <figcaption>Management process estimate versus supplied payment-file monthly average; unreconciled, never additive, and neither establishes removable labor or cashable savings.</figcaption>
+              </figure>
               <div class="detail-block"><span class="detail-label">Scope</span><p data-detail-scope="capacity">Enterprise-global management estimate · filters do not apply · not a combined capacity or P&amp;L baseline</p></div>
               <div class="detail-block"><span class="detail-label">Evidence limit</span><p data-detail-evidence="capacity">Loading capacity evidence limit…</p></div>
               <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="capacity">Loading next action…</p></div>
-              <button class="detail-guide-button" type="button" data-open-drawer="gates" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+              <button class="detail-guide-button" type="button" data-open-drawer="gates" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
             </div>
           </details>
 
@@ -310,11 +389,22 @@
               <span id="closure-summary-boundary" class="operation-status gate-status">30 Jun 2026 snapshot · date filter does not apply · currency/region/entity/bank filters apply</span>
               <span class="summary-marker" aria-hidden="true">⌄</span>
             </summary>
-            <div class="operation-detail">
+            <div class="operation-detail gate-detail">
+              <section class="analytics-card closure-table-card" aria-labelledby="closure-table-title">
+                <div class="analytics-heading"><div><span class="analytics-eyebrow">30 Jun 2026 snapshot</span><h3 id="closure-table-title">Filtered closure-validation candidates</h3></div><p>Candidate only · not approved</p></div>
+                <div class="responsive-table-wrap">
+                  <table id="closure-candidate-table" class="analytics-table closure-candidate-table">
+                    <caption>Closure-validation candidates after currency, region, entity, and bank filters</caption>
+                    <thead><tr><th scope="col">Account</th><th scope="col">Entity</th><th scope="col">Bank</th><th scope="col">Account currency</th><th scope="col">Estimated annual fee (USD)</th><th scope="col">Candidate rule</th><th scope="col">Status</th></tr></thead>
+                    <tbody id="closure-candidate-table-body"></tbody>
+                  </table>
+                </div>
+                <p id="closure-candidate-empty" class="visual-empty" role="status" hidden>No closure-validation candidates match the selected dimensions.</p>
+              </section>
               <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="closures">Loading current scope…</p></div>
               <div class="detail-block"><span class="detail-label">Evidence limit</span><p data-detail-evidence="closures">Loading closure evidence limit…</p></div>
               <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="closures">Loading next action…</p></div>
-              <button class="detail-guide-button" type="button" data-open-drawer="gates" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+              <button class="detail-guide-button" type="button" data-open-drawer="gates" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
             </div>
           </details>
         </section>
