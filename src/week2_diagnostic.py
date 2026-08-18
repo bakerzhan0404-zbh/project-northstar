@@ -19,6 +19,13 @@ from starter_analysis import enrich_balances, load_data, validate_keys
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED = ROOT / "data" / "processed"
 
+PRIORITY_PAYMENT_CATEGORIES = [
+    "Manual touch only",
+    "Manual touch + cross-border wire",
+    "Cross-border wire only",
+    "Neither priority cohort",
+]
+
 
 def enrich_payments(data: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     """Join payment records to account, entity, and daily project FX data."""
@@ -59,6 +66,45 @@ def enrich_payments(data: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     payments["amount_usd"] = payments["amount_local"] * payments["usd_per_unit"]
     payments["month"] = payments["payment_date"].dt.to_period("M").astype(str)
     return payments
+
+
+def add_priority_payment_cohorts(payments: pd.DataFrame) -> pd.DataFrame:
+    """Add the governed, mutually exclusive payment-priority cohorts."""
+    working = payments.copy()
+    working["cross_border_wire_flag"] = working["payment_type"].eq(
+        "Wire"
+    ) & working["cross_border_flag"]
+    manual_touch = working["manual_touch_flag"]
+    cross_border_wire = working["cross_border_wire_flag"]
+    working["priority_payment_cohort"] = "Neither priority cohort"
+    working.loc[manual_touch & ~cross_border_wire, "priority_payment_cohort"] = (
+        "Manual touch only"
+    )
+    working.loc[manual_touch & cross_border_wire, "priority_payment_cohort"] = (
+        "Manual touch + cross-border wire"
+    )
+    working.loc[~manual_touch & cross_border_wire, "priority_payment_cohort"] = (
+        "Cross-border wire only"
+    )
+    working["priority_payment_cohort"] = pd.Categorical(
+        working["priority_payment_cohort"],
+        categories=PRIORITY_PAYMENT_CATEGORIES,
+        ordered=True,
+    )
+    working["priority_union_cohort"] = pd.Categorical(
+        (manual_touch | cross_border_wire).map(
+            {
+                True: "Manual touch or cross-border wire",
+                False: "Outside priority union",
+            }
+        ),
+        categories=[
+            "Manual touch or cross-border wire",
+            "Outside priority union",
+        ],
+        ordered=True,
+    )
+    return working
 
 
 def calculate_process_capacity(process: pd.DataFrame) -> pd.DataFrame:
@@ -384,6 +430,384 @@ def build_visibility_diagnostic(balances: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _account_date_payment_outflow(
+    balances: pd.DataFrame, payments: pd.DataFrame
+) -> pd.Series:
+    """Return a complete account-date panel of supplied payment outflow."""
+    account_date_index = pd.MultiIndex.from_product(
+        [
+            sorted(balances["account_id"].unique()),
+            sorted(balances["date"].unique()),
+        ],
+        names=["account_id", "date"],
+    )
+    return (
+        payments.groupby(["account_id", "payment_date"])["amount_usd"]
+        .sum()
+        .rename_axis(index=["account_id", "date"])
+        .reindex(account_date_index, fill_value=0.0)
+        .sort_index()
+    )
+
+
+def build_dashboard_account_day_facts(
+    balances: pd.DataFrame, payments: pd.DataFrame
+) -> pd.DataFrame:
+    """Build the minimum governed account-day facts used by dashboard filters.
+
+    Currency, region, entity, and bank filters all resolve to accounts. Date
+    filters select account-days for visibility and use the selected end date as
+    the liquidity as-of date. The 7/14-day fields remain null until a complete
+    trailing calendar window exists, so an incomplete screen cannot be read as
+    a zero-dollar result.
+    """
+    columns = [
+        "date",
+        "account_id",
+        "entity_id",
+        "entity_name",
+        "region",
+        "currency",
+        "bank_name",
+        "visibility_method",
+        "reporting_delay_days",
+        "positive_available_usd",
+        "restricted_positive_available_usd",
+        "negative_available_usd",
+    ]
+    facts = balances[
+        [
+            "date",
+            "account_id",
+            "entity_id",
+            "entity_name",
+            "region",
+            "currency",
+            "bank_name",
+            "visibility_method",
+            "reporting_delay_days",
+            "restricted_flag",
+            "available_balance_usd",
+        ]
+    ].copy()
+    facts["positive_available_usd"] = facts["available_balance_usd"].clip(
+        lower=0
+    )
+    facts["restricted_positive_available_usd"] = facts[
+        "positive_available_usd"
+    ].where(facts["restricted_flag"], 0.0)
+    facts["negative_available_usd"] = facts["available_balance_usd"].clip(
+        upper=0
+    )
+
+    payment_outflow = _account_date_payment_outflow(balances, payments)
+    first_balance_date = facts["date"].min()
+    for window_days in [7, 14]:
+        raw_buffer_column = f"_supplied_payment_buffer_{window_days}d_usd"
+        complete_column = f"complete_{window_days}d_window"
+        unflagged_buffer_column = (
+            f"unflagged_payment_buffer_{window_days}d_usd"
+        )
+        contribution_column = f"net_screen_contribution_{window_days}d_usd"
+        rolling_buffer = (
+            payment_outflow.groupby(level="account_id")
+            .rolling(window_days, min_periods=window_days)
+            .sum()
+            .reset_index(level=0, drop=True)
+            .rename(raw_buffer_column)
+            .reset_index()
+        )
+        facts = facts.merge(
+            rolling_buffer,
+            on=["account_id", "date"],
+            how="left",
+            validate="one_to_one",
+        )
+        facts[complete_column] = facts["date"].ge(
+            first_balance_date + pd.Timedelta(days=window_days - 1)
+        )
+        facts[unflagged_buffer_column] = facts[raw_buffer_column].where(
+            ~facts["restricted_flag"], 0.0
+        )
+        screened_positive = (
+            facts["positive_available_usd"] - facts[raw_buffer_column]
+        ).clip(lower=0)
+        screened_positive = screened_positive.where(
+            ~facts["restricted_flag"], 0.0
+        )
+        facts[contribution_column] = (
+            screened_positive + facts["negative_available_usd"]
+        )
+        incomplete = ~facts[complete_column]
+        facts.loc[
+            incomplete, [unflagged_buffer_column, contribution_column]
+        ] = float("nan")
+        facts = facts.drop(columns=[raw_buffer_column])
+        columns.extend(
+            [complete_column, unflagged_buffer_column, contribution_column]
+        )
+
+    money_columns = [
+        "positive_available_usd",
+        "restricted_positive_available_usd",
+        "negative_available_usd",
+        "unflagged_payment_buffer_7d_usd",
+        "net_screen_contribution_7d_usd",
+        "unflagged_payment_buffer_14d_usd",
+        "net_screen_contribution_14d_usd",
+    ]
+    facts[money_columns] = facts[money_columns].round(6)
+    return (
+        facts[columns]
+        .sort_values(["date", "account_id"])
+        .reset_index(drop=True)
+    )
+
+
+def build_dashboard_payment_facts(payments: pd.DataFrame) -> pd.DataFrame:
+    """Build the minimum governed payment facts used by dashboard filters."""
+    working = add_priority_payment_cohorts(payments)
+    result = working[
+        [
+            "payment_id",
+            "payment_date",
+            "account_id",
+            "entity_id",
+            "entity_name",
+            "region",
+            "currency",
+            "bank_name",
+            "priority_payment_cohort",
+            "exception_flag",
+            "repair_minutes",
+        ]
+    ].copy()
+    result = result.rename(columns={"payment_date": "date"})
+    result["priority_payment_cohort"] = result[
+        "priority_payment_cohort"
+    ].astype("object")
+    return result.sort_values(["date", "payment_id"]).reset_index(drop=True)
+
+
+def validate_dashboard_filter_facts(
+    account_days: pd.DataFrame, payment_facts: pd.DataFrame
+) -> None:
+    """Fail closed unless filter facts reconcile to the Week 2 controls."""
+    failures = []
+
+    expected_account_columns = {
+        "date",
+        "account_id",
+        "entity_id",
+        "entity_name",
+        "region",
+        "currency",
+        "bank_name",
+        "visibility_method",
+        "reporting_delay_days",
+        "positive_available_usd",
+        "restricted_positive_available_usd",
+        "negative_available_usd",
+        "complete_7d_window",
+        "unflagged_payment_buffer_7d_usd",
+        "net_screen_contribution_7d_usd",
+        "complete_14d_window",
+        "unflagged_payment_buffer_14d_usd",
+        "net_screen_contribution_14d_usd",
+    }
+    expected_payment_columns = {
+        "payment_id",
+        "date",
+        "account_id",
+        "entity_id",
+        "entity_name",
+        "region",
+        "currency",
+        "bank_name",
+        "priority_payment_cohort",
+        "exception_flag",
+        "repair_minutes",
+    }
+    if set(account_days.columns) != expected_account_columns:
+        failures.append("account-day columns changed")
+    if set(payment_facts.columns) != expected_payment_columns:
+        failures.append("payment-fact columns changed")
+    if failures:
+        raise AssertionError(
+            f"Dashboard filter fact reconciliation failures: {failures}"
+        )
+
+    account_dates = pd.to_datetime(account_days["date"], errors="coerce")
+    payment_dates = pd.to_datetime(payment_facts["date"], errors="coerce")
+    dimensions = [
+        "entity_id",
+        "entity_name",
+        "region",
+        "currency",
+        "bank_name",
+    ]
+    if len(account_days) != 9_955:
+        failures.append("account-day row count is not 9,955")
+    if account_days.duplicated(["date", "account_id"]).any():
+        failures.append("account-day keys are not unique")
+    if account_days["account_id"].nunique() != 55:
+        failures.append("account-day facts do not cover 55 accounts")
+    if account_dates.nunique() != 181:
+        failures.append("account-day facts do not cover 181 dates")
+    if (
+        account_dates.min() != pd.Timestamp("2026-01-01")
+        or account_dates.max() != pd.Timestamp("2026-06-30")
+    ):
+        failures.append("account-day date range changed")
+    if not account_days.groupby("account_id").size().eq(181).all():
+        failures.append("account-day panel is not complete by account")
+    if account_days[dimensions].isna().any().any():
+        failures.append("account-day dimensions contain nulls")
+    if set(account_days["region"].unique()) != {"APAC", "EMEA", "NA"}:
+        failures.append("region values changed or literal NA was parsed as null")
+    expected_dimension_counts = {
+        "entity_id": 16,
+        "entity_name": 16,
+        "region": 3,
+        "currency": 10,
+        "bank_name": 5,
+    }
+    for dimension, expected in expected_dimension_counts.items():
+        if account_days[dimension].nunique() != expected:
+            failures.append(f"{dimension} option count changed")
+    stable_dimensions = (
+        account_days.groupby("account_id")[dimensions]
+        .nunique()
+        .le(1)
+        .all()
+        .all()
+    )
+    if not stable_dimensions:
+        failures.append("account dimensions change across dates")
+    if not account_days["reporting_delay_days"].between(0, 3).all():
+        failures.append("reporting-delay domain changed")
+    if not account_days["positive_available_usd"].ge(0).all():
+        failures.append("positive availability contains negative values")
+    if not account_days["restricted_positive_available_usd"].ge(0).all():
+        failures.append("restricted positive availability contains negative values")
+    if not account_days["restricted_positive_available_usd"].le(
+        account_days["positive_available_usd"]
+    ).all():
+        failures.append("restricted availability exceeds positive availability")
+    if not account_days["negative_available_usd"].le(0).all():
+        failures.append("negative availability contains positive values")
+
+    daily_visibility = pd.DataFrame(
+        {
+            "date": account_dates,
+            "same_day": account_days["reporting_delay_days"].eq(0),
+            "delayed": account_days["reporting_delay_days"].gt(0),
+        }
+    ).groupby("date")[["same_day", "delayed"]].sum()
+    if not daily_visibility["same_day"].eq(32).all():
+        failures.append("same-day account count is not 32 on every date")
+    if not daily_visibility["delayed"].eq(23).all():
+        failures.append("delayed account count is not 23 on every date")
+
+    expected_complete_rows = {7: 9_625, 14: 9_240}
+    for days in [7, 14]:
+        complete_column = f"complete_{days}d_window"
+        value_columns = [
+            f"unflagged_payment_buffer_{days}d_usd",
+            f"net_screen_contribution_{days}d_usd",
+        ]
+        expected_complete = account_dates.ge(
+            pd.Timestamp("2026-01-01") + pd.Timedelta(days=days - 1)
+        )
+        if not account_days[complete_column].eq(expected_complete).all():
+            failures.append(f"{days}-day completeness flags changed")
+        if int(account_days[complete_column].sum()) != expected_complete_rows[days]:
+            failures.append(f"{days}-day complete row count changed")
+        complete = account_days[complete_column]
+        if account_days.loc[complete, value_columns].isna().any().any():
+            failures.append(f"{days}-day complete rows contain null results")
+        if account_days.loc[~complete, value_columns].notna().any().any():
+            failures.append(f"{days}-day incomplete rows publish numeric results")
+
+    latest = account_days.loc[account_dates.eq(pd.Timestamp("2026-06-30"))]
+    latest_expected = {
+        "positive_available_usd": 57_801_215.46,
+        "restricted_positive_available_usd": 8_053_700.97,
+        "negative_available_usd": -2_138_293.10,
+        "unflagged_payment_buffer_7d_usd": 5_485_896.33,
+        "net_screen_contribution_7d_usd": 42_844_787.78,
+        "unflagged_payment_buffer_14d_usd": 10_828_186.91,
+        "net_screen_contribution_14d_usd": 38_127_490.73,
+    }
+    for column, expected in latest_expected.items():
+        if round(latest[column].sum(), 2) != expected:
+            failures.append(f"latest {column} changed")
+
+    if len(payment_facts) != 7_600:
+        failures.append("payment-fact row count is not 7,600")
+    if payment_facts["payment_id"].duplicated().any():
+        failures.append("payment-fact keys are not unique")
+    if payment_facts[dimensions].isna().any().any():
+        failures.append("payment-fact dimensions contain nulls")
+    if set(payment_facts["region"].unique()) != {"APAC", "EMEA", "NA"}:
+        failures.append("payment regions changed or literal NA was parsed as null")
+    if payment_dates.isna().any() or payment_dates.min() < pd.Timestamp(
+        "2026-01-01"
+    ) or payment_dates.max() > pd.Timestamp("2026-06-30"):
+        failures.append("payment dates fall outside the supplied period")
+    if payment_facts["payment_id"].nunique() != 7_600:
+        failures.append("payment facts do not contain 7,600 unique payments")
+    if payment_facts["account_id"].nunique() != 51:
+        failures.append("payment facts do not cover 51 represented accounts")
+    if not payment_facts["exception_flag"].isin([True, False]).all():
+        failures.append("payment exception flag is not boolean")
+    if not payment_facts["repair_minutes"].ge(0).all():
+        failures.append("payment repair minutes contain negative values")
+    if int(payment_facts["exception_flag"].sum()) != 479:
+        failures.append("payment exceptions do not reconcile to 479")
+    if int(payment_facts["repair_minutes"].sum()) != 20_080:
+        failures.append("payment repair minutes do not reconcile to 20,080")
+
+    expected_cohorts = {
+        "Manual touch only": (2_053, 246, 10_018),
+        "Manual touch + cross-border wire": (342, 58, 2_702),
+        "Cross-border wire only": (444, 52, 2_219),
+        "Neither priority cohort": (4_761, 123, 5_141),
+    }
+    if set(payment_facts["priority_payment_cohort"].unique()) != set(
+        expected_cohorts
+    ):
+        failures.append("priority payment cohort domain changed")
+    else:
+        cohort_totals = payment_facts.groupby(
+            "priority_payment_cohort", observed=True
+        ).agg(
+            records=("payment_id", "size"),
+            exceptions=("exception_flag", "sum"),
+            repair_minutes=("repair_minutes", "sum"),
+        )
+        for cohort, expected in expected_cohorts.items():
+            actual = tuple(int(value) for value in cohort_totals.loc[cohort])
+            if actual != expected:
+                failures.append(f"{cohort} facts changed")
+
+    account_lookup = account_days.drop_duplicates("account_id").set_index(
+        "account_id"
+    )
+    if not payment_facts["account_id"].isin(account_lookup.index).all():
+        failures.append("payment facts contain unknown accounts")
+    else:
+        for dimension in dimensions:
+            mapped = payment_facts["account_id"].map(account_lookup[dimension])
+            if not payment_facts[dimension].eq(mapped).all():
+                failures.append(f"payment {dimension} differs from account dimension")
+
+    if failures:
+        raise AssertionError(
+            f"Dashboard filter fact reconciliation failures: {failures}"
+        )
+
+
 def build_liquidity_scenarios(
     balances: pd.DataFrame, payments: pd.DataFrame
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -439,19 +863,8 @@ def build_liquidity_scenarios(
         "Estimated availability and preliminary flags do not establish transferability"
     )
 
-    account_date_index = pd.MultiIndex.from_product(
-        [
-            sorted(working["account_id"].unique()),
-            sorted(working["date"].unique()),
-        ],
-        names=["account_id", "date"],
-    )
-    daily_payment_outflow = (
-        buffer_payments.groupby(["account_id", "payment_date"])["amount_usd"]
-        .sum()
-        .rename_axis(index=["account_id", "date"])
-        .reindex(account_date_index, fill_value=0.0)
-        .sort_index()
+    daily_payment_outflow = _account_date_payment_outflow(
+        working, buffer_payments
     )
     first_balance_date = working["date"].min()
     for window_days in [7, 14]:
@@ -918,7 +1331,7 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
     Manual touch and cross-border wire are also split into four mutually
     exclusive cohorts so their overlap can be shown without double counting.
     """
-    working = payments.copy()
+    working = add_priority_payment_cohorts(payments)
     working["amount_band_usd"] = pd.cut(
         working["amount_usd"],
         bins=[float("-inf"), 10_000, 25_000, 50_000, 100_000, float("inf")],
@@ -937,46 +1350,8 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
     working["cross_border_cohort"] = working["cross_border_flag"].map(
         {True: "Cross-border", False: "Domestic"}
     )
-    working["cross_border_wire_flag"] = working["payment_type"].eq(
-        "Wire"
-    ) & working["cross_border_flag"]
-
     manual_touch = working["manual_touch_flag"]
     cross_border_wire = working["cross_border_wire_flag"]
-    priority_categories = [
-        "Manual touch only",
-        "Manual touch + cross-border wire",
-        "Cross-border wire only",
-        "Neither priority cohort",
-    ]
-    working["priority_payment_cohort"] = "Neither priority cohort"
-    working.loc[manual_touch & ~cross_border_wire, "priority_payment_cohort"] = (
-        "Manual touch only"
-    )
-    working.loc[manual_touch & cross_border_wire, "priority_payment_cohort"] = (
-        "Manual touch + cross-border wire"
-    )
-    working.loc[~manual_touch & cross_border_wire, "priority_payment_cohort"] = (
-        "Cross-border wire only"
-    )
-    working["priority_payment_cohort"] = pd.Categorical(
-        working["priority_payment_cohort"],
-        categories=priority_categories,
-        ordered=True,
-    )
-    working["priority_union_cohort"] = pd.Categorical(
-        (manual_touch | cross_border_wire).map(
-            {
-                True: "Manual touch or cross-border wire",
-                False: "Outside priority union",
-            }
-        ),
-        categories=[
-            "Manual touch or cross-border wire",
-            "Outside priority union",
-        ],
-        ordered=True,
-    )
     totals = {
         "records": len(working),
         "value_usd": working["amount_usd"].sum(),
@@ -1087,7 +1462,7 @@ def build_payment_diagnostic(payments: pd.DataFrame) -> pd.DataFrame:
         for category, frame in working.groupby(column, sort=False, observed=True):
             rows.append(summarize(frame, dimension, category, population))
 
-    for category in priority_categories:
+    for category in PRIORITY_PAYMENT_CATEGORIES:
         frame = working.loc[working["priority_payment_cohort"].eq(category)]
         row = summarize(
             frame,
@@ -1249,6 +1624,13 @@ def main() -> None:
         liquidity_summary,
         liquidity_thresholds,
     ) = build_liquidity_scenarios(balances, payments)
+    dashboard_account_day_facts = build_dashboard_account_day_facts(
+        balances, payments
+    )
+    dashboard_payment_facts = build_dashboard_payment_facts(payments)
+    validate_dashboard_filter_facts(
+        dashboard_account_day_facts, dashboard_payment_facts
+    )
     (
         simultaneous_daily,
         entity_positions,
@@ -1267,6 +1649,12 @@ def main() -> None:
     liquidity_summary.to_csv(PROCESSED / "W2_liquidity_scenarios.csv", index=False)
     liquidity_thresholds.to_csv(
         PROCESSED / "W2_liquidity_thresholds.csv", index=False
+    )
+    dashboard_account_day_facts.to_csv(
+        PROCESSED / "W2_dashboard_account_day_facts.csv", index=False
+    )
+    dashboard_payment_facts.to_csv(
+        PROCESSED / "W2_dashboard_payment_facts.csv", index=False
     )
     simultaneous_daily.to_csv(
         PROCESSED / "W2_simultaneous_positions_daily.csv", index=False
@@ -1294,6 +1682,8 @@ def main() -> None:
     print("Wrote data/processed/W2_liquidity_account_scenarios.csv")
     print("Wrote data/processed/W2_liquidity_scenarios.csv")
     print("Wrote data/processed/W2_liquidity_thresholds.csv")
+    print("Wrote data/processed/W2_dashboard_account_day_facts.csv")
+    print("Wrote data/processed/W2_dashboard_payment_facts.csv")
     print("Wrote data/processed/W2_simultaneous_positions_daily.csv")
     print("Wrote data/processed/W2_entity_positions.csv")
     print("Wrote data/processed/W2_account_positions.csv")

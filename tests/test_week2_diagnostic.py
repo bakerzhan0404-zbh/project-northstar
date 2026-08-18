@@ -12,6 +12,8 @@ sys.path.insert(0, str(ROOT / "src"))
 from starter_analysis import enrich_balances, load_data, validate_keys  # noqa: E402
 from week2_diagnostic import (  # noqa: E402
     build_account_diagnostic,
+    build_dashboard_account_day_facts,
+    build_dashboard_payment_facts,
     build_visibility_diagnostic,
     build_liquidity_scenarios,
     build_simultaneous_position_diagnostic,
@@ -20,6 +22,7 @@ from week2_diagnostic import (  # noqa: E402
     build_repair_baseline_reconciliation,
     calculate_process_capacity,
     enrich_payments,
+    validate_dashboard_filter_facts,
     validate_reconciliations,
 )
 
@@ -50,6 +53,38 @@ def main() -> None:
         build_liquidity_scenarios(balances, payments)
     )
     liquidity_metrics = liquidity_summary.set_index("metric")["value_usd"]
+    dashboard_account_days = build_dashboard_account_day_facts(
+        balances, payments
+    )
+    dashboard_payment_facts = build_dashboard_payment_facts(payments)
+    validate_dashboard_filter_facts(
+        dashboard_account_days, dashboard_payment_facts
+    )
+    dashboard_latest = dashboard_account_days.loc[
+        dashboard_account_days["date"].eq(dashboard_account_days["date"].max())
+    ]
+    dashboard_visibility_by_date = dashboard_account_days.assign(
+        same_day=dashboard_account_days["reporting_delay_days"].eq(0),
+        delayed=dashboard_account_days["reporting_delay_days"].gt(0),
+    ).groupby("date")[["same_day", "delayed"]].sum()
+    account_fact_failure_is_closed = False
+    try:
+        validate_dashboard_filter_facts(
+            dashboard_account_days.iloc[:-1], dashboard_payment_facts
+        )
+    except AssertionError:
+        account_fact_failure_is_closed = True
+    payment_fact_failure_is_closed = False
+    changed_payment_facts = dashboard_payment_facts.copy()
+    changed_payment_facts.loc[
+        changed_payment_facts.index[0], "priority_payment_cohort"
+    ] = "Unknown cohort"
+    try:
+        validate_dashboard_filter_facts(
+            dashboard_account_days, changed_payment_facts
+        )
+    except AssertionError:
+        payment_fact_failure_is_closed = True
     simultaneous_daily, entity_positions, account_positions = (
         build_simultaneous_position_diagnostic(balances)
     )
@@ -178,6 +213,66 @@ def main() -> None:
         "validated movable cash remains unestablished": pd.isna(
             liquidity_metrics["validated_movable_cash"]
         ),
+        "dashboard account-day facts reconcile to 9,955": len(
+            dashboard_account_days
+        )
+        == 9_955,
+        "dashboard account-day facts preserve literal NA region": set(
+            dashboard_account_days["region"]
+        )
+        == {"APAC", "EMEA", "NA"},
+        "dashboard facts show 32 same-day accounts on every date": (
+            dashboard_visibility_by_date["same_day"].eq(32).all()
+        ),
+        "dashboard facts show 23 delayed accounts on every date": (
+            dashboard_visibility_by_date["delayed"].eq(23).all()
+        ),
+        "dashboard seven-day complete windows are explicit": (
+            dashboard_account_days["complete_7d_window"].sum() == 9_625
+            and dashboard_account_days.loc[
+                ~dashboard_account_days["complete_7d_window"],
+                [
+                    "unflagged_payment_buffer_7d_usd",
+                    "net_screen_contribution_7d_usd",
+                ],
+            ].isna().all().all()
+        ),
+        "dashboard 14-day complete windows are explicit": (
+            dashboard_account_days["complete_14d_window"].sum() == 9_240
+            and dashboard_account_days.loc[
+                ~dashboard_account_days["complete_14d_window"],
+                [
+                    "unflagged_payment_buffer_14d_usd",
+                    "net_screen_contribution_14d_usd",
+                ],
+            ].isna().all().all()
+        ),
+        "dashboard latest seven-day net screen reconciles": round(
+            dashboard_latest["net_screen_contribution_7d_usd"].sum(), 2
+        )
+        == 42_844_787.78,
+        "dashboard latest 14-day net screen reconciles": round(
+            dashboard_latest["net_screen_contribution_14d_usd"].sum(), 2
+        )
+        == 38_127_490.73,
+        "dashboard payment facts reconcile to 7,600": len(
+            dashboard_payment_facts
+        )
+        == 7_600,
+        "dashboard payment facts preserve four exclusive cohorts": (
+            dashboard_payment_facts["priority_payment_cohort"].nunique() == 4
+            and dashboard_payment_facts.groupby(
+                "priority_payment_cohort"
+            ).size().to_dict()
+            == {
+                "Cross-border wire only": 444,
+                "Manual touch + cross-border wire": 342,
+                "Manual touch only": 2_053,
+                "Neither priority cohort": 4_761,
+            }
+        ),
+        "dashboard account fact mutation fails closed": account_fact_failure_is_closed,
+        "dashboard payment fact mutation fails closed": payment_fact_failure_is_closed,
         "simultaneous daily output covers 181 dates": len(simultaneous_daily)
         == 181,
         "positive and negative accounts coexist every day": simultaneous_daily[
