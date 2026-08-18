@@ -10,7 +10,7 @@
     <script src="app.js" defer></script>
   </head>
   <body>
-    <a class="skip-link" href="#signals">Skip to decision signals</a>
+    <a class="skip-link" href="#dashboard-menu-hub">Skip to dashboard menu</a>
 
     <div id="dashboard-shell" class="dashboard-shell" aria-busy="true">
       <div id="data-error" class="data-error" role="alert" hidden>
@@ -61,7 +61,7 @@
         </div>
       </header>
 
-      <section class="filter-toolbar" aria-label="Dashboard filters">
+      <section id="filter-toolbar" class="filter-toolbar" aria-label="Dashboard filters" hidden>
         <div class="filter-toolbar-main">
           <button
             id="filter-trigger"
@@ -190,8 +190,62 @@
       </section>
 
       <main>
-        <section id="signals" class="operation-list" aria-label="Treasury decisions and evidence signals">
-          <details id="detail-decision" class="operation-row decision-operation" name="dashboard-detail" data-inline-detail="decision">
+        <section id="dashboard-menu-hub" class="dashboard-menu-hub" aria-labelledby="dashboard-menu-title">
+          <div class="menu-hub-heading">
+            <p class="menu-hub-eyebrow">Decision workspace</p>
+            <h2 id="dashboard-menu-title" tabindex="-1">Choose a dashboard view</h2>
+            <p>Open one focused evidence view at a time. No recommendation or composite score is implied by this menu.</p>
+          </div>
+          <nav aria-label="Dashboard views">
+            <ul class="dashboard-view-menu">
+              <li>
+                <button type="button" data-select-dashboard-view="executive" aria-controls="detail-decision" data-requires-data disabled>
+                  <span class="menu-index">01</span><span><strong>Executive Overview</strong><small>Portfolio decision and the validation needed before funding or execution.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-select-dashboard-view="cash" aria-controls="detail-visibility detail-liquidity" data-requires-data disabled>
+                  <span class="menu-index">02</span><span><strong>Cash Visibility &amp; Liquidity</strong><small>Reporting delays and governed 7-day and 14-day screening sensitivities.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-select-dashboard-view="footprint" aria-controls="detail-regions detail-closures" data-requires-data disabled>
+                  <span class="menu-index">03</span><span><strong>Bank Account Footprint</strong><small>Regional account coverage and closure-validation candidates.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-select-dashboard-view="payments" aria-controls="detail-payments" data-requires-data disabled>
+                  <span class="menu-index">04</span><span><strong>Payment Operations</strong><small>Deduplicated payment cohorts, exceptions, and repair time.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-select-dashboard-view="workload" aria-controls="detail-capacity" data-requires-data disabled>
+                  <span class="menu-index">05</span><span><strong>Process Workload</strong><small>Independent management and payment-file workload estimates.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-select-dashboard-view="evidence" aria-controls="quality-view" data-requires-data disabled>
+                  <span class="menu-index">06</span><span><strong>Data Quality &amp; Evidence</strong><small>Structural checks, reconciliation controls, source artifacts, and open certification limits.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </section>
+
+        <header id="selected-view-header" class="selected-view-header" hidden>
+          <button id="all-views-button" class="all-views-button" type="button" data-show-all-views data-requires-data disabled>
+            <span aria-hidden="true">←</span> All views
+          </button>
+          <div>
+            <p id="selected-view-eyebrow" class="selected-view-eyebrow">Selected view</p>
+            <h2 id="selected-view-title" tabindex="-1">Dashboard view</h2>
+            <p id="selected-view-description">Choose a view from the menu.</p>
+          </div>
+          <button class="button button-quiet selected-view-reset" type="button" data-reset data-requires-data disabled>Reset dashboard</button>
+        </header>
+
+        <section id="signals" class="operation-list" aria-label="Selected treasury dashboard view" hidden>
+          <details id="detail-decision" class="operation-row decision-operation" name="dashboard-detail" data-inline-detail="decision" data-dashboard-view="executive" hidden>
             <summary data-detail-summary="decision">
               <span class="operation-kicker">Decision</span>
               <span class="operation-copy">
@@ -220,7 +274,7 @@
             </div>
           </details>
 
-          <details id="detail-visibility" class="operation-row visibility-operation" name="dashboard-detail" data-inline-detail="visibility">
+          <details id="detail-visibility" class="operation-row visibility-operation" name="dashboard-detail" data-inline-detail="visibility" data-dashboard-view="cash" hidden>
             <summary data-detail-summary="visibility">
               <span class="operation-kicker">Signal 01</span>
               <span class="operation-copy"><strong id="visibility-title">Reporting visibility</strong><span id="visibility-summary-boundary">Calendar-date proxy · not start-of-day or elapsed-24-hour visibility</span></span>
@@ -261,7 +315,7 @@
             </div>
           </details>
 
-          <details id="detail-liquidity" class="operation-row liquidity-operation" name="dashboard-detail" data-inline-detail="liquidity">
+          <details id="detail-liquidity" class="operation-row liquidity-operation" name="dashboard-detail" data-inline-detail="liquidity" data-dashboard-view="cash" hidden>
             <summary data-detail-summary="liquidity">
               <span class="operation-kicker">Signal 02</span>
               <span class="operation-copy"><strong id="liquidity-title">Liquidity</strong><span id="liquidity-summary-boundary">Screening only · not surplus cash or transfer authority</span></span>
@@ -317,7 +371,7 @@
             </div>
           </details>
 
-          <details id="detail-payments" class="operation-row payments-operation" name="dashboard-detail" data-inline-detail="payments">
+          <details id="detail-payments" class="operation-row payments-operation" name="dashboard-detail" data-inline-detail="payments" data-dashboard-view="payments" hidden>
             <summary data-detail-summary="payments">
               <span class="operation-kicker">Signal 03</span>
               <span class="operation-copy"><strong id="payments-title">Payment friction</strong><span id="payment-summary-boundary">Supplied records only · association, not causation</span></span>
@@ -360,7 +414,7 @@
             </div>
           </details>
 
-          <details id="detail-regions" class="operation-row regional-operation" name="dashboard-detail" data-inline-detail="regions">
+          <details id="detail-regions" class="operation-row regional-operation" name="dashboard-detail" data-inline-detail="regions" data-dashboard-view="footprint" hidden>
             <summary data-detail-summary="regions">
               <span class="operation-kicker">Scope lens</span>
               <span class="operation-copy"><strong id="regional-title">Regional footprint</strong><span id="regional-summary-boundary">Schematic account coverage · supplied diagnostics · not a live cash map</span></span>
@@ -406,9 +460,9 @@
             </div>
           </details>
 
-          <h2 id="gates-title" class="sr-only">Open evidence gates</h2>
+          <h2 id="gates-title" class="sr-only" hidden>Open evidence gates</h2>
 
-          <details id="detail-capacity" class="operation-row gate-operation" name="dashboard-detail" data-inline-detail="capacity">
+          <details id="detail-capacity" class="operation-row gate-operation" name="dashboard-detail" data-inline-detail="capacity" data-dashboard-view="workload" hidden>
             <summary data-detail-summary="capacity">
               <span class="operation-kicker">Open gate 01</span>
               <span class="operation-copy"><strong>Capacity value not fundable</strong><span id="capacity-summary">Loading capacity evidence…</span></span>
@@ -428,7 +482,7 @@
             </div>
           </details>
 
-          <details id="detail-closures" class="operation-row gate-operation" name="dashboard-detail" data-inline-detail="closures">
+          <details id="detail-closures" class="operation-row gate-operation" name="dashboard-detail" data-inline-detail="closures" data-dashboard-view="footprint" hidden>
             <summary data-detail-summary="closures">
               <span class="operation-kicker">Open gate 02</span>
               <span class="operation-copy"><strong>Closure value not fundable</strong><span id="closure-summary">Loading closure evidence…</span></span>
@@ -455,7 +509,70 @@
           </details>
         </section>
 
-        <footer class="evidence-footer"><p>Review the Metric guide before using any figure in a funding or execution decision.</p></footer>
+        <section id="quality-view" class="quality-view" aria-labelledby="quality-view-title" hidden>
+          <article class="quality-hero">
+            <div>
+              <p class="quality-eyebrow">Governed evidence status</p>
+              <h3 id="quality-view-title">Data Quality &amp; Evidence</h3>
+              <p id="quality-status">Loading internal control status…</p>
+            </div>
+            <p id="quality-certification" class="quality-certification">Source certification is loading.</p>
+          </article>
+
+          <div class="quality-control-grid" aria-label="Internal quality controls">
+            <article>
+              <span>Week 1 structural checks</span>
+              <strong id="quality-w1-checks">—</strong>
+              <small>Internal structural consistency</small>
+            </article>
+            <article>
+              <span>Week 2 reconciliation controls</span>
+              <strong id="quality-w2-controls">—</strong>
+              <small>Declared control totals</small>
+            </article>
+            <article>
+              <span>Governed source artifacts</span>
+              <strong id="quality-source-artifacts">—</strong>
+              <small>Inputs represented in this snapshot</small>
+            </article>
+          </div>
+
+          <section class="quality-population" aria-labelledby="quality-population-title">
+            <div class="quality-section-heading">
+              <div><span>Population controls</span><h3 id="quality-population-title">Supplied diagnostic population</h3></div>
+              <p>Direct controls—not a combined score</p>
+            </div>
+            <ul id="quality-population-controls" class="quality-population-list"></ul>
+          </section>
+
+          <p id="quality-boundary" class="quality-boundary">Loading evidence boundary…</p>
+
+          <section class="quality-next-action" aria-labelledby="quality-next-action-title">
+            <div>
+              <span>Next evidence action</span>
+              <h3 id="quality-next-action-title">Complete source-owner certification</h3>
+              <p id="quality-next-action">Loading evidence action…</p>
+            </div>
+            <button class="button quality-method-button" type="button" data-open-drawer="quality" data-requires-data>Open data-quality method <span aria-hidden="true">→</span></button>
+          </section>
+
+          <section class="quality-guide-links" aria-labelledby="quality-guide-links-title">
+            <div class="quality-section-heading">
+              <div><span>Methodology library</span><h3 id="quality-guide-links-title">Open a definition, formula &amp; source</h3></div>
+              <p>Six related guide topics</p>
+            </div>
+            <div class="quality-guide-grid">
+              <button type="button" data-open-drawer="overview" data-requires-data>Executive decision <span aria-hidden="true">→</span></button>
+              <button type="button" data-open-drawer="visibility" data-requires-data>Reporting visibility <span aria-hidden="true">→</span></button>
+              <button type="button" data-open-drawer="liquidity" data-requires-data>Liquidity screening <span aria-hidden="true">→</span></button>
+              <button type="button" data-open-drawer="payments" data-requires-data>Payment friction <span aria-hidden="true">→</span></button>
+              <button type="button" data-open-drawer="regions" data-requires-data>Regional footprint <span aria-hidden="true">→</span></button>
+              <button type="button" data-open-drawer="gates" data-requires-data>Evidence gates <span aria-hidden="true">→</span></button>
+            </div>
+          </section>
+        </section>
+
+        <footer id="evidence-footer" class="evidence-footer" hidden><p>Review the Metric guide before using any figure in a funding or execution decision.</p></footer>
       </main>
     </div>
 
@@ -481,6 +598,7 @@
           <button id="tab-payments" role="tab" type="button" aria-controls="panel-payments" aria-selected="false" tabindex="-1" data-tab="payments">Payments</button>
           <button id="tab-regions" role="tab" type="button" aria-controls="panel-regions" aria-selected="false" tabindex="-1" data-tab="regions">Regions</button>
           <button id="tab-gates" role="tab" type="button" aria-controls="panel-gates" aria-selected="false" tabindex="-1" data-tab="gates">Evidence gates</button>
+          <button id="tab-quality" role="tab" type="button" aria-controls="panel-quality" aria-selected="false" tabindex="-1" data-tab="quality">Data quality</button>
         </div>
 
         <div class="drawer-panels">
@@ -490,10 +608,11 @@
           <section id="panel-payments" class="drawer-panel" role="tabpanel" aria-labelledby="tab-payments" hidden></section>
           <section id="panel-regions" class="drawer-panel" role="tabpanel" aria-labelledby="tab-regions" hidden></section>
           <section id="panel-gates" class="drawer-panel" role="tabpanel" aria-labelledby="tab-gates" hidden></section>
+          <section id="panel-quality" class="drawer-panel" role="tabpanel" aria-labelledby="tab-quality" hidden></section>
         </div>
 
         <footer class="drawer-footer">
-          <button class="button button-quiet" type="button" data-reset>Reset view</button>
+          <button class="button button-quiet" type="button" data-reset>Reset dashboard</button>
         </footer>
       </div>
     </dialog>

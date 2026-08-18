@@ -1,11 +1,14 @@
 "use strict";
 
-const FilterModel = typeof window !== "undefined" ? window.NorthstarFilterModel : null;
+const FilterModel = typeof window !== "undefined"
+  ? window.NorthstarFilterModel
+  : (typeof module !== "undefined" && module.exports ? require("./filter_model.js") : null);
 
 const DEFAULT_VIEW = Object.freeze({
   liquidityDays: 14,
   paymentMeasure: "records",
   drawerTab: "overview",
+  activeDashboardView: null,
 });
 
 const PAYMENT_MEASURES = Object.freeze({
@@ -35,7 +38,7 @@ const PAYMENT_MEASURES = Object.freeze({
   },
 });
 
-const GUIDE_TOPICS = Object.freeze(["overview", "visibility", "liquidity", "payments", "regions", "gates"]);
+const GUIDE_TOPICS = Object.freeze(["overview", "visibility", "liquidity", "payments", "regions", "gates", "quality"]);
 const INLINE_TOPICS = Object.freeze(["decision", "visibility", "liquidity", "payments", "regions", "capacity", "closures"]);
 const INLINE_GUIDE_TOPIC = Object.freeze({
   decision: "overview",
@@ -46,6 +49,56 @@ const INLINE_GUIDE_TOPIC = Object.freeze({
   capacity: "gates",
   closures: "gates",
 });
+const QUALITY_POPULATION_CONTROLS = Object.freeze({
+  entities: Object.freeze({ label: "Entities", value: 16, unit: "rows", evidence_label: "ACG-DATA" }),
+  accounts: Object.freeze({ label: "Accounts", value: 55, unit: "accounts", evidence_label: "ACG-DATA" }),
+  balance_observations: Object.freeze({ label: "Account-days", value: 9955, unit: "account-days", evidence_label: "ACG-DATA" }),
+  payment_records: Object.freeze({ label: "Payment records", value: 7600, unit: "records", evidence_label: "ACG-DATA" }),
+  fx_rows: Object.freeze({ label: "FX rows", value: 1810, unit: "rows", evidence_label: "ACG-DATA" }),
+  process_activities: Object.freeze({ label: "Process activities", value: 9, unit: "activities", evidence_label: "ACG-DATA" }),
+});
+const QUALITY_POPULATION_KEYS = Object.freeze(Object.keys(QUALITY_POPULATION_CONTROLS));
+const DASHBOARD_VIEWS = Object.freeze({
+  executive: Object.freeze({
+    label: "Executive Overview",
+    applicability: "Portfolio-wide · filters do not apply",
+    description: "Portfolio decision and the validation needed before funding or execution.",
+    topics: Object.freeze(["decision"]),
+  }),
+  cash: Object.freeze({
+    label: "Cash Visibility & Liquidity",
+    applicability: "Date + dimensions",
+    description: "Reporting delays and governed 7-day and 14-day screening sensitivities.",
+    topics: Object.freeze(["visibility", "liquidity"]),
+  }),
+  footprint: Object.freeze({
+    label: "Bank Account Footprint",
+    applicability: "Mixed date rules",
+    description: "Regional account coverage and closure-validation candidates.",
+    topics: Object.freeze(["regions", "closures"]),
+  }),
+  payments: Object.freeze({
+    label: "Payment Operations",
+    applicability: "Date + dimensions",
+    description: "Deduplicated payment cohorts, exceptions, and repair time.",
+    topics: Object.freeze(["payments"]),
+  }),
+  workload: Object.freeze({
+    label: "Process Workload",
+    applicability: "Global · filters do not apply",
+    description: "Independent management and payment-file workload estimates.",
+    topics: Object.freeze(["capacity"]),
+  }),
+  evidence: Object.freeze({
+    label: "Data Quality & Evidence",
+    applicability: "Governed contract · filters do not apply",
+    description: "Structural checks, reconciliation controls, source artifacts, and open certification limits.",
+    topics: Object.freeze([]),
+  }),
+});
+const TOPIC_DASHBOARD_VIEW = Object.freeze(Object.fromEntries(
+  Object.entries(DASHBOARD_VIEWS).flatMap(([view, config]) => config.topics.map((topic) => [topic, view])),
+));
 const SEARCH_RESULT_LIMIT = 8;
 const CLOSURE_CANDIDATE_RULE = "Dormant + legacy purpose + zero supplied payment records";
 const VISUAL_COLORS = Object.freeze({
@@ -166,14 +219,121 @@ function announce(message) {
   window.setTimeout(() => setText("#dashboard-announcer", message), 20);
 }
 
+function dashboardViewForTopic(topic) {
+  return TOPIC_DASHBOARD_VIEW[topic] || null;
+}
+
+function dashboardTopicsForView(view) {
+  return DASHBOARD_VIEWS[view] ? [...DASHBOARD_VIEWS[view].topics] : [];
+}
+
+function collapseNestedDetails() {
+  getAll(".trend-data-disclosure").forEach((detail) => {
+    detail.open = false;
+  });
+}
+
+function visibleDetailSummaries() {
+  const signals = get("#signals");
+  if (!signals || signals.hidden) return [];
+  return getAll("[data-detail-summary]", signals).filter((summary) => {
+    const detail = summary.closest("[data-inline-detail]");
+    return detail && !detail.hidden;
+  });
+}
+
+function syncDashboardViewVisibility() {
+  const activeView = state.activeDashboardView;
+  const activeConfig = activeView ? DASHBOARD_VIEWS[activeView] : null;
+  const menuHub = get("#dashboard-menu-hub");
+  const selectedHeader = get("#selected-view-header");
+  const signals = get("#signals");
+  const qualityView = get("#quality-view");
+  const filterToolbar = get("#filter-toolbar");
+  const footer = get("#evidence-footer");
+
+  if (menuHub) menuHub.hidden = Boolean(activeConfig);
+  if (selectedHeader) selectedHeader.hidden = !activeConfig;
+  if (signals) signals.hidden = !activeConfig || activeView === "evidence";
+  if (qualityView) qualityView.hidden = activeView !== "evidence";
+  if (filterToolbar) {
+    filterToolbar.hidden = !dashboardData;
+  }
+  if (footer) footer.hidden = !activeConfig;
+
+  getAll("[data-inline-detail]").forEach((detail) => {
+    const visible = Boolean(activeConfig) && activeConfig.topics.includes(detail.dataset.inlineDetail);
+    if (!visible) detail.open = false;
+    detail.hidden = !visible;
+  });
+  getAll("[data-select-dashboard-view]").forEach((button) => {
+    const selected = button.dataset.selectDashboardView === activeView;
+    if (selected) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
+
+  if (activeConfig) {
+    setText("#selected-view-title", activeConfig.label);
+    setText("#selected-view-description", activeConfig.description);
+    setText("#selected-view-eyebrow", activeConfig.applicability);
+  }
+  const skipLink = get(".skip-link");
+  if (skipLink) {
+    skipLink.href = activeConfig ? "#selected-view-title" : "#dashboard-menu-title";
+    skipLink.textContent = activeConfig ? `Skip to ${activeConfig.label}` : "Skip to dashboard menu";
+  }
+  document.body.classList.toggle("has-selected-dashboard-view", Boolean(activeConfig));
+}
+
+function selectDashboardView(view, { focus = true, announceSelection = true } = {}) {
+  if (!dashboardData || !Object.prototype.hasOwnProperty.call(DASHBOARD_VIEWS, view)) return false;
+  closeSearch();
+  closeFilterPanel({ restoreFocus: false });
+  closeAllInlineDetails();
+  collapseNestedDetails();
+  state.activeDashboardView = view;
+  syncDashboardViewVisibility();
+  updateResetState();
+  if (focus) window.requestAnimationFrame(() => get("#selected-view-title").focus());
+  if (announceSelection) {
+    announce(view === "evidence"
+      ? "Data Quality & Evidence view shown. Governed evidence landing displayed."
+      : `${DASHBOARD_VIEWS[view].label} view shown. All sections are collapsed.`);
+  }
+  return true;
+}
+
+function showAllDashboardViews({ focus = true, announceSelection = true } = {}) {
+  const previousView = state.activeDashboardView;
+  closeSearch();
+  closeFilterPanel({ restoreFocus: false });
+  closeAllInlineDetails();
+  collapseNestedDetails();
+  state.activeDashboardView = null;
+  syncDashboardViewVisibility();
+  updateResetState();
+  if (focus) {
+    window.requestAnimationFrame(() => {
+      const previousButton = previousView
+        ? get(`[data-select-dashboard-view="${previousView}"]`)
+        : null;
+      const target = previousButton || get("[data-select-dashboard-view]");
+      if (target) target.focus();
+    });
+  }
+  if (announceSelection) announce("Dashboard menu shown. Choose one of six views.");
+}
+
 function setDataControlsDisabled(disabled) {
   getAll("[data-requires-data]").forEach((node) => {
     node.disabled = disabled;
   });
-  getAll("[data-inline-detail]").forEach((detail) => {
-    if (disabled) detail.open = false;
-    detail.hidden = disabled;
-  });
+  if (disabled) {
+    state.activeDashboardView = null;
+    closeAllInlineDetails();
+    collapseNestedDetails();
+  }
+  syncDashboardViewVisibility();
 }
 
 function setKpiEmpty(selector, empty) {
@@ -188,6 +348,7 @@ function assertDashboardData(data) {
     "visibility",
     "liquidity",
     "payments",
+    "quality",
     "guardrails",
     "sources",
     "filtering",
@@ -208,6 +369,47 @@ function assertDashboardData(data) {
   }
   if (data.liquidity.funded_case.value_usd !== 0 || data.liquidity.funded_case.status !== "not_fundable") {
     throw new Error("Liquidity funded case is not fail-closed");
+  }
+  const quality = data.quality;
+  const populationControls = Array.isArray(quality.population_controls) ? quality.population_controls : [];
+  const populationKeys = populationControls.map((control) => control && control.key);
+  const validPopulationControls =
+    populationControls.length === QUALITY_POPULATION_KEYS.length
+    && new Set(populationKeys).size === QUALITY_POPULATION_KEYS.length
+    && QUALITY_POPULATION_KEYS.every((key) => populationKeys.includes(key))
+    && populationControls.every((control) => {
+      if (!control || !QUALITY_POPULATION_CONTROLS[control.key]) return false;
+      const expected = QUALITY_POPULATION_CONTROLS[control.key];
+      return control.label === expected.label
+        && control.value === expected.value
+        && control.unit === expected.unit
+        && control.evidence_label === expected.evidence_label;
+    });
+  const validQualityStrings = [
+    quality.display_status,
+    quality.certification_status,
+    quality.decision_boundary,
+  ].every((value) => typeof value === "string" && value.trim());
+  if (
+    quality.status !== "reconciled_to_supplied_controls_source_certification_open"
+    || data.meta.status !== quality.status
+    || quality.display_status !== "Reconciled to supplied controls"
+    || quality.certification_status !== "Source certification open"
+    || !validQualityStrings
+    || quality.decision_boundary !== data.definitions.quality.boundary
+    || !validPopulationControls
+    || quality.source_artifacts !== 12
+    || !Array.isArray(data.sources)
+    || data.sources.length !== 12
+    || quality.source_artifacts !== data.sources.length
+    || quality.w1_checks.label !== "Week 1 structural checks"
+    || quality.w1_checks.passed !== 52
+    || quality.w1_checks.total !== 52
+    || quality.w2_controls.label !== "Week 2 reconciliation controls"
+    || quality.w2_controls.reconciled !== 13
+    || quality.w2_controls.total !== 13
+  ) {
+    throw new Error("Quality evidence is incomplete or unreconciled");
   }
   for (const topic of GUIDE_TOPICS) {
     if (!data.definitions[topic]) throw new Error(`Missing metric definition: ${topic}`);
@@ -313,6 +515,8 @@ function closeAllInlineDetails({ except = null } = {}) {
 
 function openInlineDetail(topic, { focusSummary = true } = {}) {
   if (!dashboardData || !INLINE_TOPICS.includes(topic)) return false;
+  const owningView = dashboardViewForTopic(topic);
+  if (!owningView || !selectDashboardView(owningView, { focus: false, announceSelection: false })) return false;
   const detail = get(`[data-inline-detail="${topic}"]`);
   if (!detail || detail.hidden) return false;
   closeAllInlineDetails({ except: detail });
@@ -320,6 +524,7 @@ function openInlineDetail(topic, { focusSummary = true } = {}) {
   const summary = get(`[data-detail-summary="${topic}"]`, detail);
   if (focusSummary && summary) summary.focus();
   if (summary) summary.scrollIntoView({ block: "nearest" });
+  announce(`${DASHBOARD_VIEWS[owningView].label}: ${topic} section opened.`);
   return true;
 }
 
@@ -414,6 +619,35 @@ function renderHeader() {
     scope: `Portfolio-wide decision; filters do not change it. Diagnostic scope: ${currentScopeText()}`,
     evidence: dashboardData.definitions.overview.meaning,
     nextAction: dashboardData.decision.next_step,
+  });
+}
+
+function renderQualityLanding() {
+  const quality = dashboardData.quality;
+  setText("#quality-status", quality.display_status);
+  setText("#quality-certification", quality.certification_status);
+  setText(
+    "#quality-w1-checks",
+    `${formatNumber(quality.w1_checks.passed)} / ${formatNumber(quality.w1_checks.total)} passed`,
+  );
+  setText(
+    "#quality-w2-controls",
+    `${formatNumber(quality.w2_controls.reconciled)} / ${formatNumber(quality.w2_controls.total)} reconciled`,
+  );
+  setText("#quality-source-artifacts", formatNumber(quality.source_artifacts));
+  setText("#quality-boundary", `Evidence limit · ${quality.decision_boundary}`);
+  setText("#quality-next-action", dashboardData.definitions.quality.next_action);
+
+  const population = get("#quality-population-controls");
+  population.replaceChildren();
+  quality.population_controls.forEach((control) => {
+    const item = make("li");
+    item.append(
+      make("span", "", control.label),
+      make("strong", "", formatNumber(control.value)),
+      make("small", "", `${control.unit} · ${control.evidence_label}`),
+    );
+    population.append(item);
   });
 }
 
@@ -1204,6 +1438,7 @@ function clearVisualizationOutputs(message = "Data unavailable — validation di
     "#closure-candidate-table-body",
     "#regional-map-markers",
     "#regional-evidence-table-body",
+    "#quality-population-controls",
   ].forEach((selector) => {
     const node = get(selector);
     if (node) node.replaceChildren();
@@ -1215,6 +1450,13 @@ function clearVisualizationOutputs(message = "Data unavailable — validation di
   setText("#decision-payments-chip", "Unavailable");
   setText("#regional-summary-context", "Unavailable");
   setText("#regional-selection-status", "No current result published.");
+  setText("#quality-status", "Unavailable — validation failed");
+  setText("#quality-certification", "No evidence status published.");
+  setText("#quality-w1-checks", "—");
+  setText("#quality-w2-controls", "—");
+  setText("#quality-source-artifacts", "—");
+  setText("#quality-boundary", message);
+  setText("#quality-next-action", message);
   setText("#trend-7-endpoint", "—");
   setText("#trend-14-endpoint", "—");
   const canvas = get("#liquidity-trend-canvas");
@@ -1493,23 +1735,31 @@ function resetView({ shouldAnnounce = true } = {}) {
   if (!dashboardData) return;
   state.liquidityDays = DEFAULT_VIEW.liquidityDays;
   state.paymentMeasure = DEFAULT_VIEW.paymentMeasure;
+  state.drawerTab = DEFAULT_VIEW.drawerTab;
+  state.activeDashboardView = DEFAULT_VIEW.activeDashboardView;
   closeAllInlineDetails();
-  getAll(".trend-data-disclosure").forEach((detail) => {
-    detail.open = false;
-  });
+  collapseNestedDetails();
   clearSearch();
   closeFilterPanel({ restoreFocus: false });
+  const dialog = get("#evidence-dialog");
+  if (dialog.open) {
+    lastDrawerOpener = null;
+    dialog.close();
+  }
   const validated = FilterModel.validateState(dashboardData, defaultFilters);
   appliedFilters = { ...validated };
   draftFilters = { ...validated };
   currentSummary = FilterModel.summarize(dashboardData, validated);
   writeFilterForm(draftFilters);
   renderAll();
-  if (get("#evidence-dialog").open) renderDrawerPanel(state.drawerTab);
-  if (shouldAnnounce) announce("Dashboard reset to all supplied data, 14-day liquidity, and payment records.");
+  window.requestAnimationFrame(() => {
+    const firstView = get("[data-select-dashboard-view]");
+    if (firstView) firstView.focus();
+  });
+  if (shouldAnnounce) announce("Dashboard reset. Menu shown with all supplied data, 14-day liquidity, and payment records restored.");
 }
 
-function metricSearchDefinitions() {
+function metricSearchDefinitions(data = dashboardData) {
   const inlineDefinitions = [
     ["decision", "Decision", "Expand the portfolio-wide decision and validation direction."],
     ["visibility", "Reporting visibility", "Expand the current filtered visibility result."],
@@ -1520,7 +1770,7 @@ function metricSearchDefinitions() {
     ["closures", "Closure evidence gate", "Expand the current filtered closure candidates."],
   ].map(([topic, label, description]) => {
     const guideTopic = INLINE_GUIDE_TOPIC[topic];
-    const definition = dashboardData.definitions[guideTopic];
+    const definition = data.definitions[guideTopic];
     return {
       id: `inline:${topic}`,
       label,
@@ -1528,8 +1778,14 @@ function metricSearchDefinitions() {
       keywords: [definition.title, definition.meaning, ...definition.search_aliases].join(" "),
     };
   });
+  const viewDefinitions = Object.entries(DASHBOARD_VIEWS).map(([view, config]) => ({
+    id: `view:${view}`,
+    label: config.label,
+    description: config.description,
+    keywords: `${config.label} ${config.description} ${config.applicability}`,
+  }));
   const methodologyDefinitions = GUIDE_TOPICS.map((topic) => {
-    const definition = dashboardData.definitions[topic];
+    const definition = data.definitions[topic];
     return {
       id: `guide:${topic}`,
       label: `${definition.title} — method and sources`,
@@ -1545,7 +1801,7 @@ function metricSearchDefinitions() {
       ].join(" "),
     };
   });
-  return inlineDefinitions.concat(methodologyDefinitions);
+  return inlineDefinitions.concat(viewDefinitions, methodologyDefinitions);
 }
 
 function closeSearch() {
@@ -1667,6 +1923,8 @@ function chooseSearchResult(index) {
     clearSearch();
     if (entry.id.startsWith("inline:")) {
       openInlineDetail(entry.id.slice("inline:".length));
+    } else if (entry.id.startsWith("view:")) {
+      selectDashboardView(entry.id.slice("view:".length));
     } else if (entry.id.startsWith("guide:")) {
       const topic = entry.id.slice("guide:".length);
       openDrawer(GUIDE_TOPICS.includes(topic) ? topic : "overview", searchInput);
@@ -1694,6 +1952,7 @@ function updateResetState() {
   const viewIsDefault =
     state.liquidityDays === DEFAULT_VIEW.liquidityDays &&
     state.paymentMeasure === DEFAULT_VIEW.paymentMeasure &&
+    state.activeDashboardView === DEFAULT_VIEW.activeDashboardView &&
     (!appliedFilters || isDefaultFilterState(appliedFilters)) &&
     !(get("#dashboard-search") && get("#dashboard-search").value.trim()) &&
     !inlineDetailOpen &&
@@ -1704,6 +1963,12 @@ function updateResetState() {
 }
 
 function bindEvents() {
+  getAll("[data-select-dashboard-view]").forEach((button) => {
+    button.addEventListener("click", () => selectDashboardView(button.dataset.selectDashboardView));
+  });
+  getAll("[data-show-all-views]").forEach((button) => {
+    button.addEventListener("click", () => showAllDashboardViews());
+  });
   getAll("[data-open-drawer]").forEach((button) => {
     button.addEventListener("click", () => openDrawer(button.dataset.openDrawer, button));
   });
@@ -1713,7 +1978,6 @@ function bindEvents() {
   setupLiquidityTrendResizeHandling();
 
   const inlineDetails = getAll("[data-inline-detail]");
-  const detailSummaries = getAll("[data-detail-summary]");
   inlineDetails.forEach((detail) => {
     detail.addEventListener("toggle", () => {
       if (detail.open) closeAllInlineDetails({ except: detail });
@@ -1721,8 +1985,11 @@ function bindEvents() {
       updateResetState();
     });
   });
-  detailSummaries.forEach((summary, index) => {
+  getAll("[data-detail-summary]").forEach((summary) => {
     summary.addEventListener("keydown", (event) => {
+      const detailSummaries = visibleDetailSummaries();
+      const index = detailSummaries.indexOf(summary);
+      if (index < 0) return;
       let nextIndex = null;
       if (event.key === "ArrowDown" || event.key === "ArrowRight") nextIndex = (index + 1) % detailSummaries.length;
       if (event.key === "ArrowUp" || event.key === "ArrowLeft") nextIndex = (index - 1 + detailSummaries.length) % detailSummaries.length;
@@ -1869,6 +2136,7 @@ function bindEvents() {
 
 function renderAll() {
   renderHeader();
+  renderQualityLanding();
   renderFilterChrome();
   renderVisibility();
   renderLiquidity();
@@ -1876,6 +2144,7 @@ function renderAll() {
   renderRegions();
   renderGuardrails();
   if (get("#evidence-dialog").open) renderDrawerPanel(state.drawerTab);
+  syncDashboardViewVisibility();
   updateResetState();
 }
 
@@ -1918,6 +2187,10 @@ if (typeof module !== "undefined" && module.exports) {
     regionalDelayedText,
     regionalPaymentText,
     orderSearchResultsForDisplay,
+    dashboardViewForTopic,
+    dashboardTopicsForView,
+    assertDashboardData,
+    metricSearchDefinitions,
   });
 }
 
