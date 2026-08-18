@@ -6,6 +6,7 @@
     <meta name="description" content="Project Northstar treasury diagnostic dashboard">
     <title>Project Northstar — Treasury decision dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="filter_model.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -19,19 +20,174 @@
 
       <header class="dashboard-header">
         <div class="header-copy">
+          <p class="project-name">Project Northstar</p>
           <h1>Treasury decision dashboard</h1>
           <p id="dashboard-scope" class="scope">Loading governed diagnostic data…</p>
         </div>
+
+        <div id="dashboard-search-shell" class="dashboard-search">
+          <label class="sr-only" for="dashboard-search">Search dashboard</label>
+          <input
+            id="dashboard-search"
+            type="search"
+            role="combobox"
+            placeholder="Search metrics, entities, banks…"
+            autocomplete="off"
+            spellcheck="false"
+            aria-autocomplete="list"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="dashboard-search-results"
+            data-dashboard-search
+            data-requires-data
+            disabled
+          >
+          <div
+            id="dashboard-search-results"
+            class="search-results"
+            role="listbox"
+            aria-label="Dashboard search results"
+            data-search-results
+            hidden
+          ></div>
+        </div>
+
         <div class="header-actions">
           <p id="data-status" class="status-chip">Checking supplied controls…</p>
-          <button class="button button-secondary" type="button" data-open-drawer="overview" data-requires-data>
-            Evidence &amp; definitions
-          </button>
-          <button id="reset-button" class="button button-quiet" type="button" data-reset data-requires-data disabled>
-            Reset view
+          <button class="button button-secondary guide-button" type="button" data-open-drawer="overview" data-requires-data>
+            <span class="button-glyph" aria-hidden="true">?</span>
+            <span>Metric guide</span>
           </button>
         </div>
       </header>
+
+      <section class="filter-toolbar" aria-label="Dashboard filters">
+        <div class="filter-toolbar-main">
+          <button
+            id="filter-trigger"
+            class="button filter-trigger"
+            type="button"
+            aria-expanded="false"
+            aria-controls="filter-panel"
+            data-toggle-filters
+            data-requires-data
+            disabled
+          >
+            <span>Filters</span>
+            <span id="filter-count" class="filter-count" aria-label="0 active filters" hidden>0</span>
+            <span class="filter-chevron" aria-hidden="true">▾</span>
+          </button>
+
+          <p id="filter-scope-summary" class="filter-scope-summary" aria-live="polite">
+            All dates · All currencies · All regions · All entities · All banks
+          </p>
+
+          <div
+            id="active-filter-chips"
+            class="active-filter-chips"
+            role="list"
+            aria-label="Applied filters"
+            data-filter-chips
+            hidden
+          ></div>
+
+          <button
+            id="clear-active-filters"
+            class="clear-filter-button"
+            type="button"
+            data-clear-filters="applied"
+            hidden
+          >
+            Clear filters
+          </button>
+        </div>
+
+        <div id="filter-panel" class="filter-panel" data-filter-panel hidden>
+          <form id="filter-form" data-filter-form novalidate>
+            <div class="filter-panel-heading">
+              <div>
+                <h2>Filter dashboard</h2>
+                <p>Choose a scope, then apply. Unavailable metrics will be clearly marked.</p>
+              </div>
+              <button
+                class="filter-panel-close"
+                type="button"
+                aria-label="Close dashboard filters"
+                data-close-filters
+              >
+                ×
+              </button>
+            </div>
+
+            <fieldset class="date-filter-group">
+              <legend>Date range <span>Inclusive dates</span></legend>
+              <label for="filter-date-from">
+                <span>From</span>
+                <input
+                  id="filter-date-from"
+                  name="dateFrom"
+                  type="date"
+                  min="2026-01-01"
+                  max="2026-06-30"
+                  value="2026-01-01"
+                  data-filter-field="dateFrom"
+                >
+              </label>
+              <label for="filter-date-to">
+                <span>To</span>
+                <input
+                  id="filter-date-to"
+                  name="dateTo"
+                  type="date"
+                  min="2026-01-01"
+                  max="2026-06-30"
+                  value="2026-06-30"
+                  data-filter-field="dateTo"
+                >
+              </label>
+            </fieldset>
+
+            <div class="filter-field-grid">
+              <label for="filter-currency">
+                <span>Currency</span>
+                <select id="filter-currency" name="currency" data-filter-field="currency">
+                  <option value="">All currencies</option>
+                </select>
+              </label>
+              <label for="filter-region">
+                <span>Region</span>
+                <select id="filter-region" name="region" data-filter-field="region">
+                  <option value="">All regions</option>
+                </select>
+              </label>
+              <label for="filter-entity">
+                <span>Entity</span>
+                <select id="filter-entity" name="entity" data-filter-field="entity">
+                  <option value="">All entities</option>
+                </select>
+              </label>
+              <label for="filter-bank">
+                <span>Bank</span>
+                <select id="filter-bank" name="bank" data-filter-field="bank">
+                  <option value="">All banks</option>
+                </select>
+              </label>
+            </div>
+
+            <p id="filter-validation" class="filter-message filter-validation" role="alert" hidden>
+              From date must be on or before To date.
+            </p>
+            <p id="filter-empty-state" class="filter-message filter-empty-state" role="status" hidden>
+              No comparable records match these filters. Clear one or more filters.
+            </p>
+
+            <div class="filter-panel-actions">
+              <button class="button button-quiet" type="button" data-clear-filters="draft">Clear all</button>
+              <button class="button filter-apply" type="submit">Apply filters</button>
+            </div>
+          </form>
+        </div>
+      </section>
 
       <main>
         <section class="decision-banner" aria-labelledby="decision-title">
@@ -39,7 +195,7 @@
             <h2 id="decision-title">Design and test; do not fund or execute yet.</h2>
             <p id="decision-support">Evidence is loading.</p>
           </div>
-          <span class="decision-badge">Validation required</span>
+          <span class="decision-badge">Portfolio-wide · Validation required</span>
         </section>
 
         <section id="signals" class="signal-grid" aria-label="Decision signals">
@@ -62,7 +218,7 @@
             <p class="interpretation">Focus the pilot on the highest-exposure portal and spreadsheet sources.</p>
             <p id="visibility-boundary" class="boundary">Reporting evidence boundary is loading.</p>
             <button class="card-action visibility-action" type="button" data-open-drawer="visibility" data-requires-data>
-              Inspect reporting sources <span aria-hidden="true">→</span>
+              How visibility is calculated <span aria-hidden="true">→</span>
             </button>
           </article>
 
@@ -90,7 +246,7 @@
             <p id="liquidity-interpretation" class="interpretation">Loading liquidity interpretation…</p>
             <p id="liquidity-boundary" class="boundary" aria-live="polite">Liquidity evidence boundary is loading.</p>
             <button class="card-action liquidity-action" type="button" data-open-drawer="liquidity" data-requires-data>
-              Inspect mobility evidence <span aria-hidden="true">→</span>
+              How liquidity is calculated <span aria-hidden="true">→</span>
             </button>
           </article>
 
@@ -116,7 +272,7 @@
             <p id="payment-overlap" class="overlap-note">Overlap control is loading.</p>
             <p id="payment-boundary" class="boundary">Payment evidence boundary is loading.</p>
             <button class="card-action payment-action" type="button" data-open-drawer="payments" data-requires-data>
-              Compare payment cohorts <span aria-hidden="true">→</span>
+              How payment friction is calculated <span aria-hidden="true">→</span>
             </button>
           </article>
         </section>
@@ -128,6 +284,7 @@
           </div>
           <button class="guardrail-card" type="button" data-open-drawer="gates" data-requires-data>
             <strong>Capacity value not fundable</strong>
+            <em id="capacity-filter-note" class="global-baseline-note">Global baseline · filters do not apply</em>
             <span id="capacity-summary">Loading capacity evidence…</span>
           </button>
           <button class="guardrail-card" type="button" data-open-drawer="gates" data-requires-data>
@@ -137,35 +294,35 @@
         </section>
 
         <footer class="evidence-footer">
-          <p>Review evidence before using any figure in a funding or execution decision.</p>
+          <p>Review the Metric guide before using any figure in a funding or execution decision.</p>
           <button class="footer-action" type="button" data-open-drawer="overview" data-requires-data>
-            Open evidence &amp; definitions <span aria-hidden="true">→</span>
+            Open Metric guide <span aria-hidden="true">→</span>
           </button>
         </footer>
       </main>
     </div>
 
-    <dialog id="evidence-dialog" class="evidence-dialog" aria-labelledby="drawer-title">
+    <dialog id="evidence-dialog" class="evidence-dialog" aria-labelledby="drawer-title" aria-describedby="drawer-description">
       <div class="drawer-shell">
         <header class="drawer-header">
           <div>
-            <h2 id="drawer-title">Evidence &amp; definitions</h2>
-            <p>Inspect the evidence before acting.</p>
+            <h2 id="drawer-title">Metric guide</h2>
+            <p id="drawer-description">Definitions, formulas, and sources for the current view.</p>
           </div>
-          <button id="drawer-close" class="drawer-close" type="button" data-close-drawer aria-label="Close evidence drawer">×</button>
+          <button id="drawer-close" class="drawer-close" type="button" data-close-drawer aria-label="Close metric guide">×</button>
         </header>
 
         <div class="drawer-context">
-          <strong>Why this exists</strong>
-          <p>The executive view stays concise; evidence and decision boundaries remain one click away.</p>
+          <strong>Current scope</strong>
+          <p id="guide-scope-summary">All dates · All currencies · All regions · All entities · All banks</p>
         </div>
 
-        <div class="drawer-tabs" role="tablist" aria-label="Evidence topic">
+        <div class="drawer-tabs" role="tablist" aria-label="Metric guide topic">
           <button id="tab-overview" role="tab" type="button" aria-controls="panel-overview" aria-selected="true" tabindex="0" data-tab="overview">Overview</button>
           <button id="tab-visibility" role="tab" type="button" aria-controls="panel-visibility" aria-selected="false" tabindex="-1" data-tab="visibility">Visibility</button>
           <button id="tab-liquidity" role="tab" type="button" aria-controls="panel-liquidity" aria-selected="false" tabindex="-1" data-tab="liquidity">Liquidity</button>
           <button id="tab-payments" role="tab" type="button" aria-controls="panel-payments" aria-selected="false" tabindex="-1" data-tab="payments">Payments</button>
-          <button id="tab-gates" role="tab" type="button" aria-controls="panel-gates" aria-selected="false" tabindex="-1" data-tab="gates">Open gates</button>
+          <button id="tab-gates" role="tab" type="button" aria-controls="panel-gates" aria-selected="false" tabindex="-1" data-tab="gates">Evidence gates</button>
         </div>
 
         <div class="drawer-panels">
