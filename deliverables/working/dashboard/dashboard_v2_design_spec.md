@@ -48,6 +48,14 @@ Expanded signal panels contain:
 
 The 7/14-day control lives inside the expanded Liquidity section. The Records/Exceptions/Repair time control lives inside the expanded Payment friction section.
 
+### Scope-lens disclosure
+
+| Section | Always-visible result | Supporting boundary |
+|---|---|---|
+| Regional footprint | `3 regions represented` · `55 selected accounts` | Schematic account coverage · supplied diagnostics · not a live cash map |
+
+The regional footprint is a scope lens, not a fourth decision signal. The collapsed row reports the actually applied dashboard scope. Its expanded map and table expose governed NA, EMEA, and APAC alternatives while keeping the region-override basis explicit and preserving other filters and the selected liquidity/payment controls.
+
 ### Evidence-gate disclosures
 
 | Section | Always-visible result | Supporting boundary |
@@ -59,9 +67,9 @@ Capacity detail remains enterprise-global. Closure detail follows selected curre
 
 ### Accordion behavior
 
-All six primary sections are collapsed by default. Only one section may be open at a time across Decision, Reporting visibility, Liquidity, Payment friction, Capacity evidence, and Closure evidence. Opening another section closes the previous one; clicking the open header collapses it.
+All seven primary sections are collapsed by default. Only one section may be open at a time across Decision, Reporting visibility, Liquidity, Payment friction, Regional footprint, Capacity evidence, and Closure evidence. Opening another section closes the previous one; clicking the open header collapses it.
 
-Applying filters preserves the open section and updates its summary and detail together. Reset collapses all sections. Empty scopes show `No matching data` and `—`, never a false zero percentage or retained portfolio value.
+Applying filters preserves the open section and updates its summary and detail together. Reset collapses all sections. Empty scopes show `No matching data` and `—`, never a false zero percentage or retained portfolio value. Regional footprint may continue to show explicitly labelled alternative facet rows when the applied region itself has no matches under the other filters; this is a region override, not a portfolio fallback.
 
 ## Expanded analytical-view specification
 
@@ -73,8 +81,17 @@ The visual language takes the useful hierarchy and density of the supplied dashb
 | Reporting visibility | `Account visibility composition` ring beside filtered reporting-method exposure bars | Inclusive From/To dates plus currency, region, entity, and bank update the ring, bars, interpretation, and summary | Show delayed accounts over selected accounts and `Calendar-date proxy · not start-of-day or elapsed-24-hour visibility`. The ring is composition, not target attainment. Action copy must follow the delayed methods present in the selected scope. |
 | Liquidity | Selected 7-day/14-day `Account-floor waterfall`, followed by solid 7-day and dashed 14-day daily screen lines plus `View trend data table` | Dimension filters select accounts. To supplies the waterfall as-of date; the horizon control changes the waterfall and summary. The trend spans the inclusive selected range and retains both horizons. | Gross positive estimate − preliminary restrictions + negative positions − effective buffer after account-level floors = modeled screen. Use the effective deduction, not the raw buffer. Trend gaps mean incomplete trailing windows. Always show `$0` funded case, mobility `not established`, and screening-only language. No area fill, forecast, goal, or performance arrow. |
 | Payment friction | Priority-union composition ring beside a 100% stack for Manual only, Manual + cross-border wire, Cross-border wire only, and Neither | Records/Exceptions/Repair time updates the ring, stack, persistent legend, numerator, denominator, and summary from the same filtered rows | The stack denominator is all matching selected-measure evidence; all four cohorts reconcile to it. The overlap is one mutually exclusive cohort and is counted once. Keep supplied-extract and association-not-causation boundaries visible. |
+| Regional footprint | Schematic world map with selectable NA, EMEA, and APAC markers plus a semantic regional comparison table | Each regional row overrides the active region while date, currency, entity, and bank remain applied. A marker or table action sets the region across the dashboard; `All regions` clears only region. | Treat markers as business-region classifications, not precise bank, account, cash, legal-domicile, or transfer-path locations. Do not plot liquidity, rank regions, or introduce risk/performance colors. Matching accounts ignore the date filter; delayed/payment evidence uses the inclusive period; closures use the fixed 30 Jun 2026 snapshot. |
 | Capacity evidence | Shared-scale bars comparing the management process estimate with the supplied payment-file monthly average | Filters never apply; both bars remain enterprise-global | Keep `Independent baselines`, `Shared scale · never additive`, and the global-filter boundary. Neither value is observed labor, headcount, cashable savings, or a combined P&L baseline. |
 | Closure evidence | Semantic table with Account, Entity, Bank, Account currency, Estimated annual fee (USD), Candidate rule, and Status | Currency, region, entity, and bank update rows and summary; date does not apply to the fixed 30 Jun 2026 snapshot | Every row states the narrow screen and `Validation required · not approved`. Candidate fees are not booked savings. |
+
+### Regional facet and map behavior
+
+- The local 1,280 × 650 map is a decorative rasterization of a CC0 Robinson-projection map; its source, author, geography, license, retrieval date, dimensions, and SHA-256 are recorded in `dashboard/assets/README.md`.
+- Each facet row removes only the active region constraint, retains From/To, currency, entity, and bank, and recomputes the governed NA, EMEA, or APAC summary. The interface labels this as `Comparison basis: each row overrides region`.
+- Desktop marker size represents matching account count and always shows the raw count. Unavailable anchors use a fixed size plus `Unavailable` or `Applied · no matches`, so size never invents a value.
+- Marker or table selection applies the region atomically, preserves all other filters and analytical controls, keeps Regional footprint open, synchronizes the region chip and filter form, and restores focus. Selecting an unavailable or already-applied region produces an explanatory announcement; `All regions` clears only region.
+- Liquidity remains outside the map and table. A region selection scopes the separate Liquidity section, where the as-of date, trailing horizon, `$0` funded case, and mobility `not established` remain visible.
 
 ### Visual and interaction behavior
 
@@ -83,6 +100,9 @@ The visual language takes the useful hierarchy and density of the supplied dashb
 - Empty scopes show `No matching data` and `—`. Incomplete liquidity windows show gaps and unavailable values; neither state may retain a portfolio value or substitute `0%`.
 - Use a restrained light application shell and dark navy analytical cards with purple, teal, blue, orange, and neutral accents. These colors separate categories and horizons; they do not grade performance.
 - On desktop, place primary visuals beside the interpretation rail. On tablet and mobile, stack visual regions in reading order. Long evidence tables and waterfall steps may scroll horizontally without clipping the page.
+- On desktop, keep the regional map spatial and the comparison table full width. At mobile widths, hide the decorative silhouette and convert the same region controls to a two-column, then one-column, selector-card layout without dropping counts or selected/unavailable states.
+- Treat Regional footprint as a scope-selection surface, not a ranked signal: no choropleth, performance heat, pulsing live marker, route arc, cash-sized bubble, or transfer-flow animation is permitted.
+- Exact region-code search (`NA`, `EMEA`, `APAC`) presents the dimension action first. `Regional footprint`, `region overview`, and `map` open the scope lens; methodology terms open its Metric guide topic.
 
 ### Accessible evidence rendering
 
@@ -91,6 +111,7 @@ The visual language takes the useful hierarchy and density of the supplied dashb
 - Keep legends persistent with labels, values, and shares; color alone does not encode cohort, horizon, or status.
 - Distinguish the liquidity horizons by line style as well as color: 7-day solid, 14-day dashed. Do not require hover; the trend table is the exact-value alternative.
 - Render liquidity and closure tables with captions, column headers, and row-header semantics. Announce filter and toggle updates through the existing live region.
+- Render region markers as real buttons in a labelled group, expose selected and unavailable states in text and ARIA, support arrow/Home/End movement, and repeat every regional value and action in a captioned semantic table.
 
 ## Metric guide
 
@@ -105,6 +126,8 @@ The Metric guide is stable methodology, not a second results view. It contains:
 
 The guide does not repeat current values, interpretations, decision boundaries, or next actions. Those belong to the inline disclosure so the user can interpret evidence without leaving page context.
 
+The Regional footprint topic defines the governed classifications, facet-override calculation, source files, mixed date applicability, and schematic/non-live method limit. It does not repeat current marker/table values or selected-region actions.
+
 Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$0 funded case`, or `not established` in hover-only help.
 
 ## User-facing design rules
@@ -117,13 +140,15 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$
 - Keep all toggle targets at least 44 px and use direct text; do not depend on color, hover, or icons alone.
 - Preserve `$0` funded-case mobility, `not established`, and global-capacity labelling in the collapsed state.
 - Keep current evidence and actions inline; reserve the Metric guide for definitions, formulas, sources, and method limits.
+- Label Regional footprint as `Scope lens`; do not number or describe it as a performance signal.
+- Preserve map/table equivalence: the map provides spatial selection while the table provides exact evidence and the same region actions. Remove only the decorative map when the viewport is too narrow.
 - Preserve Version 1 unchanged on its own Figma page.
 - Use the existing Inter fallback because SF Pro renders without glyphs through the current Figma automation integration.
 
 ## Acceptance criteria
 
 - A reviewer can state `design and test—not fund or execute` within ten seconds.
-- A reviewer can scan all five signal/gate summaries without opening a section.
+- A reviewer can scan all six signal/scope/gate summaries without opening a section.
 - No chart, detailed control, warning block, or evidence table is expanded by default.
 - Opening one primary section closes the previously open section.
 - Search expands and focuses the correct section; methodology search opens the Metric guide.
@@ -138,6 +163,9 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$
 - The selected liquidity waterfall reconciles to the modeled screen, uses the effective post-floor buffer deduction, and never converts the screen into validated mobility.
 - Liquidity lines have no fill or forecast treatment; incomplete trailing windows remain gaps, and exact daily values are available in the semantic table.
 - The payment ring and four-cohort stack use the same filtered denominator and reconcile for Records, Exceptions, and Repair time; overlap is counted once.
+- Regional account, delayed-account, payment, closure, and complete-screen totals reconcile to the non-region facet scope; the map never presents liquidity, a composite score, or live-location semantics.
+- Region marker/table selection preserves every non-region filter, leaves the Regional footprint open, synchronizes the filter form and chips, and returns focus to the equivalent selected control. `All regions` clears only region.
+- Exact NA, EMEA, and APAC search applies the corresponding region filter; `Regional footprint`, `region overview`, or `map` opens the scope lens.
 - Capacity comparison bars remain global, independent, and non-additive.
 - Closure candidate rows follow dimension filters, ignore the date filter by design, label fee estimates in USD, and remain explicitly unapproved and unvalidated.
 - Charts retain visible labels, legends, and accessible text equivalents; empty and incomplete states never imply zero.
@@ -156,14 +184,15 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$
 
 The browser implementation adds only interactions that support a decision or reveal its evidence:
 
-- **Inline progressive disclosure:** six summary rows expose current evidence in place; one-open-at-a-time behavior keeps the page concise.
-- **Reference-inspired analytics:** expanded sections add separate decision chips, visibility composition/source exposure, liquidity construction and date sensitivity, payment cohort composition, independent capacity comparison, and row-level closure evidence. Each form explains a supported relationship without implying performance, certainty, or fundable value.
+- **Inline progressive disclosure:** seven summary rows expose current evidence in place; one-open-at-a-time behavior keeps the page concise.
+- **Reference-inspired analytics:** expanded sections add separate decision chips, visibility composition/source exposure, liquidity construction and date sensitivity, payment cohort composition, a regional scope map/table, independent capacity comparison, and row-level closure evidence. Each form explains a supported relationship without implying performance, certainty, or fundable value.
 - **Dashboard search:** expands metric sections, applies explicit dimension/account context, and routes methodology queries to the Metric guide.
-- **Governed filters:** applies an inclusive date range plus single-select currency, region, entity, and bank. Visibility and payments use the selected period; liquidity uses the period end date; closures use account dimensions; capacity remains global.
+- **Governed filters:** applies an inclusive date range plus single-select currency, region, entity, and bank. Visibility and payments use the selected period; liquidity uses the period end date; closures use account dimensions; capacity remains global. Regional comparison rows explicitly override only region while retaining other filters and their measure-specific date rules.
 - **Liquidity horizon:** switches governed 7-day and 14-day evidence inside the open Liquidity section. Validated mobility remains `not established`, and the funded case remains `$0`.
 - **Payment measure:** switches records, exceptions, and repair minutes inside the open Payment friction section while preserving the deduplicated cohort union.
+- **Regional scope lens:** applies a governed NA, EMEA, or APAC filter from either the schematic map or exact table while preserving all other control state. Each comparison row overrides region only, so alternate regional scopes remain inspectable.
 - **Metric guide:** provides definition, formula, source, and method-limit reference without duplicating current evidence or actions.
 - **Reset:** clears search and filters, restores the full-period/14-day/payment-record baseline, and collapses all sections.
-- **Accessible navigation:** native disclosure behavior handles Enter/Space; arrow keys, Home/End, and Escape provide fast keyboard movement and collapse with focus return.
+- **Accessible navigation:** native disclosure behavior handles Enter/Space; section arrow keys, Home/End, and Escape provide fast movement and collapse with focus return. Regional markers add arrow/Home/End focus movement, pressed/disabled state, live announcements, equivalent table actions, and post-filter focus restoration.
 
 These interactions make the artifact behave like an analytical application rather than a static slide. Free-form thresholds, recommendation scores, funding controls, and execution actions remain intentionally excluded.
