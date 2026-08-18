@@ -63,6 +63,35 @@ All six primary sections are collapsed by default. Only one section may be open 
 
 Applying filters preserves the open section and updates its summary and detail together. Reset collapses all sections. Empty scopes show `No matching data` and `—`, never a false zero percentage or retained portfolio value.
 
+## Expanded analytical-view specification
+
+The visual language takes the useful hierarchy and density of the supplied dashboard references while preserving the limits of the Week 1–2 evidence. Visuals appear only inside the open accordion section; the fully collapsed executive view remains concise.
+
+| Section | Expanded visual and role | Interaction and scope | Required evidence boundary |
+|---|---|---|---|
+| Portfolio decision | Three portfolio evidence chips headed `Three signals remain separate` | The chips remain portfolio-wide and filter-independent | Always show `Separate signals—not a composite score.` No weighting, recommendation score, or confidence score is calculated. |
+| Reporting visibility | `Account visibility composition` ring beside filtered reporting-method exposure bars | Inclusive From/To dates plus currency, region, entity, and bank update the ring, bars, interpretation, and summary | Show delayed accounts over selected accounts and `Calendar-date proxy · not start-of-day or elapsed-24-hour visibility`. The ring is composition, not target attainment. Action copy must follow the delayed methods present in the selected scope. |
+| Liquidity | Selected 7-day/14-day `Account-floor waterfall`, followed by solid 7-day and dashed 14-day daily screen lines plus `View trend data table` | Dimension filters select accounts. To supplies the waterfall as-of date; the horizon control changes the waterfall and summary. The trend spans the inclusive selected range and retains both horizons. | Gross positive estimate − preliminary restrictions + negative positions − effective buffer after account-level floors = modeled screen. Use the effective deduction, not the raw buffer. Trend gaps mean incomplete trailing windows. Always show `$0` funded case, mobility `not established`, and screening-only language. No area fill, forecast, goal, or performance arrow. |
+| Payment friction | Priority-union composition ring beside a 100% stack for Manual only, Manual + cross-border wire, Cross-border wire only, and Neither | Records/Exceptions/Repair time updates the ring, stack, persistent legend, numerator, denominator, and summary from the same filtered rows | The stack denominator is all matching selected-measure evidence; all four cohorts reconcile to it. The overlap is one mutually exclusive cohort and is counted once. Keep supplied-extract and association-not-causation boundaries visible. |
+| Capacity evidence | Shared-scale bars comparing the management process estimate with the supplied payment-file monthly average | Filters never apply; both bars remain enterprise-global | Keep `Independent baselines`, `Shared scale · never additive`, and the global-filter boundary. Neither value is observed labor, headcount, cashable savings, or a combined P&L baseline. |
+| Closure evidence | Semantic table with Account, Entity, Bank, Account currency, Estimated annual fee (USD), Candidate rule, and Status | Currency, region, entity, and bank update rows and summary; date does not apply to the fixed 30 Jun 2026 snapshot | Every row states the narrow screen and `Validation required · not approved`. Candidate fees are not booked savings. |
+
+### Visual and interaction behavior
+
+- Keep the one-open-at-a-time accordion rule. Metric search opens and focuses the inline section; methodology search opens the Metric guide.
+- Apply a valid filter atomically to the collapsed summary, expanded visual, legend or table, interpretation, and scope. An invalid range leaves the last valid view unchanged.
+- Empty scopes show `No matching data` and `—`. Incomplete liquidity windows show gaps and unavailable values; neither state may retain a portfolio value or substitute `0%`.
+- Use a restrained light application shell and dark navy analytical cards with purple, teal, blue, orange, and neutral accents. These colors separate categories and horizons; they do not grade performance.
+- On desktop, place primary visuals beside the interpretation rail. On tablet and mobile, stack visual regions in reading order. Long evidence tables and waterfall steps may scroll horizontally without clipping the page.
+
+### Accessible evidence rendering
+
+- Keep every section summary and control keyboard-operable with a minimum 44 px target and visible focus.
+- Give each composition ring and chart an accessible name containing the current numerator, denominator, unit, and scope. Repeat essential values visibly.
+- Keep legends persistent with labels, values, and shares; color alone does not encode cohort, horizon, or status.
+- Distinguish the liquidity horizons by line style as well as color: 7-day solid, 14-day dashed. Do not require hover; the trend table is the exact-value alternative.
+- Render liquidity and closure tables with captions, column headers, and row-header semantics. Announce filter and toggle updates through the existing live region.
+
 ## Metric guide
 
 The top-menu control and the button inside each expanded section open an accessible right-side dialog on the relevant topic.
@@ -104,6 +133,14 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$
 - Capacity remains visibly global and closure/capacity figures remain non-fundable.
 - Empty or incomplete scopes show `No matching data` or `—`, never stale portfolio values or false zero percentages.
 - Keyboard navigation supports Enter/Space, arrow keys, Home/End, and Escape.
+- Decision chips remain separate evidence signals and never resolve to a composite score.
+- Visibility ring values and source bars reconcile to the selected account population, and action copy follows the delayed methods actually present.
+- The selected liquidity waterfall reconciles to the modeled screen, uses the effective post-floor buffer deduction, and never converts the screen into validated mobility.
+- Liquidity lines have no fill or forecast treatment; incomplete trailing windows remain gaps, and exact daily values are available in the semantic table.
+- The payment ring and four-cohort stack use the same filtered denominator and reconcile for Records, Exceptions, and Repair time; overlap is counted once.
+- Capacity comparison bars remain global, independent, and non-additive.
+- Closure candidate rows follow dimension filters, ignore the date filter by design, label fee estimates in USD, and remain explicitly unapproved and unvalidated.
+- Charts retain visible labels, legends, and accessible text equivalents; empty and incomplete states never imply zero.
 - The Metric guide contains no duplicate current-result or next-action content.
 
 ## Figma build record
@@ -113,13 +150,14 @@ Do not hide `supplied`, `estimated`, `screening sensitivity`, `deduplicated`, `$
 - Closed-state frame: `Project Northstar — Dashboard V2` (`11:3`)
 - Canvas: 1440 × 900, with the original Version 1 frame preserved unchanged.
 - Visual QA: 49 text layers use Inter; no zero-size text, overflow, placeholder layers, or missing required evidence language remain.
-- Implementation: the Figma frame remains the palette and typography reference; the browser dashboard extends it with the inline progressive-disclosure model specified here.
+- Implementation: the Figma frame remains the palette and typography reference; the browser dashboard extends it with inline progressive disclosure and reference-inspired analytical forms whose labels, interactions, and empty states are governed by this specification.
 
 ## Implemented interaction model
 
 The browser implementation adds only interactions that support a decision or reveal its evidence:
 
 - **Inline progressive disclosure:** six summary rows expose current evidence in place; one-open-at-a-time behavior keeps the page concise.
+- **Reference-inspired analytics:** expanded sections add separate decision chips, visibility composition/source exposure, liquidity construction and date sensitivity, payment cohort composition, independent capacity comparison, and row-level closure evidence. Each form explains a supported relationship without implying performance, certainty, or fundable value.
 - **Dashboard search:** expands metric sections, applies explicit dimension/account context, and routes methodology queries to the Metric guide.
 - **Governed filters:** applies an inclusive date range plus single-select currency, region, entity, and bank. Visibility and payments use the selected period; liquidity uses the period end date; closures use account dimensions; capacity remains global.
 - **Liquidity horizon:** switches governed 7-day and 14-day evidence inside the open Liquidity section. Validated mobility remains `not established`, and the funded case remains `$0`.

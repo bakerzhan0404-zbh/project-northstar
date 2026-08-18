@@ -25,6 +25,19 @@ Each collapsed row keeps the decision-ready summary and its essential evidence b
 
 Why: the default view behaves like an analytical worklist rather than a presentation slide. A user can scan every conclusion first, then open only the evidence needed for the current decision.
 
+### Expanded analytical views
+
+Reference-inspired visuals appear only after a section is opened. They translate governed Week 1–2 evidence into inspectable comparisons; they are not targets, scores, forecasts, or approved value.
+
+| Section | Expanded evidence | Why this form fits the evidence |
+|---|---|---|
+| Portfolio decision | Three evidence chips for reporting visibility, liquidity, and payment friction | The chips make separate portfolio signals scannable without combining them into a recommendation or confidence score. The portfolio-wide decision does not change with filters. |
+| Reporting visibility | A selected-account composition ring and reporting-method exposure bars | The ring shows delayed and same-day parts of the selected account population; the bars show where source exposure sits. Both describe composition, not target attainment. |
+| Liquidity | A selected-horizon account-floor waterfall, unfilled 7-day/14-day screen lines, and an exact-value table | The waterfall makes the governed construction auditable. The lines show modeled sensitivity across supplied dates—not a forecast, surplus-cash series, or transfer authorization. |
+| Payment friction | A priority-union composition ring and a 100% stack of four mutually exclusive cohorts | The ring shows how much of the selected measure is in the deduplicated union; the stack shows each cohort's contribution while counting the overlap once. |
+| Capacity evidence | Two shared-scale comparison bars | The bars compare the management process estimate with the supplied payment-file monthly average without adding them or presenting either as removable labor or cashable savings. |
+| Closure evidence | A row-level candidate table | Account, entity, bank, account currency, USD fee estimate, candidate rule, and validation status stay together so every row reads as a validation candidate—not an approved closure. |
+
 ### Dashboard search
 
 Search metrics, entities, banks, regions, currencies, or account identifiers. Selecting a metric expands and focuses the matching inline section. Selecting a dimension applies that filter; selecting an account applies its currency, region, entity, and bank context. Searches for definitions, formulas, sources, or methodology open the Metric guide.
@@ -37,11 +50,15 @@ Open `Filters` to select an inclusive date range, currency, region, entity, and 
 
 Why: this tests whether a portfolio-level signal persists in a specific operating scope. Visibility and payments use the selected date range; liquidity uses the selected end date and its complete trailing 7/14-day window; closure candidates use account dimensions; the capacity baseline remains global.
 
+Applied filters update the closed summaries and every open visual atomically: visibility composition/source bars and payment composition use the inclusive period, the liquidity waterfall uses the range end and selected horizon while its trend spans the inclusive range, closure rows use account dimensions only, and capacity remains global.
+
 ### Liquidity horizon and payment measure
 
-Open `Liquidity` to switch between the governed 7-day and 14-day screens. Open `Payment friction` to switch the same four mutually exclusive cohorts between `Records`, `Exceptions`, and `Repair time`. Each control updates its collapsed summary and open detail panel together.
+Open `Liquidity` to switch the selected waterfall and collapsed summary between the governed 7-day and 14-day screens. The trend continues to compare both horizons across the selected date range, and `View trend data table` exposes the exact daily values. Dates without a complete trailing window remain unavailable and appear as gaps rather than zero.
 
-Why: controls stay next to the evidence they change. The liquidity screen never implies transferability, and the payment numerator, denominator, unit, chart, and explanation move together while the overlap is counted once.
+Open `Payment friction` to switch the ring, 100% cohort stack, legend, numerator, denominator, and collapsed summary together between `Records`, `Exceptions`, and `Repair time`. All four cohorts remain mutually exclusive, so the manual-touch/cross-border overlap is counted once.
+
+Why: controls stay next to the evidence they change. The liquidity views explain modeled construction and date sensitivity without implying transferability; the payment views preserve one selected-scope denominator from summary through detail.
 
 ### Metric guide
 
@@ -66,6 +83,14 @@ Native disclosure headers support `Enter` and `Space`. `Up`/`Down` or `Left`/`Ri
 - An empty or incomplete filtered scope is shown as unavailable, never as a false zero or a retained portfolio value.
 - No free-form threshold sliders, recommendation scores, funding controls, or execution actions are included.
 - The snapshot remains limited to supplied data for 1 January–30 June 2026 and is not live operations.
+- Every expanded visual is rendered from the governed current-scope summary; filtered views never fall back to portfolio totals.
+- Composition rings show a numerator and denominator and are labelled as composition, never as a score, grade, or target.
+- The liquidity waterfall uses the effective buffer deduction after account-level floors and reconciles to the selected modeled screen; the raw buffer is not substituted for that deduction.
+- Liquidity lines are unfilled and retain gaps for incomplete 7-day or 14-day windows. A semantic table provides exact values; missing values are never plotted as zero.
+- Payment cohort segments reconcile to the selected measure. Persistent labels show cohort, value, and share, and the overlap remains its own mutually exclusive cohort.
+- Capacity bars remain independent, share a scale, and are never additive. Filters do not apply to this enterprise-global comparison.
+- Closure rows remain `Candidate only · not approved`; local purpose, dependencies, continuity, closure cost, and fee removal remain unvalidated.
+- Visual meaning is available without color or hover through direct labels, persistent legends, accessible chart descriptions, and semantic tables.
 
 ## Refresh and verify
 
@@ -90,8 +115,8 @@ The final UI test opens a temporary loopback server when the environment permits
 - `dashboard/dashboard_data.json` — generated governed contract
 - `dashboard/index.html` — semantic dashboard structure
 - `dashboard/styles.css` — Figma-aligned responsive design
-- `dashboard/filter_model.js` — deterministic filtering, summaries, and search
-- `dashboard/app.js` — accordion, search, filter, Metric guide, accessibility, and fail-closed interactions
+- `dashboard/filter_model.js` — deterministic filtering, governed visualization summaries, and search
+- `dashboard/app.js` — accordion, charts, search, filters, Metric guide, accessibility, and fail-closed interactions
 - `tests/test_dashboard_data.py` — analytical contract tests
-- `tests/test_dashboard_filter_model.js` — filter, search, date, and empty-scope tests
-- `tests/test_dashboard_ui.py` — structure, accordion exclusivity, keyboard, claim, safety, and local-asset tests
+- `tests/test_dashboard_filter_model.js` — filter, visualization reconciliation, search, date, mutation, and empty-scope tests
+- `tests/test_dashboard_ui.py` — structure, visualization, accordion, keyboard, claim, safety, and local-asset tests
