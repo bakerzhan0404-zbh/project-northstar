@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Project Northstar treasury diagnostic dashboard">
+    <title>Project Northstar — Treasury decision dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#signals">Skip to decision signals</a>
+
+    <div id="dashboard-shell" class="dashboard-shell" aria-busy="true">
+      <div id="data-error" class="data-error" role="alert" hidden>
+        <strong>Data unavailable — validation did not complete.</strong>
+        <span>No dashboard result has been published.</span>
+      </div>
+
+      <header class="dashboard-header">
+        <div class="header-copy">
+          <h1>Treasury decision dashboard</h1>
+          <p id="dashboard-scope" class="scope">Loading governed diagnostic data…</p>
+        </div>
+        <div class="header-actions">
+          <p id="data-status" class="status-chip">Checking supplied controls…</p>
+          <button class="button button-secondary" type="button" data-open-drawer="overview" data-requires-data>
+            Evidence &amp; definitions
+          </button>
+          <button id="reset-button" class="button button-quiet" type="button" data-reset data-requires-data disabled>
+            Reset view
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="decision-banner" aria-labelledby="decision-title">
+          <div>
+            <h2 id="decision-title">Design and test; do not fund or execute yet.</h2>
+            <p id="decision-support">Evidence is loading.</p>
+          </div>
+          <span class="decision-badge">Validation required</span>
+        </section>
+
+        <section id="signals" class="signal-grid" aria-label="Decision signals">
+          <article class="signal-card signal-visibility" aria-labelledby="visibility-title">
+            <div class="signal-heading">
+              <h2 id="visibility-title">Reporting visibility</h2>
+              <span>Signal 01</span>
+            </div>
+            <div class="kpi-block">
+              <strong id="visibility-kpi" class="kpi" aria-live="polite">—</strong>
+              <span>accounts are delayed</span>
+            </div>
+            <div class="account-split" aria-label="Same-day and delayed account split">
+              <div class="split-bar">
+                <span id="same-day-segment" class="split-segment same-day"><b id="same-day-label">—</b></span>
+                <span id="delayed-segment" class="split-segment delayed"><b id="delayed-label">—</b></span>
+              </div>
+              <p id="visibility-interpretation">Loading reporting-source evidence…</p>
+            </div>
+            <p class="interpretation">Focus the pilot on the highest-exposure portal and spreadsheet sources.</p>
+            <p id="visibility-boundary" class="boundary">Reporting evidence boundary is loading.</p>
+            <button class="card-action visibility-action" type="button" data-open-drawer="visibility" data-requires-data>
+              Inspect reporting sources <span aria-hidden="true">→</span>
+            </button>
+          </article>
+
+          <article class="signal-card signal-liquidity" aria-labelledby="liquidity-title">
+            <div class="signal-heading">
+              <h2 id="liquidity-title">Liquidity</h2>
+              <span>Signal 02</span>
+            </div>
+            <div class="kpi-block mobility-kpi">
+              <strong id="funded-case-value" class="kpi">—</strong>
+              <span>funded-case mobility</span>
+              <small id="mobility-status">Validated mobility is loading.</small>
+            </div>
+            <fieldset class="segmented-control" data-requires-data>
+              <legend>Modeled screening sensitivity</legend>
+              <label>
+                <input type="radio" name="liquidity-days" value="7">
+                <span>7-day · <b id="screen-7-value">—</b></span>
+              </label>
+              <label>
+                <input type="radio" name="liquidity-days" value="14" checked>
+                <span>14-day · <b id="screen-14-value">—</b></span>
+              </label>
+            </fieldset>
+            <p id="liquidity-interpretation" class="interpretation">Loading liquidity interpretation…</p>
+            <p id="liquidity-boundary" class="boundary" aria-live="polite">Liquidity evidence boundary is loading.</p>
+            <button class="card-action liquidity-action" type="button" data-open-drawer="liquidity" data-requires-data>
+              Inspect mobility evidence <span aria-hidden="true">→</span>
+            </button>
+          </article>
+
+          <article class="signal-card signal-payments" aria-labelledby="payments-title">
+            <div class="signal-heading">
+              <h2 id="payments-title">Payment friction</h2>
+              <span>Signal 03</span>
+            </div>
+            <div class="kpi-block">
+              <strong id="payment-kpi" class="kpi" aria-live="polite">—</strong>
+              <span id="payment-kpi-label">priority-union share</span>
+            </div>
+            <fieldset class="segmented-control payment-control" data-requires-data>
+              <legend>Compare the same deduplicated cohorts by</legend>
+              <label><input type="radio" name="payment-measure" value="records" checked><span>Records</span></label>
+              <label><input type="radio" name="payment-measure" value="exceptions"><span>Exceptions</span></label>
+              <label><input type="radio" name="payment-measure" value="repair_minutes"><span>Repair time</span></label>
+            </fieldset>
+            <div class="union-share" aria-label="Priority union share of selected measure">
+              <span id="payment-union-bar" class="union-fill"></span>
+              <span id="payment-union-label" class="union-label">Loading payment evidence…</span>
+            </div>
+            <p id="payment-overlap" class="overlap-note">Overlap control is loading.</p>
+            <p id="payment-boundary" class="boundary">Payment evidence boundary is loading.</p>
+            <button class="card-action payment-action" type="button" data-open-drawer="payments" data-requires-data>
+              Compare payment cohorts <span aria-hidden="true">→</span>
+            </button>
+          </article>
+        </section>
+
+        <section class="guardrail-strip" aria-labelledby="gates-title">
+          <div class="guardrail-intro">
+            <span>Not yet fundable</span>
+            <h2 id="gates-title">Two evidence gates remain open</h2>
+          </div>
+          <button class="guardrail-card" type="button" data-open-drawer="gates" data-requires-data>
+            <strong>Capacity value not fundable</strong>
+            <span id="capacity-summary">Loading capacity evidence…</span>
+          </button>
+          <button class="guardrail-card" type="button" data-open-drawer="gates" data-requires-data>
+            <strong>Closure value not fundable</strong>
+            <span id="closure-summary">Loading closure evidence…</span>
+          </button>
+        </section>
+
+        <footer class="evidence-footer">
+          <p>Review evidence before using any figure in a funding or execution decision.</p>
+          <button class="footer-action" type="button" data-open-drawer="overview" data-requires-data>
+            Open evidence &amp; definitions <span aria-hidden="true">→</span>
+          </button>
+        </footer>
+      </main>
+    </div>
+
+    <dialog id="evidence-dialog" class="evidence-dialog" aria-labelledby="drawer-title">
+      <div class="drawer-shell">
+        <header class="drawer-header">
+          <div>
+            <h2 id="drawer-title">Evidence &amp; definitions</h2>
+            <p>Inspect the evidence before acting.</p>
+          </div>
+          <button id="drawer-close" class="drawer-close" type="button" data-close-drawer aria-label="Close evidence drawer">×</button>
+        </header>
+
+        <div class="drawer-context">
+          <strong>Why this exists</strong>
+          <p>The executive view stays concise; evidence and decision boundaries remain one click away.</p>
+        </div>
+
+        <div class="drawer-tabs" role="tablist" aria-label="Evidence topic">
+          <button id="tab-overview" role="tab" type="button" aria-controls="panel-overview" aria-selected="true" tabindex="0" data-tab="overview">Overview</button>
+          <button id="tab-visibility" role="tab" type="button" aria-controls="panel-visibility" aria-selected="false" tabindex="-1" data-tab="visibility">Visibility</button>
+          <button id="tab-liquidity" role="tab" type="button" aria-controls="panel-liquidity" aria-selected="false" tabindex="-1" data-tab="liquidity">Liquidity</button>
+          <button id="tab-payments" role="tab" type="button" aria-controls="panel-payments" aria-selected="false" tabindex="-1" data-tab="payments">Payments</button>
+          <button id="tab-gates" role="tab" type="button" aria-controls="panel-gates" aria-selected="false" tabindex="-1" data-tab="gates">Open gates</button>
+        </div>
+
+        <div class="drawer-panels">
+          <section id="panel-overview" class="drawer-panel" role="tabpanel" aria-labelledby="tab-overview"></section>
+          <section id="panel-visibility" class="drawer-panel" role="tabpanel" aria-labelledby="tab-visibility" hidden></section>
+          <section id="panel-liquidity" class="drawer-panel" role="tabpanel" aria-labelledby="tab-liquidity" hidden></section>
+          <section id="panel-payments" class="drawer-panel" role="tabpanel" aria-labelledby="tab-payments" hidden></section>
+          <section id="panel-gates" class="drawer-panel" role="tabpanel" aria-labelledby="tab-gates" hidden></section>
+        </div>
+
+        <footer class="drawer-footer">
+          <button class="button button-quiet" type="button" data-reset>Reset view</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <p id="dashboard-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+    <noscript>
+      <p class="noscript-message">JavaScript is required to inspect the governed dashboard evidence. No analytical result is shown without validation.</p>
+    </noscript>
+  </body>
+</html>

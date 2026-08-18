@@ -1,0 +1,336 @@
+{
+  "decision": {
+    "headline": "Design and test; do not fund or execute yet.",
+    "next_step": "Prioritize delayed reporting sources and payment root causes; certify mobility before booking value.",
+    "status": "validation_required"
+  },
+  "guardrails": {
+    "capacity": {
+      "decision_boundary": "Source scope and removability are unresolved; no combined capacity or P&L baseline",
+      "difference_hours_monthly": 46.8222,
+      "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+      "payment_file_repair_hours_monthly": 55.7778,
+      "process_file_exception_repair_hours_monthly": 102.6,
+      "process_to_payment_ratio": 1.8394,
+      "status": "not_fundable",
+      "total_estimated_manual_hours_monthly": 617.72
+    },
+    "closures": {
+      "approved_closures": 0,
+      "candidate_account_ids": [
+        "AC0004",
+        "AC0009",
+        "AC0024",
+        "AC0037"
+      ],
+      "decision_boundary": "Local purpose, dependencies, signatories, service continuity, closure cost, and fee removal are not validated",
+      "estimated_annual_fees_usd": 7800.0,
+      "evidence_label": "ANALYST-CALC",
+      "funded_case_value_usd": 0,
+      "status": "not_fundable",
+      "validation_candidates": 4
+    }
+  },
+  "liquidity": {
+    "decision_boundary": "Scenario screen only; no threshold is validated movable cash",
+    "default_window_days": 14,
+    "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+    "evidence_ladder": [
+      {
+        "decision_boundary": "Before negative positions, restrictions, and buffers",
+        "evidence_label": "ANALYST-CALC",
+        "key": "gross_positive_estimated_availability",
+        "label": "Gross positive estimated availability",
+        "role": "starting_total",
+        "value_usd": 57801215.46,
+        "waterfall_delta_usd": 57801215.46
+      },
+      {
+        "decision_boundary": "Preliminary flag only; requires account-level certification",
+        "evidence_label": "ANALYST-CALC",
+        "key": "preliminary_restrictions",
+        "label": "Preliminary restrictions",
+        "role": "deduction",
+        "value_usd": 8053700.97,
+        "waterfall_delta_usd": -8053700.97
+      },
+      {
+        "decision_boundary": "Derived within the adapter from the reconciled scenario layers; not proof of transferability",
+        "evidence_label": "ANALYST-CALC",
+        "key": "negative_positions",
+        "label": "Negative positions",
+        "role": "deduction",
+        "value_usd": -2138293.09,
+        "waterfall_delta_usd": -2138293.09
+      },
+      {
+        "decision_boundary": "Before an operating buffer; not validated movable cash",
+        "evidence_label": "ANALYST-CALC",
+        "key": "apparent_net_before_buffer",
+        "label": "Apparent net before illustrative buffer",
+        "role": "resulting_total",
+        "value_usd": 47609221.4,
+        "waterfall_delta_usd": null
+      }
+    ],
+    "funded_case": {
+      "display": "$0",
+      "reason": "Validated mobility has not been established",
+      "status": "not_fundable",
+      "value_usd": 0
+    },
+    "scenarios": {
+      "14": {
+        "buffer_usd": 10828186.91,
+        "screen_usd": 38127490.73,
+        "thresholds": {
+          "base": {
+            "complete_windows": 168,
+            "decision_boundary": "Scenario screen only; no threshold is validated movable cash",
+            "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+            "median_screen_usd": 36667187.11,
+            "met_rate_pct": 82.14,
+            "minimum_screen_usd": 31277959.18,
+            "threshold_usd": 35000000.0,
+            "windows_met": 138
+          },
+          "stress": {
+            "complete_windows": 168,
+            "decision_boundary": "Scenario screen only; no threshold is validated movable cash",
+            "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+            "median_screen_usd": 36667187.11,
+            "met_rate_pct": 100.0,
+            "minimum_screen_usd": 31277959.18,
+            "threshold_usd": 21000000.0,
+            "windows_met": 168
+          },
+          "upside": {
+            "complete_windows": 168,
+            "decision_boundary": "Scenario screen only; no threshold is validated movable cash",
+            "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+            "median_screen_usd": 36667187.11,
+            "met_rate_pct": 0.0,
+            "minimum_screen_usd": 31277959.18,
+            "threshold_usd": 46200000.0,
+            "windows_met": 0
+          }
+        },
+        "unflagged_screen_usd": 40265783.82
+      },
+      "7": {
+        "buffer_usd": 5485896.33,
+        "screen_usd": 42844787.78,
+        "thresholds": {
+          "base": {
+            "complete_windows": 175,
+            "decision_boundary": "Scenario screen only; no threshold is validated movable cash",
+            "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+            "median_screen_usd": 41951646.43,
+            "met_rate_pct": 100.0,
+            "minimum_screen_usd": 37901838.94,
+            "threshold_usd": 35000000.0,
+            "windows_met": 175
+          },
+          "stress": {
+            "complete_windows": 175,
+            "decision_boundary": "Scenario screen only; no threshold is validated movable cash",
+            "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+            "median_screen_usd": 41951646.43,
+            "met_rate_pct": 100.0,
+            "minimum_screen_usd": 37901838.94,
+            "threshold_usd": 21000000.0,
+            "windows_met": 175
+          },
+          "upside": {
+            "complete_windows": 175,
+            "decision_boundary": "Scenario screen only; no threshold is validated movable cash",
+            "evidence_label": "ANALYST-CALC / ANALYST-ASSUMPTION",
+            "median_screen_usd": 41951646.43,
+            "met_rate_pct": 0.0,
+            "minimum_screen_usd": 37901838.94,
+            "threshold_usd": 46200000.0,
+            "windows_met": 0
+          }
+        },
+        "unflagged_screen_usd": 44983080.88
+      }
+    },
+    "validated_mobility": {
+      "decision_boundary": "Not established by supplied data",
+      "evidence_label": "NOT ESTABLISHED",
+      "status": "not_established",
+      "value_usd": null
+    }
+  },
+  "meta": {
+    "period_end": "2026-06-30",
+    "period_start": "2026-01-01",
+    "scope": "Week 1\u20132 diagnostic snapshot; supplied data, not live operations",
+    "status": "reconciled_to_supplied_controls_source_certification_open",
+    "title": "Project Northstar \u2014 Treasury decision dashboard"
+  },
+  "payments": {
+    "cohorts": {
+      "cross_border_wire_only": {
+        "exception_contribution_pct": 10.86,
+        "exception_rate_pct": 11.71,
+        "exceptions": 52,
+        "label": "Cross-border wire only",
+        "record_contribution_pct": 5.84,
+        "records": 444,
+        "repair_contribution_pct": 11.05,
+        "repair_minutes": 2219
+      },
+      "manual_touch_and_cross_border_wire": {
+        "exception_contribution_pct": 12.11,
+        "exception_rate_pct": 16.96,
+        "exceptions": 58,
+        "label": "Manual touch + cross-border wire",
+        "record_contribution_pct": 4.5,
+        "records": 342,
+        "repair_contribution_pct": 13.46,
+        "repair_minutes": 2702
+      },
+      "manual_touch_only": {
+        "exception_contribution_pct": 51.36,
+        "exception_rate_pct": 11.98,
+        "exceptions": 246,
+        "label": "Manual touch only",
+        "record_contribution_pct": 27.01,
+        "records": 2053,
+        "repair_contribution_pct": 49.89,
+        "repair_minutes": 10018
+      },
+      "neither_priority_cohort": {
+        "exception_contribution_pct": 25.68,
+        "exception_rate_pct": 2.58,
+        "exceptions": 123,
+        "label": "Neither priority cohort",
+        "record_contribution_pct": 62.64,
+        "records": 4761,
+        "repair_contribution_pct": 25.6,
+        "repair_minutes": 5141
+      }
+    },
+    "decision_boundary": "Within supplied 7,600 records only; association does not establish cause or ACG-wide performance",
+    "evidence_label": "ANALYST-CALC",
+    "overall": {
+      "exception_contribution_pct": 100.0,
+      "exception_rate_pct": 6.3,
+      "exceptions": 479,
+      "record_contribution_pct": 100.0,
+      "records": 7600,
+      "repair_contribution_pct": 100.0,
+      "repair_minutes": 20080
+    },
+    "priority_union": {
+      "exception_contribution_pct": 74.32,
+      "exception_rate_pct": 12.54,
+      "exceptions": 356,
+      "label": "Manual touch or cross-border wire (deduplicated)",
+      "record_contribution_pct": 37.36,
+      "records": 2839,
+      "repair_contribution_pct": 74.4,
+      "repair_minutes": 14939
+    }
+  },
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "file": "W1_data_quality_checks.csv",
+      "role": "w1_checks"
+    },
+    {
+      "file": "W1_data_quality_metrics.csv",
+      "role": "w1_metrics"
+    },
+    {
+      "file": "W2_reconciliation_metrics.csv",
+      "role": "w2_reconciliation"
+    },
+    {
+      "file": "W2_visibility_diagnostic.csv",
+      "role": "visibility"
+    },
+    {
+      "file": "W2_liquidity_scenarios.csv",
+      "role": "liquidity_scenarios"
+    },
+    {
+      "file": "W2_liquidity_thresholds.csv",
+      "role": "liquidity_thresholds"
+    },
+    {
+      "file": "W2_payment_diagnostic.csv",
+      "role": "payments"
+    },
+    {
+      "file": "W2_process_capacity.csv",
+      "role": "process_capacity"
+    },
+    {
+      "file": "W2_repair_baseline_reconciliation.csv",
+      "role": "repair_baseline"
+    },
+    {
+      "file": "W2_account_diagnostic.csv",
+      "role": "accounts"
+    }
+  ],
+  "visibility": {
+    "accounts_total": 55,
+    "decision_boundary": "Calendar-date proxy; not start-of-day or elapsed-24-hour visibility",
+    "delayed_accounts": 23,
+    "evidence_label": "ANALYST-CALC",
+    "observations": 9955,
+    "same_day_accounts": 32,
+    "same_day_rate_pct": 58.18,
+    "sources": [
+      {
+        "accounts": 12,
+        "maximum_delay_days": 0,
+        "method": "API",
+        "observations": 2172,
+        "one_day_delayed_observations": 0,
+        "same_day_observations": 2172,
+        "same_day_rate_pct": 100.0,
+        "two_plus_day_delayed_observations": 0,
+        "within_one_day_observations": 2172
+      },
+      {
+        "accounts": 20,
+        "maximum_delay_days": 0,
+        "method": "Host-to-host",
+        "observations": 3620,
+        "one_day_delayed_observations": 0,
+        "same_day_observations": 3620,
+        "same_day_rate_pct": 100.0,
+        "two_plus_day_delayed_observations": 0,
+        "within_one_day_observations": 3620
+      },
+      {
+        "accounts": 9,
+        "maximum_delay_days": 1,
+        "method": "Portal",
+        "observations": 1629,
+        "one_day_delayed_observations": 1629,
+        "same_day_observations": 0,
+        "same_day_rate_pct": 0.0,
+        "two_plus_day_delayed_observations": 0,
+        "within_one_day_observations": 1629
+      },
+      {
+        "accounts": 14,
+        "maximum_delay_days": 3,
+        "method": "Spreadsheet",
+        "observations": 2534,
+        "one_day_delayed_observations": 0,
+        "same_day_observations": 0,
+        "same_day_rate_pct": 0.0,
+        "two_plus_day_delayed_observations": 2534,
+        "within_one_day_observations": 0
+      }
+    ],
+    "within_one_day_rate_pct": 74.55
+  }
+}
