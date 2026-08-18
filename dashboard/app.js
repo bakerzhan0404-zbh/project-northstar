@@ -58,6 +58,71 @@ const QUALITY_POPULATION_CONTROLS = Object.freeze({
   process_activities: Object.freeze({ label: "Process activities", value: 9, unit: "activities", evidence_label: "ACG-DATA" }),
 });
 const QUALITY_POPULATION_KEYS = Object.freeze(Object.keys(QUALITY_POPULATION_CONTROLS));
+const QUALITY_DIMENSION_CONTRACT = Object.freeze({
+  uniqueness: Object.freeze({
+    label: "Uniqueness", status: "measured", statusLabel: "Measured", result: "5 / 5 mapped rules passed",
+    ruleKeys: Object.freeze(["entity_primary_key_unique", "account_primary_key_unique", "payment_primary_key_unique", "balance_account_date_unique", "fx_currency_date_unique"]),
+  }),
+  accuracy: Object.freeze({
+    label: "Accuracy", status: "not_certified", statusLabel: "Not certified", result: "No certified source comparison",
+    ruleKeys: Object.freeze([]),
+  }),
+  consistency: Object.freeze({
+    label: "Consistency", status: "partial_proxy", statusLabel: "Partial · proxy", result: "15 / 15 mapped rules passed",
+    ruleKeys: Object.freeze([
+      "account_entities_resolve", "balance_accounts_resolve", "payment_accounts_resolve", "balance_fx_resolves",
+      "payment_fx_resolves", "payment_currency_matches_account", "available_not_above_positive_closing",
+      "nonexception_repair_minutes_zero", "fx_dates_match_balance_dates", "visibility_source_quality_mapping_valid",
+      "repaired_payments_are_exceptions", "rejected_payments_are_exceptions", "completed_payments_are_not_exceptions",
+      "exception_payments_have_repair_minutes", "payment_dates_have_fx_coverage",
+    ]),
+  }),
+  completeness: Object.freeze({
+    label: "Completeness", status: "partial_proxy", statusLabel: "Partial · proxy", result: "4 / 4 mapped rules passed",
+    ruleKeys: Object.freeze(["balance_panel_complete", "fx_panel_complete", "all_required_fields_complete", "balance_date_range_contiguous"]),
+  }),
+  timeliness: Object.freeze({
+    label: "Timeliness", status: "partial_proxy", statusLabel: "Partial · proxy",
+    result: "5,792 / 9,955 same-day account-days · 23 / 55 accounts delayed",
+    ruleKeys: Object.freeze(["reporting_date_not_before_balance_date"]),
+  }),
+  currency: Object.freeze({
+    label: "Currency / freshness", status: "not_certified", statusLabel: "Not certified",
+    result: "2 / 2 period checks passed · baseline only",
+    ruleKeys: Object.freeze(["balance_period_matches_project", "fx_period_matches_project"]),
+  }),
+  conformance: Object.freeze({
+    label: "Conformance / validity", status: "measured", statusLabel: "Measured", result: "25 / 25 mapped rules passed",
+    ruleKeys: Object.freeze([
+      "repair_minutes_nonnegative", "entity_region_domain_valid", "account_status_domain_valid",
+      "visibility_method_domain_valid", "balance_source_quality_domain_valid", "payment_status_domain_valid",
+      "restricted_flag_is_boolean", "payment_flags_are_boolean", "fx_rates_positive", "payment_amounts_positive",
+      "payment_fees_nonnegative", "account_fees_nonnegative", "process_numeric_inputs_nonnegative",
+      "process_manual_percentage_in_range", "entity_schema_exact", "account_schema_exact", "balance_schema_exact",
+      "payment_schema_exact", "fx_schema_exact", "process_schema_exact", "account_purpose_domain_valid",
+      "sweep_structure_domain_valid", "entity_restriction_domain_valid", "payment_type_domain_valid",
+      "process_control_criticality_domain_valid",
+    ]),
+  }),
+});
+const QUALITY_DIMENSION_KEYS = Object.freeze(Object.keys(QUALITY_DIMENSION_CONTRACT));
+const QUALITY_ISSUE_CONTRACT = Object.freeze({
+  "DQ-01": Object.freeze({ dimension: "timeliness", severity: "High" }),
+  "DQ-02": Object.freeze({ dimension: "accuracy", severity: "High" }),
+  "DQ-03": Object.freeze({ dimension: "accuracy", severity: "High" }),
+  "DQ-04": Object.freeze({ dimension: "completeness", severity: "High" }),
+  "DQ-05": Object.freeze({ dimension: "completeness", severity: "High" }),
+  "DQ-06": Object.freeze({ dimension: "accuracy", severity: "Medium" }),
+  "DQ-07": Object.freeze({ dimension: "accuracy", severity: "Medium" }),
+  "DQ-08": Object.freeze({ dimension: "currency", severity: "Medium" }),
+  "DQ-09": Object.freeze({ dimension: "completeness", severity: "High" }),
+  "DQ-10": Object.freeze({ dimension: "completeness", severity: "High" }),
+  "DQ-11": Object.freeze({ dimension: "consistency", severity: "Medium" }),
+  "DQ-12": Object.freeze({ dimension: "completeness", severity: "High" }),
+  "DQ-13": Object.freeze({ dimension: "completeness", severity: "High" }),
+  "DQ-14": Object.freeze({ dimension: "completeness", severity: "High" }),
+  "DQ-15": Object.freeze({ dimension: "consistency", severity: "High" }),
+});
 const DASHBOARD_VIEWS = Object.freeze({
   executive: Object.freeze({
     label: "Executive Overview",
@@ -233,6 +298,12 @@ function collapseNestedDetails() {
   });
 }
 
+function collapseQualityDisclosures() {
+  getAll("#quality-view details").forEach((detail) => {
+    detail.open = false;
+  });
+}
+
 function visibleDetailSummaries() {
   const signals = get("#signals");
   if (!signals || signals.hidden) return [];
@@ -291,6 +362,7 @@ function selectDashboardView(view, { focus = true, announceSelection = true } = 
   closeFilterPanel({ restoreFocus: false });
   closeAllInlineDetails();
   collapseNestedDetails();
+  collapseQualityDisclosures();
   state.activeDashboardView = view;
   syncDashboardViewVisibility();
   updateResetState();
@@ -309,6 +381,7 @@ function showAllDashboardViews({ focus = true, announceSelection = true } = {}) 
   closeFilterPanel({ restoreFocus: false });
   closeAllInlineDetails();
   collapseNestedDetails();
+  collapseQualityDisclosures();
   state.activeDashboardView = null;
   syncDashboardViewVisibility();
   updateResetState();
@@ -332,6 +405,7 @@ function setDataControlsDisabled(disabled) {
     state.activeDashboardView = null;
     closeAllInlineDetails();
     collapseNestedDetails();
+    collapseQualityDisclosures();
   }
   syncDashboardViewVisibility();
 }
@@ -339,6 +413,100 @@ function setDataControlsDisabled(disabled) {
 function setKpiEmpty(selector, empty) {
   const node = get(selector);
   if (node) node.classList.toggle("kpi-empty", empty);
+}
+
+function nonemptyText(value) {
+  return typeof value === "string" && Boolean(value.trim());
+}
+
+function qualityDimensionsAreValid(quality) {
+  const dimensions = Array.isArray(quality.dimensions) ? quality.dimensions : [];
+  const issues = Array.isArray(quality.issue_queue) ? quality.issue_queue : [];
+  const monitoring = quality.monitoring || {};
+  if (
+    dimensions.length !== QUALITY_DIMENSION_KEYS.length
+    || dimensions.some((dimension, index) => !dimension || dimension.key !== QUALITY_DIMENSION_KEYS[index])
+  ) return false;
+
+  const allRules = [];
+  const issueCounts = Object.fromEntries(QUALITY_DIMENSION_KEYS.map((key) => [key, 0]));
+  for (const dimension of dimensions) {
+    const expected = QUALITY_DIMENSION_CONTRACT[dimension.key];
+    const strings = [
+      dimension.label,
+      dimension.status_label,
+      dimension.definition,
+      dimension.result,
+      dimension.grain,
+      dimension.threshold,
+      dimension.evidence_summary,
+      dimension.boundary,
+      dimension.owner,
+      dimension.next_action,
+    ];
+    if (
+      !expected
+      || dimension.label !== expected.label
+      || dimension.status !== expected.status
+      || dimension.status_label !== expected.statusLabel
+      || dimension.result !== expected.result
+      || dimension.measured_rules !== expected.ruleKeys.length
+      || dimension.passed_rules !== expected.ruleKeys.length
+      || !Number.isInteger(dimension.open_issue_count)
+      || dimension.open_issue_count < 0
+      || !strings.every(nonemptyText)
+      || !Array.isArray(dimension.sources)
+      || !dimension.sources.length
+      || !dimension.sources.every(nonemptyText)
+      || !Array.isArray(dimension.rules)
+      || dimension.rules.length !== expected.ruleKeys.length
+    ) return false;
+    for (const [index, rule] of dimension.rules.entries()) {
+      if (
+        !rule
+        || rule.key !== expected.ruleKeys[index]
+        || !nonemptyText(rule.label)
+        || rule.result !== "pass"
+      ) return false;
+      allRules.push(rule.key);
+    }
+  }
+  if (
+    allRules.length !== 52
+    || new Set(allRules).size !== 52
+  ) return false;
+
+  if (
+    issues.length !== 15
+    || issues.some((issue, index) => {
+      const expectedId = `DQ-${String(index + 1).padStart(2, "0")}`;
+      const expectedIssue = QUALITY_ISSUE_CONTRACT[expectedId];
+      if (
+        !issue
+        || issue.id !== expectedId
+        || !expectedIssue
+        || issue.dimension !== expectedIssue.dimension
+        || issue.severity !== expectedIssue.severity
+        || ![issue.issue, issue.decision_impact, issue.action, issue.owner].every(nonemptyText)
+      ) return true;
+      issueCounts[issue.dimension] += 1;
+      return false;
+    })
+  ) return false;
+  const severityCounts = issues.reduce((counts, issue) => {
+    counts[issue.severity] += 1;
+    return counts;
+  }, { High: 0, Medium: 0 });
+  if (severityCounts.High !== 11 || severityCounts.Medium !== 4) return false;
+  if (dimensions.some((dimension) => dimension.open_issue_count !== issueCounts[dimension.key])) return false;
+
+  return monitoring.status === "baseline_only"
+    && monitoring.label === "Baseline only · monitoring history not yet available"
+    && monitoring.period_start === "2026-01-01"
+    && monitoring.period_end === "2026-06-30"
+    && monitoring.snapshots === 1
+    && nonemptyText(monitoring.boundary)
+    && quality.issue_source === "W1_data_quality_report.md · Appendix A";
 }
 
 function assertDashboardData(data) {
@@ -408,6 +576,7 @@ function assertDashboardData(data) {
     || quality.w2_controls.label !== "Week 2 reconciliation controls"
     || quality.w2_controls.reconciled !== 13
     || quality.w2_controls.total !== 13
+    || !qualityDimensionsAreValid(quality)
   ) {
     throw new Error("Quality evidence is incomplete or unreconciled");
   }
@@ -622,6 +791,219 @@ function renderHeader() {
   });
 }
 
+function qualityDetailCard(label, content, extraClass = "") {
+  const card = make("div", `quality-detail-card ${extraClass}`.trim());
+  card.append(make("span", "quality-detail-label", label), make("p", "", content));
+  return card;
+}
+
+function qualityChevron() {
+  const chevron = make("span", "quality-disclosure-chevron", "⌄");
+  chevron.setAttribute("aria-hidden", "true");
+  return chevron;
+}
+
+function bindQualitySummaryKeyboard(summary, summarySelector) {
+  summary.addEventListener("keydown", (event) => {
+    const summaries = getAll(summarySelector).filter((node) => node.offsetParent !== null);
+    const index = summaries.indexOf(summary);
+    if (index < 0) return;
+    let nextIndex = null;
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") nextIndex = (index + 1) % summaries.length;
+    if (event.key === "ArrowUp" || event.key === "ArrowLeft") nextIndex = (index - 1 + summaries.length) % summaries.length;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = summaries.length - 1;
+    if (nextIndex !== null) {
+      event.preventDefault();
+      summaries[nextIndex].focus();
+    }
+    if (event.key === "Escape") {
+      const detail = summary.closest("details");
+      if (detail && detail.open) {
+        event.preventDefault();
+        event.stopPropagation();
+        detail.open = false;
+        summary.focus();
+      }
+    }
+  });
+}
+
+function closeQualityGroup(containerSelector, except = null) {
+  const container = get(containerSelector);
+  if (!container) return;
+  getAll(":scope > details", container).forEach((detail) => {
+    if (detail !== except) detail.open = false;
+  });
+}
+
+function qualityRuleDisclosure(dimension) {
+  if (!dimension.rules.length) {
+    return make(
+      "p",
+      "quality-coverage-note",
+      "No direct accuracy rule is available. Internal checks cannot substitute for an authoritative source comparison.",
+    );
+  }
+  const disclosure = make("details", "quality-rule-disclosure");
+  const summary = make("summary");
+  summary.append(
+    make("span", "", `View ${formatNumber(dimension.measured_rules)} mapped technical ${dimension.measured_rules === 1 ? "rule" : "rules"}`),
+    qualityChevron(),
+  );
+  const list = make("ul", "quality-rule-list");
+  list.dataset.qualityRuleList = dimension.key;
+  dimension.rules.forEach((rule) => {
+    const item = make("li");
+    item.append(make("strong", "", `${rule.label} · Technical pass`), make("code", "", rule.key));
+    list.append(item);
+  });
+  disclosure.append(summary, list);
+  summary.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !disclosure.open) return;
+    event.preventDefault();
+    event.stopPropagation();
+    disclosure.open = false;
+    summary.focus();
+  });
+  return disclosure;
+}
+
+function openQualityIssue(issueId, { focusSummary = true } = {}) {
+  if (!dashboardData) return false;
+  if (!selectDashboardView("evidence", { focus: false, announceSelection: false })) return false;
+  const queue = get("#quality-issues-disclosure");
+  const detail = get(`[data-quality-issue="${issueId}"]`);
+  if (!queue || !detail) return false;
+  queue.open = true;
+  closeQualityGroup("#quality-issue-list", detail);
+  detail.open = true;
+  const summary = detail.querySelector("summary");
+  if (focusSummary && summary) summary.focus();
+  if (summary) summary.scrollIntoView({ block: "nearest" });
+  announce(`${issueId} evidence action opened.`);
+  return true;
+}
+
+function openQualityIssuesForDimension(dimensionKey) {
+  const issue = dashboardData.quality.issue_queue.find((item) => item.dimension === dimensionKey);
+  if (!issue) return false;
+  return openQualityIssue(issue.id);
+}
+
+function openQualityDimension(dimensionKey, { focusSummary = true } = {}) {
+  if (!dashboardData || !QUALITY_DIMENSION_CONTRACT[dimensionKey]) return false;
+  if (!selectDashboardView("evidence", { focus: false, announceSelection: false })) return false;
+  const detail = get(`[data-quality-dimension="${dimensionKey}"]`);
+  if (!detail) return false;
+  closeQualityGroup("#quality-dimension-list", detail);
+  detail.open = true;
+  const summary = detail.querySelector("summary");
+  if (focusSummary && summary) summary.focus();
+  if (summary) summary.scrollIntoView({ block: "nearest" });
+  announce(`${detail.dataset.qualityDimensionLabel} data-quality dimension opened.`);
+  return true;
+}
+
+function renderQualityDimensions(quality) {
+  const list = get("#quality-dimension-list");
+  if (list.childElementCount) return;
+  quality.dimensions.forEach((dimension) => {
+    const detail = make("details", "quality-dimension");
+    detail.dataset.qualityDimension = dimension.key;
+    detail.dataset.qualityDimensionLabel = dimension.label;
+    const summary = make("summary");
+    summary.dataset.qualityDimensionSummary = dimension.key;
+    const title = make("span", "quality-dimension-title");
+    title.append(
+      make("strong", "", dimension.label),
+      make("small", "", `${formatNumber(dimension.measured_rules)} directly mapped technical ${dimension.measured_rules === 1 ? "rule" : "rules"}`),
+    );
+    const status = make("span", "quality-status", dimension.status_label);
+    status.dataset.qualityStatus = dimension.status;
+    summary.append(
+      title,
+      make("span", "quality-dimension-result", dimension.result),
+      status,
+      qualityChevron(),
+    );
+
+    const panel = make("div", "quality-dimension-panel");
+    const evidenceGrid = make("div", "quality-evidence-grid");
+    evidenceGrid.append(
+      qualityDetailCard("Definition", dimension.definition),
+      qualityDetailCard("Current evidence", dimension.evidence_summary),
+      qualityDetailCard("Grain / denominator", dimension.grain),
+      qualityDetailCard("Threshold status", dimension.threshold),
+      qualityDetailCard("Evidence limit", dimension.boundary, "quality-detail-boundary"),
+      qualityDetailCard("Proposed validation owner(s)", dimension.owner),
+      qualityDetailCard("Next action", dimension.next_action),
+    );
+    const sourceCard = make("div", "quality-detail-card");
+    sourceCard.append(make("span", "quality-detail-label", "Evidence source"));
+    const sources = make("ul", "quality-source-list");
+    dimension.sources.forEach((source) => sources.append(make("li", "", source)));
+    sourceCard.append(sources);
+    evidenceGrid.append(sourceCard);
+    panel.append(evidenceGrid, qualityRuleDisclosure(dimension));
+    if (dimension.open_issue_count > 0) {
+      const issueButton = make(
+        "button",
+        "quality-related-issues",
+        `Go to the first of ${formatNumber(dimension.open_issue_count)} related evidence ${dimension.open_issue_count === 1 ? "gap" : "gaps"}`,
+      );
+      issueButton.type = "button";
+      issueButton.dataset.openQualityIssues = dimension.key;
+      const arrow = make("span", "", "→");
+      arrow.setAttribute("aria-hidden", "true");
+      issueButton.append(arrow);
+      issueButton.addEventListener("click", () => openQualityIssuesForDimension(dimension.key));
+      panel.append(issueButton);
+    }
+    detail.append(summary, panel);
+    detail.addEventListener("toggle", () => {
+      if (detail.open) closeQualityGroup("#quality-dimension-list", detail);
+      updateResetState();
+    });
+    bindQualitySummaryKeyboard(summary, "#quality-dimension-list > details > summary");
+    list.append(detail);
+  });
+}
+
+function renderQualityIssueQueue(quality) {
+  const list = get("#quality-issue-list");
+  if (list.childElementCount) return;
+  quality.issue_queue.forEach((issue) => {
+    const dimension = quality.dimensions.find((item) => item.key === issue.dimension);
+    const detail = make("details", "quality-issue");
+    detail.dataset.qualityIssue = issue.id;
+    detail.dataset.qualityIssueDimension = issue.dimension;
+    const summary = make("summary");
+    const copy = make("span");
+    copy.append(make("strong", "", `${issue.id} · ${issue.issue}`), make("small", "", dimension.label));
+    const severity = make("span", "quality-issue-severity", issue.severity);
+    severity.dataset.severity = issue.severity;
+    summary.append(copy, severity, qualityChevron());
+    const panel = make("dl", "quality-issue-panel");
+    [
+      ["Decision impact", issue.decision_impact],
+      ["Validation action", issue.action],
+      ["Validation owner(s) from issue log", issue.owner],
+    ].forEach(([label, value]) => {
+      const group = make("div");
+      group.append(make("dt", "", label), make("dd", "", value));
+      panel.append(group);
+    });
+    detail.append(summary, panel);
+    detail.addEventListener("toggle", () => {
+      if (detail.open) closeQualityGroup("#quality-issue-list", detail);
+      updateResetState();
+    });
+    bindQualitySummaryKeyboard(summary, "#quality-issue-list > details > summary");
+    list.append(detail);
+  });
+}
+
 function renderQualityLanding() {
   const quality = dashboardData.quality;
   setText("#quality-status", quality.display_status);
@@ -635,8 +1017,18 @@ function renderQualityLanding() {
     `${formatNumber(quality.w2_controls.reconciled)} / ${formatNumber(quality.w2_controls.total)} reconciled`,
   );
   setText("#quality-source-artifacts", formatNumber(quality.source_artifacts));
+  setText("#quality-monitoring-title", "Baseline only");
+  setText("#quality-monitoring-status", quality.monitoring.label);
+  setText("#quality-monitoring-period", `${formatIsoDate(quality.monitoring.period_start)}–${formatIsoDate(quality.monitoring.period_end)} · ${plural(quality.monitoring.snapshots, "governed snapshot")}`);
+  setText("#quality-monitoring-boundary", quality.monitoring.boundary);
+  const highIssues = quality.issue_queue.filter((issue) => issue.severity === "High").length;
+  const mediumIssues = quality.issue_queue.filter((issue) => issue.severity === "Medium").length;
+  setText("#quality-issue-summary", `${formatNumber(quality.issue_queue.length)} evidence gaps · ${formatNumber(highIssues)} High · ${formatNumber(mediumIssues)} Medium`);
+  setText("#quality-issue-source", quality.issue_source);
   setText("#quality-boundary", `Evidence limit · ${quality.decision_boundary}`);
   setText("#quality-next-action", dashboardData.definitions.quality.next_action);
+  renderQualityDimensions(quality);
+  renderQualityIssueQueue(quality);
 
   const population = get("#quality-population-controls");
   population.replaceChildren();
@@ -1439,6 +1831,8 @@ function clearVisualizationOutputs(message = "Data unavailable — validation di
     "#regional-map-markers",
     "#regional-evidence-table-body",
     "#quality-population-controls",
+    "#quality-dimension-list",
+    "#quality-issue-list",
   ].forEach((selector) => {
     const node = get(selector);
     if (node) node.replaceChildren();
@@ -1455,6 +1849,11 @@ function clearVisualizationOutputs(message = "Data unavailable — validation di
   setText("#quality-w1-checks", "—");
   setText("#quality-w2-controls", "—");
   setText("#quality-source-artifacts", "—");
+  setText("#quality-monitoring-status", message);
+  setText("#quality-monitoring-period", "—");
+  setText("#quality-monitoring-boundary", message);
+  setText("#quality-issue-summary", "No evidence action queue published.");
+  setText("#quality-issue-source", "Unavailable");
   setText("#quality-boundary", message);
   setText("#quality-next-action", message);
   setText("#trend-7-endpoint", "—");
@@ -1739,6 +2138,7 @@ function resetView({ shouldAnnounce = true } = {}) {
   state.activeDashboardView = DEFAULT_VIEW.activeDashboardView;
   closeAllInlineDetails();
   collapseNestedDetails();
+  collapseQualityDisclosures();
   clearSearch();
   closeFilterPanel({ restoreFocus: false });
   const dialog = get("#evidence-dialog");
@@ -1784,6 +2184,31 @@ function metricSearchDefinitions(data = dashboardData) {
     description: config.description,
     keywords: `${config.label} ${config.description} ${config.applicability}`,
   }));
+  const qualityDimensionDefinitions = data.quality.dimensions.map((dimension) => ({
+    id: `quality-dimension:${dimension.key}`,
+    label: dimension.label,
+    description: `${dimension.status_label}. ${dimension.result}`,
+    keywords: [
+      dimension.label,
+      dimension.status_label,
+      dimension.definition,
+      dimension.result,
+      dimension.evidence_summary,
+      dimension.grain,
+      dimension.threshold,
+      dimension.boundary,
+      dimension.owner,
+      dimension.next_action,
+      dimension.sources.join(" "),
+      dimension.rules.map((rule) => `${rule.key} ${rule.label}`).join(" "),
+    ].join(" "),
+  }));
+  const qualityIssueDefinitions = data.quality.issue_queue.map((issue) => ({
+    id: `quality-issue:${issue.id}`,
+    label: `${issue.id} — ${issue.issue}`,
+    description: `${issue.severity} evidence gap · ${issue.owner}`,
+    keywords: `${issue.id} ${issue.issue} ${issue.decision_impact} ${issue.action} ${issue.owner}`,
+  }));
   const methodologyDefinitions = GUIDE_TOPICS.map((topic) => {
     const definition = data.definitions[topic];
     return {
@@ -1801,7 +2226,12 @@ function metricSearchDefinitions(data = dashboardData) {
       ].join(" "),
     };
   });
-  return inlineDefinitions.concat(viewDefinitions, methodologyDefinitions);
+  return inlineDefinitions.concat(
+    viewDefinitions,
+    qualityDimensionDefinitions,
+    qualityIssueDefinitions,
+    methodologyDefinitions,
+  );
 }
 
 function closeSearch() {
@@ -1925,6 +2355,10 @@ function chooseSearchResult(index) {
       openInlineDetail(entry.id.slice("inline:".length));
     } else if (entry.id.startsWith("view:")) {
       selectDashboardView(entry.id.slice("view:".length));
+    } else if (entry.id.startsWith("quality-dimension:")) {
+      openQualityDimension(entry.id.slice("quality-dimension:".length));
+    } else if (entry.id.startsWith("quality-issue:")) {
+      openQualityIssue(entry.id.slice("quality-issue:".length));
     } else if (entry.id.startsWith("guide:")) {
       const topic = entry.id.slice("guide:".length);
       openDrawer(GUIDE_TOPICS.includes(topic) ? topic : "overview", searchInput);
@@ -2012,6 +2446,18 @@ function bindEvents() {
   });
   getAll(".trend-data-disclosure").forEach((detail) => {
     const summary = detail.querySelector("summary");
+    detail.addEventListener("toggle", updateResetState);
+    if (!summary) return;
+    summary.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !detail.open) return;
+      event.preventDefault();
+      event.stopPropagation();
+      detail.open = false;
+      summary.focus();
+    });
+  });
+  getAll(".quality-support-disclosure").forEach((detail) => {
+    const summary = detail.querySelector(":scope > summary");
     detail.addEventListener("toggle", updateResetState);
     if (!summary) return;
     summary.addEventListener("keydown", (event) => {
@@ -2190,6 +2636,7 @@ if (typeof module !== "undefined" && module.exports) {
     dashboardViewForTopic,
     dashboardTopicsForView,
     assertDashboardData,
+    qualityDimensionsAreValid,
     metricSearchDefinitions,
   });
 }

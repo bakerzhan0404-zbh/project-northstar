@@ -187,9 +187,21 @@ class DashboardUiTest(unittest.TestCase):
             "quality-w1-checks",
             "quality-w2-controls",
             "quality-source-artifacts",
+            "quality-monitoring-title",
+            "quality-monitoring-status",
+            "quality-monitoring-period",
+            "quality-monitoring-boundary",
+            "quality-dimensions-note",
+            "quality-dimension-list",
+            "quality-population-disclosure",
             "quality-population-controls",
+            "quality-issues-disclosure",
+            "quality-issue-summary",
+            "quality-issue-list",
+            "quality-issue-source",
             "quality-boundary",
             "quality-next-action",
+            "quality-methodology-disclosure",
         }
         self.assertTrue(required_ids.issubset(self.parser.ids))
         self.assertIn('name="viewport"', self.index)
@@ -405,7 +417,7 @@ class DashboardUiTest(unittest.TestCase):
         self.assertIn("FilterModel.validateState", self.script)
         self.assertIn("FilterModel.summarize", self.script)
 
-    def test_quality_landing_uses_governed_controls_and_seven_guide_topics(self) -> None:
+    def test_quality_landing_uses_governed_dimensions_and_progressive_disclosure(self) -> None:
         quality = self.payload["quality"]
         self.assertEqual(quality["w1_checks"], {
             "label": "Week 1 structural checks",
@@ -419,6 +431,16 @@ class DashboardUiTest(unittest.TestCase):
         })
         self.assertEqual(quality["source_artifacts"], 12)
         self.assertEqual(len(quality["population_controls"]), 6)
+        self.assertEqual(len(quality["dimensions"]), 7)
+        self.assertEqual(sum(row["measured_rules"] for row in quality["dimensions"]), 52)
+        self.assertEqual(quality["monitoring"]["status"], "baseline_only")
+        self.assertEqual(quality["monitoring"]["snapshots"], 1)
+        self.assertEqual(len(quality["issue_queue"]), 15)
+        self.assertEqual(
+            {severity: sum(issue["severity"] == severity for issue in quality["issue_queue"])
+             for severity in ("High", "Medium")},
+            {"High": 11, "Medium": 4},
+        )
         self.assertIn("does not certify source completeness", quality["decision_boundary"])
         self.assertIn(
             "Complete source-owner certification",
@@ -428,7 +450,17 @@ class DashboardUiTest(unittest.TestCase):
         quality_section = self.index.split('id="quality-view"', 1)[1].split(
             "</section>\n\n        <footer", 1
         )[0]
-        self.assertNotIn("<details", quality_section)
+        self.assertIn("<details", quality_section)
+        self.assertIn('id="quality-population-disclosure"', quality_section)
+        self.assertIn('id="quality-issues-disclosure"', quality_section)
+        self.assertIn('id="quality-methodology-disclosure"', quality_section)
+        self.assertNotIn('id="quality-population-disclosure" open', quality_section)
+        self.assertNotIn('id="quality-issues-disclosure" open', quality_section)
+        self.assertNotIn('id="quality-methodology-disclosure" open', quality_section)
+        self.assertIn(
+            "Coverage labels describe available evidence—not performance, certification, or a composite data-quality score.",
+            quality_section,
+        )
         for topic in (
             "overview", "visibility", "liquidity", "payments", "regions", "gates", "quality"
         ):
@@ -453,6 +485,12 @@ class DashboardUiTest(unittest.TestCase):
             "quality.w2_controls.reconciled",
             "quality.source_artifacts",
             "quality.population_controls.forEach",
+            "function renderQualityDimensions(quality)",
+            "function renderQualityIssueQueue(quality)",
+            "function openQualityDimension",
+            "function openQualityIssue",
+            "quality.monitoring.label",
+            "quality.issue_queue",
             "quality.decision_boundary",
             "dashboardData.definitions.quality.next_action",
             'renderQualityLanding();',
@@ -461,6 +499,23 @@ class DashboardUiTest(unittest.TestCase):
             self.assertIn(token, self.script)
         self.assertIn('data-tab="quality"', self.index)
         self.assertIn('id="panel-quality"', self.index)
+        self.assertNotIn("quality scorecard", quality_section.lower())
+        self.assertNotIn("pass rate", quality_section.lower())
+        for selector in (
+            ".quality-dimension > summary:focus-visible",
+            ".quality-issue > summary:focus-visible",
+            ".quality-support-disclosure > summary:focus-visible",
+            ".quality-rule-disclosure > summary:focus-visible",
+        ):
+            self.assertIn(selector, self.styles)
+        self.assertIn('chevron.setAttribute("aria-hidden", "true")', self.script)
+        mobile_css = self.styles.split("@media (max-width: 760px)", 1)[1].split(
+            "@media (max-width: 440px)", 1
+        )[0]
+        self.assertIn(
+            ".quality-dimension > summary {\n    grid-template-columns: minmax(0, 1fr) auto 22px;",
+            mobile_css,
+        )
 
     def test_reference_visuals_live_only_in_expanded_sections(self) -> None:
         expected_hooks = {
@@ -661,6 +716,17 @@ const mutations = [
   data => { data.quality.w2_controls.reconciled = 1; data.quality.w2_controls.total = 1; },
   data => { data.quality.status = 'quality_score_passed'; },
   data => { data.meta.status = 'certified_live'; },
+  data => { data.quality.dimensions.pop(); },
+  data => { data.quality.dimensions[0].rules[1].key = data.quality.dimensions[0].rules[0].key; },
+  data => { const moved = data.quality.dimensions[0].rules[0]; data.quality.dimensions[0].rules[0] = data.quality.dimensions[2].rules[0]; data.quality.dimensions[2].rules[0] = moved; },
+  data => { data.quality.dimensions[0].label = 'Duplicate freedom'; },
+  data => { data.quality.dimensions[1].status = 'measured'; data.quality.dimensions[1].status_label = 'Measured'; },
+  data => { data.quality.dimensions[1].result = '0 / 0 passed'; },
+  data => { data.quality.monitoring.snapshots = 2; },
+  data => { data.quality.monitoring.status = 'improving'; },
+  data => { data.quality.issue_queue.pop(); },
+  data => { data.quality.issue_queue[0].severity = 'Critical'; },
+  data => { data.quality.issue_queue[0].dimension = 'accuracy'; },
 ];
 let rejected = 0;
 for (const mutate of mutations) {
@@ -677,7 +743,7 @@ process.stdout.write(JSON.stringify({ rejected, total: mutations.length }));
             capture_output=True,
             text=True,
         )
-        self.assertEqual(json.loads(completed.stdout), {"rejected": 12, "total": 12})
+        self.assertEqual(json.loads(completed.stdout), {"rejected": 23, "total": 23})
 
     def test_exact_menu_labels_route_to_their_owning_views(self) -> None:
         node_script = """
@@ -709,6 +775,38 @@ process.stdout.write(JSON.stringify({ routes, expected }));
         )
         result = json.loads(completed.stdout)
         self.assertEqual(result["routes"], result["expected"])
+
+    def test_quality_dimension_and_issue_search_routes_are_indexed(self) -> None:
+        node_script = """
+const fs = require('node:fs');
+const model = require('./dashboard/filter_model.js');
+const app = require('./dashboard/app.js');
+const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const index = model.buildSearchIndex(data, app.metricSearchDefinitions(data));
+const firstId = query => model.querySearchIndex(index, query, { limit: 8 })[0]?.id ?? null;
+process.stdout.write(JSON.stringify({
+  accuracy: firstId('Accuracy'),
+  timeliness: firstId('Timeliness'),
+  issue: firstId('DQ-11'),
+}));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(
+            json.loads(completed.stdout),
+            {
+                "accuracy": "quality-dimension:accuracy",
+                "timeliness": "quality-dimension:timeliness",
+                "issue": "quality-issue:DQ-11",
+            },
+        )
+        self.assertIn('entry.id.startsWith("quality-dimension:")', self.script)
+        self.assertIn('entry.id.startsWith("quality-issue:")', self.script)
 
     def test_visual_renderers_update_with_existing_state_and_fail_closed(self) -> None:
         required = (

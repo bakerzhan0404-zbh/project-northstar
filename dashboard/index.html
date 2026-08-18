@@ -537,13 +537,52 @@
             </article>
           </div>
 
-          <section class="quality-population" aria-labelledby="quality-population-title">
-            <div class="quality-section-heading">
-              <div><span>Population controls</span><h3 id="quality-population-title">Supplied diagnostic population</h3></div>
-              <p>Direct controls—not a combined score</p>
+          <section class="quality-monitoring" aria-labelledby="quality-monitoring-title">
+            <div>
+              <span>Monitoring state</span>
+              <h3 id="quality-monitoring-title">Baseline only</h3>
+              <p id="quality-monitoring-status">Loading monitoring status…</p>
             </div>
-            <ul id="quality-population-controls" class="quality-population-list"></ul>
+            <div class="quality-monitoring-meta">
+              <strong id="quality-monitoring-period">—</strong>
+              <p id="quality-monitoring-boundary">Loading monitoring boundary…</p>
+            </div>
           </section>
+
+          <section class="quality-dimensions" aria-labelledby="quality-dimensions-title">
+            <div class="quality-section-heading">
+              <div><span>Dimension coverage</span><h3 id="quality-dimensions-title">Inspect the evidence by data-quality dimension</h3></div>
+              <p>Choose a dimension to expand its rules and action</p>
+            </div>
+            <p id="quality-dimensions-note" class="quality-coverage-note">Coverage labels describe available evidence—not performance, certification, or a composite data-quality score.</p>
+            <div id="quality-dimension-list" class="quality-dimension-list"></div>
+          </section>
+
+          <details id="quality-population-disclosure" class="quality-support-disclosure">
+            <summary>
+              <span><strong>Population &amp; provenance</strong><small>Six supplied population controls · direct counts, not a score</small></span>
+              <span class="quality-disclosure-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="quality-support-panel">
+              <div class="quality-section-heading">
+                <div><span>Population controls</span><h3 id="quality-population-title">Supplied diagnostic population</h3></div>
+                <p>Source certification remains open</p>
+              </div>
+              <ul id="quality-population-controls" class="quality-population-list"></ul>
+            </div>
+          </details>
+
+          <details id="quality-issues-disclosure" class="quality-support-disclosure">
+            <summary>
+              <span><strong>Evidence issue &amp; action queue</strong><small id="quality-issue-summary">Loading documented evidence gaps…</small></span>
+              <span class="quality-disclosure-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="quality-support-panel">
+              <p class="quality-issue-note">These are certification and decision-evidence gaps—not failed structural rules.</p>
+              <div id="quality-issue-list" class="quality-issue-list"></div>
+              <p class="quality-source-note">Source: <span id="quality-issue-source">Loading issue source…</span></p>
+            </div>
+          </details>
 
           <p id="quality-boundary" class="quality-boundary">Loading evidence boundary…</p>
 
@@ -556,20 +595,26 @@
             <button class="button quality-method-button" type="button" data-open-drawer="quality" data-requires-data>Open data-quality method <span aria-hidden="true">→</span></button>
           </section>
 
-          <section class="quality-guide-links" aria-labelledby="quality-guide-links-title">
-            <div class="quality-section-heading">
-              <div><span>Methodology library</span><h3 id="quality-guide-links-title">Open a definition, formula &amp; source</h3></div>
-              <p>Six related guide topics</p>
+          <details id="quality-methodology-disclosure" class="quality-support-disclosure">
+            <summary>
+              <span><strong>Methodology library</strong><small>Definitions, formulas, sources, and method limits</small></span>
+              <span class="quality-disclosure-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="quality-support-panel quality-guide-links" aria-labelledby="quality-guide-links-title">
+              <div class="quality-section-heading">
+                <div><span>Methodology library</span><h3 id="quality-guide-links-title">Open a definition, formula &amp; source</h3></div>
+                <p>Six related guide topics</p>
+              </div>
+              <div class="quality-guide-grid">
+                <button type="button" data-open-drawer="overview" data-requires-data>Executive decision <span aria-hidden="true">→</span></button>
+                <button type="button" data-open-drawer="visibility" data-requires-data>Reporting visibility <span aria-hidden="true">→</span></button>
+                <button type="button" data-open-drawer="liquidity" data-requires-data>Liquidity screening <span aria-hidden="true">→</span></button>
+                <button type="button" data-open-drawer="payments" data-requires-data>Payment friction <span aria-hidden="true">→</span></button>
+                <button type="button" data-open-drawer="regions" data-requires-data>Regional footprint <span aria-hidden="true">→</span></button>
+                <button type="button" data-open-drawer="gates" data-requires-data>Evidence gates <span aria-hidden="true">→</span></button>
+              </div>
             </div>
-            <div class="quality-guide-grid">
-              <button type="button" data-open-drawer="overview" data-requires-data>Executive decision <span aria-hidden="true">→</span></button>
-              <button type="button" data-open-drawer="visibility" data-requires-data>Reporting visibility <span aria-hidden="true">→</span></button>
-              <button type="button" data-open-drawer="liquidity" data-requires-data>Liquidity screening <span aria-hidden="true">→</span></button>
-              <button type="button" data-open-drawer="payments" data-requires-data>Payment friction <span aria-hidden="true">→</span></button>
-              <button type="button" data-open-drawer="regions" data-requires-data>Regional footprint <span aria-hidden="true">→</span></button>
-              <button type="button" data-open-drawer="gates" data-requires-data>Evidence gates <span aria-hidden="true">→</span></button>
-            </div>
-          </section>
+          </details>
         </section>
 
         <footer id="evidence-footer" class="evidence-footer" hidden><p>Review the Metric guide before using any figure in a funding or execution decision.</p></footer>
