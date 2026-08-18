@@ -23,7 +23,7 @@
 | A15 | Diagnostic narrative confirmation | Which Week 2 facts and open gates constrain the recommendation? | Complete | Baseline above; Week 2 findings retained without new client evidence |
 | A16 | Design principles | What rules must every credible option satisfy? | Complete — analyst proposal | `W3_design_principles.md` |
 | A17 | Strategic option comparison | Which ambition level is preferred under locked weights and alternative priorities? | Complete — conditional analyst direction | `W3_strategic_options.md`; four option-model CSVs |
-| A18 | Future-state operating model | How should cash positioning and payments operate, and who owns each decision/control? | Not started | Future-state model, process maps, RACI, control inventory, pilot charters |
+| A18 | Future-state operating model | How should cash positioning and payments operate, and who owns each decision/control? | Complete — proposed design; client validation open | Future-state model, process maps, RACI, control inventory, pilot charters |
 | A19 | Business case | What value remains defensible when cash, P&L, capacity, risk, and cost are separated? | Not started | `W3_business_case.md`; reproducible scenario model |
 | A20 | Executive synthesis | What should the CFO align on now, and what remains conditional? | Not started | Interim steering deck, CFO Q&A, weekly update, findings/decision/risk logs |
 
@@ -59,3 +59,15 @@
 - **Code/test:** `src/week3_strategy.py`; `tests/test_week3_strategy.py` (28 controls).
 - **Outputs:** `W3_option_weighted_scores.csv`, `W3_option_summary.csv`, `W3_option_sensitivity.csv`, and `W3_model_controls.csv`.
 - **Status:** Complete as a conditional analyst recommendation for detailed design; not client approval or execution authorization.
+
+## A18 — Design the future-state operating model and bounded validation tests
+
+- **Design question:** How can federated coordination create a governed cash/payment decision chain while preserving explicit regional and local service, exception, and emergency rights?
+- **Operating-model result:** One common data, policy, KPI, control, and escalation spine; regional/local validation and governed execution rights; standardized payment intake and exception learning; authoritative-source, mobility, control, service, resilience, evidence, and value gates.
+- **Process/control result:** Two proposed future-state process maps, detailed cash and payment RACIs, an exception taxonomy, and 19 proposed controls across cash, payment, technology/resilience, and governance. All owners, service levels, approval limits, and specialist conclusions remain proposed.
+- **Visibility design:** A 55-account evidence-readiness census precedes any later launch; the provisional ten-account, three-region, three-ERP, four-bank cohort is purposive and read-only. The proposed 95% cutoff and 100% reconciled/formally explained conditions require four comparable weeks and owner approval; they are not the current baseline.
+- **Payment design:** Phase A is a 120-record, four-stratum root-cause review with 15 issue cases and 15 non-issue controls per stratum. It is purposive case-control diagnosis, not prevalence, causation, or benefit evidence. A production intervention remains undefined until a cause, comparator, control design, cost, and baseline are approved.
+- **Affordability/value boundary:** Both charters keep cost ranges `TBD`; the `$1.0–$1.5m` FY2026 envelope is a combined-stage ceiling, not a pilot budget or spend authority. Mobility, capacity, account fees, P&L, and risk value remain unfunded.
+- **Code/test:** `tests/test_week3_operating_model.py` validates artifact presence, the 19-control contract, control references, process-map blocks, provisional populations, and evidence boundaries.
+- **Outputs:** `W3_future_state_operating_model.md`, `W3_future_state_process_map_and_RACI.md`, `W3_control_inventory.csv`, `W3_visibility_pilot_charter.md`, and `W3_payment_pilot_charter.md`.
+- **Status:** Complete for Week 3 design review only; no launch, production change, cash movement, closure, labor action, benefit recognition, or scale is authorized.

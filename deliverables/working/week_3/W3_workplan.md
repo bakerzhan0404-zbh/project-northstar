@@ -23,8 +23,8 @@ Develop a transparent strategic direction, future-state operating model, two bou
 |---|---|---|---:|---|---|
 | W3-01 | What rules must every credible option satisfy? | `W3_design_principles.md` | 18 Aug | Five Week 2 findings and stakeholder constraints | Complete — analyst proposal |
 | W3-02 | Which ambition levels are coherent and which direction is preferred? | `W3_strategic_options.md`; reproducible score and sensitivity outputs | 20 Aug | W3-01; weights fixed before scores | Complete — conditional analyst direction |
-| W3-03 | How should cash positioning and payments operate? | `W3_future_state_operating_model.md`; process/RACI/control design | 21 Aug | W3-02; owner and specialist validation | Not started |
-| W3-04 | What two bounded tests can close the evidence gaps? | Visibility and payment pilot charters; deterministic selection frames | 21 Aug | Authoritative data/source-document readiness | Not started |
+| W3-03 | How should cash positioning and payments operate? | `W3_future_state_operating_model.md`; process/RACI/control design | 21 Aug | W3-02; owner and specialist validation | Complete — proposed design; client validation open |
+| W3-04 | What two bounded tests can close the evidence gaps? | Visibility and payment pilot charters; deterministic selection frames | 21 Aug | Authoritative data/source-document readiness | In progress — charters complete; selection frames pending |
 | W3-05 | What value is defensible? | `W3_business_case.md`; assumptions/sensitivity table; reproducible model | 22 Aug | Mobility, actual cost, observed-time, fee, and Finance evidence | Not started — validation case only |
 | W3-06 | What should the CFO align now? | Maximum-ten-slide interim source deck and five CFO answers | 23 Aug | W3-01–05 | Not started |
 | W3-07 | Is the pack complete, traceable, and reproducible? | Logs/registers, weekly update, submission index, full regression | 23 Aug | All modules | Not started |
