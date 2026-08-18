@@ -36,7 +36,7 @@ Why: the first viewport asks what the user wants to investigate instead of prese
 
 ### Expanded analytical views
 
-Reference-inspired visuals appear only after a view is selected and an analytical section is opened. They translate governed Week 1–2 evidence into inspectable comparisons; they are not targets, scores, forecasts, or approved value. Data Quality & Evidence is a direct evidence landing rather than another accordion.
+Reference-inspired visuals appear only after a view is selected and an analytical section is opened. They translate governed Week 1–2 evidence into inspectable comparisons; they are not targets, scores, forecasts, or approved value. Data Quality & Evidence is a direct evidence landing with progressive-disclosure details rather than another top-level analytical accordion.
 
 | Section | Expanded evidence | Why this form fits the evidence |
 |---|---|---|
@@ -47,7 +47,7 @@ Reference-inspired visuals appear only after a view is selected and an analytica
 | Regional footprint | A schematic CC0 world map with selectable NA, EMEA, and APAC markers plus a reconciled regional table | The map provides spatial orientation and a direct region-filter shortcut. The table supplies the exact account, delayed-reporting, priority-union, and closure-candidate evidence without implying live cash locations or regional performance. |
 | Capacity evidence | Two shared-scale comparison bars | The bars compare the management process estimate with the supplied payment-file monthly average without adding them or presenting either as removable labor or cashable savings. |
 | Closure evidence | A row-level candidate table | Account, entity, bank, account currency, USD fee estimate, candidate rule, and validation status stay together so every row reads as a validation candidate—not an approved closure. |
-| Data Quality & Evidence | Status, exact check/control counts, governed-source count, population controls, evidence limit, and next action | It reports internal consistency and reconciliation without inventing a quality score, source certification, or decision approval. |
+| Data Quality & Evidence | Contract status, seven evidence dimensions, a baseline-only monitoring state, population provenance, and a 15-item validation queue | Closed dimension rows keep the landing concise; opening one reveals its definition, grain, rule coverage, evidence limit, proposed owner, source, and next action without inventing a pass-rate score. |
 
 ### Data Quality & Evidence
 
@@ -62,11 +62,29 @@ The quality landing reads the governed contract rather than hard-coded fallback 
 
 Its persistent limit is: `Passing internal checks establishes structural consistency and reconciliation only; it does not certify source completeness, semantic accuracy, operational timing, causation, or decision authority.` The displayed next action is to complete source-owner certification and resolve semantic or operational gaps before treating consistency as decision authority.
 
-Filters never change this full-contract result. No composite quality score, grade, completeness claim, or approval is calculated. An incomplete or contradictory quality contract fails closed and publishes no plausible result.
+The 52 Week 1 rules are mapped exactly once across seven evidence dimensions:
+
+| Dimension | Evidence status | Mapped Week 1 rules | Current interpretation |
+|---|---|---:|---|
+| Uniqueness | `Measured` | 5 | Reproducible internal duplicate/key checks passed for the supplied snapshot. |
+| Accuracy | `Not certified` | 0 | No certified source comparison exists; the interface never renders a misleading `0 / 0` pass rate. |
+| Consistency | `Partial · proxy` | 15 | Internal relationships reconcile, while source certification and the $3.9bn-versus-$3.8bn boundary remain open. |
+| Completeness | `Partial · proxy` | 4 | Supplied-file fields can be tested, but completeness against the authoritative source population is not established. |
+| Timeliness | `Partial · proxy` | 1 | The reporting-date proxy is measurable; it is not start-of-day, elapsed-24-hour, or SLA evidence. |
+| Currency / freshness | `Not certified` | 2 | The supplied period is known, but no owner-approved freshness policy or continuing refresh history exists. |
+| Conformance / validity | `Measured` | 25 | Internal type, domain, schema, and logical checks passed for the supplied snapshot. |
+
+`Measured` means a reproducible internal rule exists for this supplied snapshot—not that an external source has been certified. `Partial · proxy` means some evidence is available but the decision-relevant definition remains incomplete. `Not certified` means no authoritative or owner-approved control supports the claim yet. The 13 Week 2 reconciliation controls remain a separate denominator and are never blended into the 52-rule coverage.
+
+Every dimension is closed by default. Opening one reveals its definition, current evidence, grain and denominator, threshold status, evidence limit, proposed validation owner, next action, sources, and mapped technical rules. `Population & provenance`, `Evidence issues & actions`, and the methodology library are separate closed disclosures. The issue queue preserves DQ-01 through DQ-15 from the Week 1 report—11 High and 4 Medium—as validation and decision-evidence gaps, not as failed structural rules.
+
+The dashboard also states `Baseline only · monitoring history not yet available`. One supplied snapshot cannot establish deterioration, improvement, drift, or a control range; future refreshes can add history only after the same governed checks are rerun. This applies the useful design principles in [Informatica's dimensions-of-data-quality article](https://www.informatica.com/blogs/the-importance-of-high-quality-data-requires-constant-vigilance-dimensions-of-data-quality.html)—dimension-based rules, drill-down, traceability, ownership, and monitoring—without treating the article as project evidence or importing its example scores.
+
+Filters never change this full-contract result. No composite quality score, grade, completeness claim, arbitrary business threshold, or approval is calculated. An incomplete, duplicated, reordered, or contradictory quality contract fails closed and publishes no plausible result.
 
 ### Dashboard search
 
-Search is available on the menu page and in every selected view. An exact menu title opens that view. A metric result routes to its owning view and opens its section; `Data Quality & Evidence` routes to the quality landing. A methodology result opens the Metric guide without changing views.
+Search is available on the menu page and in every selected view. An exact menu title opens that view. A metric result routes to its owning view and opens its section; `Data Quality & Evidence` routes to the quality landing. Searching a quality dimension, mapped rule key or label, or issue ID such as `Accuracy`, `Timeliness`, or `DQ-11` opens and focuses the matching disclosure. A methodology result opens the Metric guide without changing views.
 
 Selecting a dimension applies that filter without forcing a view change; selecting an account applies its currency, region, entity, and bank context. Exact `NA`, `EMEA`, and `APAC` matches present the region filter first. Search uses literal token matching, not regular-expression evaluation.
 
@@ -108,13 +126,18 @@ Why: the page answers “what is happening and what should I do?” while the gu
 
 `All views` returns to the six-option menu without clearing filters or analytical toggles and restores focus to the menu choice just left. `Reset dashboard` clears search and filters, restores the full-period, 14-day liquidity and payment-record defaults, closes transient panels, and returns to the menu.
 
-The six view choices are ordinary buttons inside a labelled navigation list. Selected views use `aria-current="page"`; focus moves to the view heading after selection. Native disclosure headers support `Enter` and `Space`; arrow keys and Home/End move between visible headers; Escape collapses the open section. Regional controls preserve their marker/table keyboard behavior. Interactive targets remain at least 44 px, and hidden views are removed from the accessibility tree.
+The six view choices are ordinary buttons inside a labelled navigation list. Selected views use `aria-current="page"`; focus moves to the view heading after selection. Native disclosure headers support `Enter` and `Space`; arrow keys and Home/End move between visible headers; Escape collapses the open section. Data-quality dimension and issue disclosures use the same keyboard pattern and collapse when the user switches views, returns to All views, or resets. Regional controls preserve their marker/table keyboard behavior. Interactive targets remain at least 44 px, and hidden views are removed from the accessibility tree.
 
 ## Evidence safeguards
 
 - Menu selection changes presentation only; it never recalculates or mutates the governed filter state.
 - The quality landing requires the exact 52/52 Week 1 checks, 13/13 Week 2 controls, 12 sources, six population controls, declared provenance, and open-certification boundary. Contradictory values fail closed.
 - Passing quality controls are never converted into a score, grade, source-certification claim, or decision authority.
+- Every one of the 52 Week 1 rules appears exactly once in the declared seven-dimension mapping; missing, duplicated, reordered, or reassigned rules fail closed.
+- Dimension coverage labels describe available evidence, not performance. Accuracy remains `Not certified` and never displays a fabricated zero-denominator rate.
+- Week 1 rule coverage and Week 2 reconciliation controls retain separate denominators; they are not combined into a composite quality percentage.
+- Monitoring remains explicitly baseline-only until more governed snapshots exist. No trend, improvement, deterioration, target, or control range is inferred from one snapshot.
+- The DQ-01–DQ-15 queue reports validation and decision-evidence gaps from the Week 1 issue log; it does not relabel the 52 passing technical checks as failures.
 - The browser aggregates only governed filter facts; it never reads or recalculates from raw source files.
 - The adapter validates exact schemas, keys, dimensions, control totals, cohort reconciliation, evidence labels, and decision boundaries before writing JSON.
 - Validated movable cash is serialized as `null` with status `not_established`, never as an observed numeric zero.
@@ -153,13 +176,13 @@ The final UI test opens a temporary loopback server when the environment permits
 - `src/build_dashboard_data.py` — validation and dashboard-data adapter
 - `data/processed/W2_dashboard_account_day_facts.csv` — governed visibility and liquidity filter facts
 - `data/processed/W2_dashboard_payment_facts.csv` — governed payment filter facts
-- `dashboard/dashboard_data.json` — generated governed data, filter, definition, and quality contract
+- `dashboard/dashboard_data.json` — generated governed data, filter, definition, quality-dimension, monitoring, and action-queue contract
 - `dashboard/index.html` — menu-first semantic dashboard structure
 - `dashboard/styles.css` — Figma-aligned responsive design
 - `dashboard/assets/world-map.png` — locally vendored decorative CC0 Robinson-projection map raster
 - `dashboard/assets/README.md` — map source, author, CC0 license, retrieval date, dimensions, and checksum
 - `dashboard/filter_model.js` — deterministic filtering, governed visualization summaries, and search
-- `dashboard/app.js` — six-view navigation, quality landing, accordions, charts, search, filters, Metric guide, accessibility, and fail-closed interactions
+- `dashboard/app.js` — six-view navigation, quality drill-down/action queue, accordions, charts, search, filters, Metric guide, accessibility, and fail-closed interactions
 - `tests/test_dashboard_data.py` — analytical contract tests
 - `tests/test_dashboard_filter_model.js` — filter, visualization reconciliation, search, date, mutation, and empty-scope tests
-- `tests/test_dashboard_ui.py` — menu routing, quality-contract mutation, structure, visualization, keyboard, claim, safety, and local-asset tests
+- `tests/test_dashboard_ui.py` — menu routing, exact quality mappings, adversarial quality mutations, disclosure/search behavior, visualization, keyboard, claim, safety, and local-asset tests
