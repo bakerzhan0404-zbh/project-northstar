@@ -138,6 +138,295 @@ CLOSURE_BOUNDARY = (
     "and fee removal are not validated"
 )
 
+QUALITY_DIMENSION_CHECKS = {
+    "uniqueness": (
+        "entity_primary_key_unique",
+        "account_primary_key_unique",
+        "payment_primary_key_unique",
+        "balance_account_date_unique",
+        "fx_currency_date_unique",
+    ),
+    "accuracy": (),
+    "consistency": (
+        "account_entities_resolve",
+        "balance_accounts_resolve",
+        "payment_accounts_resolve",
+        "balance_fx_resolves",
+        "payment_fx_resolves",
+        "payment_currency_matches_account",
+        "available_not_above_positive_closing",
+        "nonexception_repair_minutes_zero",
+        "fx_dates_match_balance_dates",
+        "visibility_source_quality_mapping_valid",
+        "repaired_payments_are_exceptions",
+        "rejected_payments_are_exceptions",
+        "completed_payments_are_not_exceptions",
+        "exception_payments_have_repair_minutes",
+        "payment_dates_have_fx_coverage",
+    ),
+    "completeness": (
+        "balance_panel_complete",
+        "fx_panel_complete",
+        "all_required_fields_complete",
+        "balance_date_range_contiguous",
+    ),
+    "timeliness": ("reporting_date_not_before_balance_date",),
+    "currency": (
+        "balance_period_matches_project",
+        "fx_period_matches_project",
+    ),
+    "conformance": (
+        "repair_minutes_nonnegative",
+        "entity_region_domain_valid",
+        "account_status_domain_valid",
+        "visibility_method_domain_valid",
+        "balance_source_quality_domain_valid",
+        "payment_status_domain_valid",
+        "restricted_flag_is_boolean",
+        "payment_flags_are_boolean",
+        "fx_rates_positive",
+        "payment_amounts_positive",
+        "payment_fees_nonnegative",
+        "account_fees_nonnegative",
+        "process_numeric_inputs_nonnegative",
+        "process_manual_percentage_in_range",
+        "entity_schema_exact",
+        "account_schema_exact",
+        "balance_schema_exact",
+        "payment_schema_exact",
+        "fx_schema_exact",
+        "process_schema_exact",
+        "account_purpose_domain_valid",
+        "sweep_structure_domain_valid",
+        "entity_restriction_domain_valid",
+        "payment_type_domain_valid",
+        "process_control_criticality_domain_valid",
+    ),
+}
+
+QUALITY_DIMENSION_SPECS = (
+    {
+        "key": "uniqueness",
+        "label": "Uniqueness",
+        "status": "measured",
+        "status_label": "Measured",
+        "definition": (
+            "Whether each supplied entity or record has a unique key and no exact "
+            "primary or composite key appears more than once."
+        ),
+        "grain": "Dataset and primary/composite-key occurrence checks",
+        "threshold": "Technical gate · zero duplicate primary or composite keys",
+        "evidence_summary": (
+            "Exact key checks passed for supplied entities, accounts, payments, "
+            "account-days, and FX rates."
+        ),
+        "boundary": (
+            "Covers exact duplicates in supplied files only; it does not perform "
+            "fuzzy identity matching or prove enterprise-population uniqueness."
+        ),
+        "owner": "Data owners / IT",
+        "sources": [
+            "W1_data_quality_checks.csv",
+            "W1_data_quality_metrics.csv",
+        ],
+        "next_action": (
+            "Run the same duplicate checks on every refresh and define cross-system "
+            "identity resolution before making an enterprise-wide uniqueness claim."
+        ),
+    },
+    {
+        "key": "accuracy",
+        "label": "Accuracy",
+        "status": "not_certified",
+        "status_label": "Not certified",
+        "definition": (
+            "Whether supplied values correctly represent the real-world balances, "
+            "restrictions, fees, activities, and events they are intended to model."
+        ),
+        "grain": "Attribute or record value against an authoritative reference",
+        "threshold": "Business threshold not approved",
+        "evidence_summary": (
+            "No certified external source-of-truth or source-owner comparison is supplied."
+        ),
+        "boundary": (
+            "Internal validity cannot certify estimated availability, preliminary "
+            "restriction flags, estimated fees, or management-estimated effort."
+        ),
+        "owner": "Source owners / Group Finance / Treasury",
+        "sources": [
+            "W1_data_quality_metrics.csv",
+            "W1_data_quality_report.md · Appendix A",
+        ],
+        "next_action": (
+            "Reconcile critical values to bank, legal, invoice, and observed-operating "
+            "evidence, with accountable owner sign-off."
+        ),
+    },
+    {
+        "key": "consistency",
+        "label": "Consistency",
+        "status": "partial_proxy",
+        "status_label": "Partial · proxy",
+        "definition": (
+            "Whether related values agree across records, files, joins, statuses, and "
+            "declared control totals."
+        ),
+        "grain": "Cross-field, cross-record, and cross-file relationships",
+        "threshold": "Technical gate · all mapped internal relationships reconcile",
+        "evidence_summary": (
+            "Mapped joins, status relationships, and internal control relationships pass."
+        ),
+        "boundary": (
+            "Internal agreement does not prove correctness; the supplied $3.9bn entity "
+            "total remains unreconciled to the $3.8bn client-brief baseline."
+        ),
+        "owner": "Group Finance / Data owners",
+        "sources": [
+            "W1_data_quality_checks.csv",
+            "W1_data_quality_metrics.csv",
+            "W2_reconciliation_metrics.csv",
+            "W2_repair_baseline_reconciliation.csv",
+        ],
+        "next_action": (
+            "Reconcile source perimeters and the payment/process scope differences before "
+            "using cross-source totals as one baseline."
+        ),
+    },
+    {
+        "key": "completeness",
+        "label": "Completeness",
+        "status": "partial_proxy",
+        "status_label": "Partial · proxy",
+        "definition": (
+            "Whether required supplied values and declared panels are present for the "
+            "scope being analysed."
+        ),
+        "grain": "Required field, panel, and declared supplied-population checks",
+        "threshold": "Technical gate · required fields populated and declared panels complete",
+        "evidence_summary": (
+            "Required supplied fields are populated and the declared balance and FX panels "
+            "are structurally complete."
+        ),
+        "boundary": (
+            "This does not establish enterprise-population completeness: payment extract "
+            "controls, receivables, FX transactions, operating-buffer inputs, and other "
+            "decision evidence remain absent."
+        ),
+        "owner": "Business data owners",
+        "sources": [
+            "W1_data_quality_checks.csv",
+            "W1_data_quality_metrics.csv",
+            "W2_reconciliation_metrics.csv",
+        ],
+        "next_action": (
+            "Obtain source control totals and the missing subject extracts, then document "
+            "mandatory, optional, and inapplicable fields with owners."
+        ),
+    },
+    {
+        "key": "timeliness",
+        "label": "Timeliness",
+        "status": "partial_proxy",
+        "status_label": "Partial · proxy",
+        "definition": (
+            "Whether information becomes accessible by the time it is required for a "
+            "treasury decision."
+        ),
+        "grain": "Account-day reporting-date proxy",
+        "threshold": "Business SLA and cutoff threshold not approved",
+        "evidence_summary": (
+            "5,792 of 9,955 supplied account-days are same-calendar-day; 23 of 55 "
+            "accounts show a delay."
+        ),
+        "boundary": (
+            "Reporting dates contain no receipt timestamps or agreed cutoffs, so the proxy "
+            "does not establish start-of-day or elapsed-24-hour performance."
+        ),
+        "owner": "Group Treasury / IT",
+        "sources": [
+            "W1_data_quality_metrics.csv",
+            "W2_visibility_diagnostic.csv",
+            "W2_dashboard_account_day_facts.csv",
+        ],
+        "next_action": (
+            "Capture receipt timestamps, define the required cutoff, and agree the service "
+            "threshold before monitoring timeliness performance."
+        ),
+    },
+    {
+        "key": "currency",
+        "label": "Currency / freshness",
+        "status": "not_certified",
+        "status_label": "Not certified",
+        "definition": (
+            "Whether the information is sufficiently current and refreshed at the frequency "
+            "required for its intended decision."
+        ),
+        "grain": "Snapshot period and refresh history",
+        "threshold": "Refresh cadence and expiry threshold not defined",
+        "evidence_summary": "One governed baseline covers 1 Jan–30 Jun 2026.",
+        "boundary": (
+            "The dashboard is a static six-month diagnostic snapshot, not a live feed; no "
+            "successive refresh history or freshness SLA is available."
+        ),
+        "owner": "Data owner / Dashboard owner",
+        "sources": [
+            "W1_data_quality_metrics.csv",
+            "dashboard snapshot metadata",
+        ],
+        "next_action": (
+            "Agree refresh frequency and expiry rules, then retain comparable snapshots "
+            "before presenting a trend or control chart."
+        ),
+    },
+    {
+        "key": "conformance",
+        "label": "Conformance / validity",
+        "status": "measured",
+        "status_label": "Measured",
+        "definition": (
+            "Whether supplied values conform to the declared schema, data types, domains, "
+            "formats, ranges, and logical rules."
+        ),
+        "grain": "Field, record, and file-contract checks",
+        "threshold": "Technical gate · all mapped schema, type, domain, and range rules pass",
+        "evidence_summary": (
+            "Mapped schema, type, domain, range, and boolean checks pass for the supplied files."
+        ),
+        "boundary": (
+            "Conformance to the supplied file contract does not establish semantic accuracy, "
+            "business fitness, or source certification."
+        ),
+        "owner": "Data engineering / Source owners",
+        "sources": [
+            "W1_data_quality_checks.csv",
+            "W1_data_quality_metrics.csv",
+        ],
+        "next_action": (
+            "Version the data contract, block invalid refreshes, and add owner-approved "
+            "business rules as source semantics are certified."
+        ),
+    },
+)
+
+QUALITY_ISSUE_QUEUE = (
+    ("DQ-01", "timeliness", "Reporting dates lack timestamps and cutoff definitions", "Cannot prove start-of-day or within-24-hour visibility", "Obtain receipt timestamps and actual report-run logs; agree KPI definition", "Group Treasury / IT", "High"),
+    ("DQ-02", "accuracy", "available_balance_local is estimated", "May overstate mobilizable cash", "Reconcile to bank definitions; distinguish ledger, available, restricted, and required buffers", "Treasury / Controllers", "High"),
+    ("DQ-03", "accuracy", "Restriction flags are preliminary", "Could reverse liquidity opportunity", "Complete legal, tax, and regulatory review by entity/account; document approval", "Legal / Tax / Local Finance", "High"),
+    ("DQ-04", "completeness", "No operating-buffer or settlement-calendar data", "Positive cash may be operationally required", "Define buffer methodology and test sensitivity", "Treasury / Regional Finance", "High"),
+    ("DQ-05", "completeness", "Payment exceptions lack root-cause fields", "Cannot target the correct intervention", "Obtain exception codes, beneficiary/invoice fields, and repaired-payment samples", "Shared Services / AP", "High"),
+    ("DQ-06", "accuracy", "Fees are estimates, not invoices", "P&L benefit cannot be booked", "Reconcile 12 months of bank invoices and internal cost allocation", "Treasury / Finance", "Medium"),
+    ("DQ-07", "accuracy", "Process time and manual percentages are estimates", "Capacity benefit may be overstated", "Time sample and validate volumes; protect control-critical effort", "Process owners / Audit", "Medium"),
+    ("DQ-08", "currency", "Only six months of history are supplied", "Seasonality and peak behavior may be missed", "Obtain at least 12–24 months or explicitly constrain conclusions", "Data owner", "Medium"),
+    ("DQ-09", "completeness", "No borrowing rates, facility usage, or transfer costs", "Cannot quantify avoidable external funding", "Obtain facility statements, interest, FX, tax, and transfer cost data", "Treasurer / FP&A", "High"),
+    ("DQ-10", "completeness", "No account dependency, signatory, or closure-cost data", "Dormant does not equal closable", "Perform local account certification and closure checklist", "Regional Controllers", "High"),
+    ("DQ-11", "consistency", "Entity revenue sums to $3.9bn versus $3.8bn in the client brief", "Entity-level sizing and denominator-based metrics could be misstated", "Reconcile scope, period, eliminations, and rounding with Group Finance", "Group Finance", "Medium"),
+    ("DQ-12", "completeness", "No AR ledger, receipt, remittance, match-status, reason, or aging data", "Receivables reconciliation cannot be diagnosed", "Obtain reconciled receivables extracts and source-system controls", "Group Finance / AR owner", "High"),
+    ("DQ-13", "completeness", "FX file contains rates only; no trades, exposures, hedges, spreads/fees, or settlements", "FX transaction patterns, costs, and risks cannot be diagnosed", "Obtain FX transaction/exposure extracts and policy context", "Group Treasury / Finance", "High"),
+    ("DQ-14", "completeness", "Payment extract control total and sampling method are absent", "Rates may not represent ACG's full payment population", "Reconcile record/value totals to source and document extract logic", "Shared Services / Data owner", "High"),
+    ("DQ-15", "consistency", "Payment file implies 79.83 exceptions and 55.78 repair hours/month versus process estimates of 180 and 102.60", "Process capacity and root-cause baselines may use different scope or periods", "Reconcile definitions, populations, periods, and manual-percentage treatment", "Shared Services / Process owner", "High"),
+)
+
 
 class DashboardDataError(ValueError):
     """Raised when the dashboard evidence contract cannot be certified."""
@@ -1267,6 +1556,101 @@ def _build_filtering_contract(
     }
 
 
+def _quality_rule_label(check_key: str) -> str:
+    label = check_key.replace("_", " ")
+    for source, replacement in (
+        ("fx", "FX"),
+        ("primary key", "primary key"),
+    ):
+        label = label.replace(source, replacement)
+    return label[0].upper() + label[1:]
+
+
+def _build_quality_dimensions(
+    frames: Mapping[str, pd.DataFrame],
+) -> list[Dict[str, Any]]:
+    checks = frames["w1_checks"]
+    check_results = {
+        str(row["check"]): str(row["passed"]).lower() == "true"
+        for _, row in checks.iterrows()
+    }
+    mapped_keys = [
+        check_key
+        for dimension in QUALITY_DIMENSION_CHECKS.values()
+        for check_key in dimension
+    ]
+    if len(mapped_keys) != len(set(mapped_keys)):
+        raise DashboardDataError("A Week 1 quality check maps to more than one dimension")
+    if set(mapped_keys) != set(check_results):
+        missing = sorted(set(check_results).difference(mapped_keys))
+        unknown = sorted(set(mapped_keys).difference(check_results))
+        raise DashboardDataError(
+            "Week 1 quality-dimension mapping changed: "
+            f"unmapped={missing!r}; unavailable={unknown!r}"
+        )
+
+    issue_counts: Dict[str, int] = {key: 0 for key in QUALITY_DIMENSION_CHECKS}
+    for _, dimension, *_ in QUALITY_ISSUE_QUEUE:
+        if dimension not in issue_counts:
+            raise DashboardDataError(
+                f"Quality issue maps to unknown dimension: {dimension!r}"
+            )
+        issue_counts[dimension] += 1
+
+    dimensions = []
+    for spec in QUALITY_DIMENSION_SPECS:
+        key = str(spec["key"])
+        rule_keys = QUALITY_DIMENSION_CHECKS[key]
+        rules = [
+            {
+                "key": rule_key,
+                "label": _quality_rule_label(rule_key),
+                "result": "pass" if check_results[rule_key] else "fail",
+            }
+            for rule_key in rule_keys
+        ]
+        passed = sum(rule["result"] == "pass" for rule in rules)
+        total = len(rules)
+        if key == "accuracy":
+            result = "No certified source comparison"
+        elif key == "timeliness":
+            result = "5,792 / 9,955 same-day account-days · 23 / 55 accounts delayed"
+        elif key == "currency":
+            result = f"{passed} / {total} period checks passed · baseline only"
+        else:
+            result = f"{passed} / {total} mapped rules passed"
+        dimensions.append(
+            {
+                **spec,
+                "result": result,
+                "passed_rules": passed,
+                "measured_rules": total,
+                "open_issue_count": issue_counts[key],
+                "rules": rules,
+            }
+        )
+    return dimensions
+
+
+def _build_quality_issue_queue() -> list[Dict[str, Any]]:
+    issues = []
+    for issue_id, dimension, issue, impact, action, owner, severity in QUALITY_ISSUE_QUEUE:
+        issues.append(
+            {
+                "id": issue_id,
+                "dimension": dimension,
+                "issue": issue,
+                "decision_impact": impact,
+                "action": action,
+                "owner": owner,
+                "severity": severity,
+            }
+        )
+    if [issue["id"] for issue in issues] != [f"DQ-{index:02d}" for index in range(1, 16)]:
+        raise DashboardDataError("Quality issue queue must contain ordered DQ-01 to DQ-15")
+    return issues
+
+
 def _build_quality_contract(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
     checks = frames["w1_checks"]
     passed = checks["passed"].astype(str).str.lower().map(
@@ -1311,6 +1695,20 @@ def _build_quality_contract(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any
         },
         "source_artifacts": len(INPUT_FILES),
         "population_controls": population_controls,
+        "dimensions": _build_quality_dimensions(frames),
+        "monitoring": {
+            "status": "baseline_only",
+            "label": "Baseline only · monitoring history not yet available",
+            "period_start": "2026-01-01",
+            "period_end": "2026-06-30",
+            "snapshots": 1,
+            "boundary": (
+                "One supplied diagnostic snapshot cannot establish a quality trend, "
+                "control range, or improvement trajectory."
+            ),
+        },
+        "issue_queue": _build_quality_issue_queue(),
+        "issue_source": "W1_data_quality_report.md · Appendix A",
         "decision_boundary": QUALITY_BOUNDARY,
     }
 

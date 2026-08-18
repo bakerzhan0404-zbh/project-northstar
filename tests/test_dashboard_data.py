@@ -140,6 +140,78 @@ class DashboardDataTest(unittest.TestCase):
             "does not certify source completeness", quality["decision_boundary"]
         )
 
+        dimensions = quality["dimensions"]
+        self.assertEqual(
+            [dimension["key"] for dimension in dimensions],
+            [
+                "uniqueness",
+                "accuracy",
+                "consistency",
+                "completeness",
+                "timeliness",
+                "currency",
+                "conformance",
+            ],
+        )
+        self.assertEqual(
+            {dimension["key"]: dimension["status"] for dimension in dimensions},
+            {
+                "uniqueness": "measured",
+                "accuracy": "not_certified",
+                "consistency": "partial_proxy",
+                "completeness": "partial_proxy",
+                "timeliness": "partial_proxy",
+                "currency": "not_certified",
+                "conformance": "measured",
+            },
+        )
+        self.assertEqual(
+            {dimension["key"]: dimension["measured_rules"] for dimension in dimensions},
+            {
+                "uniqueness": 5,
+                "accuracy": 0,
+                "consistency": 15,
+                "completeness": 4,
+                "timeliness": 1,
+                "currency": 2,
+                "conformance": 25,
+            },
+        )
+        mapped_rules = [
+            rule["key"]
+            for dimension in dimensions
+            for rule in dimension["rules"]
+        ]
+        self.assertEqual(len(mapped_rules), 52)
+        self.assertEqual(len(set(mapped_rules)), 52)
+        self.assertTrue(all(rule["result"] == "pass" for dimension in dimensions for rule in dimension["rules"]))
+        self.assertEqual(
+            quality["monitoring"],
+            {
+                "status": "baseline_only",
+                "label": "Baseline only · monitoring history not yet available",
+                "period_start": "2026-01-01",
+                "period_end": "2026-06-30",
+                "snapshots": 1,
+                "boundary": (
+                    "One supplied diagnostic snapshot cannot establish a quality trend, "
+                    "control range, or improvement trajectory."
+                ),
+            },
+        )
+        self.assertEqual(len(quality["issue_queue"]), 15)
+        self.assertEqual(
+            [issue["id"] for issue in quality["issue_queue"]],
+            [f"DQ-{index:02d}" for index in range(1, 16)],
+        )
+        self.assertEqual(quality["issue_source"], "W1_data_quality_report.md · Appendix A")
+
+    def test_quality_dimensions_fail_closed_when_check_inventory_changes(self) -> None:
+        frames = copy.deepcopy(self.frames)
+        frames["w1_checks"].loc[0, "check"] = "unexpected_replacement_check"
+        with self.assertRaisesRegex(DashboardDataError, "quality-dimension mapping changed"):
+            build_dashboard_data(frames)
+
     def test_filter_catalog_preserves_na_and_control_counts(self) -> None:
         self.assertIn("NA", set(self.frames["accounts"]["region"]))
         self.assertFalse(self.frames["accounts"]["region"].isna().any())
