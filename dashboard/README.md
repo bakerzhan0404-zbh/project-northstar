@@ -17,39 +17,45 @@ The dashboard is intentionally local and has not been deployed or pushed.
 
 ## What is interactive—and why
 
+### Inline decision sections
+
+The main body uses six click-to-open sections: `Portfolio decision`, `Reporting visibility`, `Liquidity`, `Payment friction`, `Capacity evidence`, and `Closure evidence`. All details are collapsed by default, and only one section can be open at a time. Opening another section closes the previous one; clicking the open header collapses it.
+
+Each collapsed row keeps the decision-ready summary and its essential evidence boundary visible. Expanded panels contain the current-scope evidence, interpretation, decision boundary, and next action. Liquidity always keeps `$0` funded-case mobility and `not established` visible; capacity always remains labelled as an enterprise-global management estimate to which filters do not apply.
+
+Why: the default view behaves like an analytical worklist rather than a presentation slide. A user can scan every conclusion first, then open only the evidence needed for the current decision.
+
 ### Dashboard search
 
-Search metrics, entities, banks, regions, currencies, or account identifiers. Selecting a metric opens the relevant Metric guide topic; selecting a filter value applies that scope.
+Search metrics, entities, banks, regions, currencies, or account identifiers. Selecting a metric expands and focuses the matching inline section. Selecting a dimension applies that filter; selecting an account applies its currency, region, entity, and bank context. Searches for definitions, formulas, sources, or methodology open the Metric guide.
 
-Why: search is a navigation shortcut, not an opaque recalculation or a card-hiding mechanism.
+Why: search is a navigation and scope shortcut, not an opaque recalculation or a card-hiding mechanism.
 
 ### Governed filters
 
 Open `Filters` to select an inclusive date range, currency, region, entity, and bank. Dimension filters combine with `AND` logic and use the same selected account population across visibility, liquidity, payments, and closure candidates.
 
-Why: this lets a user test whether a portfolio-level signal persists in a specific operating scope. Visibility and payments use the selected date range; liquidity uses the selected end date and its complete trailing 7/14-day window; closure candidates use account dimensions; the capacity baseline remains global and is labelled accordingly.
+Why: this tests whether a portfolio-level signal persists in a specific operating scope. Visibility and payments use the selected date range; liquidity uses the selected end date and its complete trailing 7/14-day window; closure candidates use account dimensions; the capacity baseline remains global.
 
-### Liquidity horizon
+### Liquidity horizon and payment measure
 
-Switch between the 7-day and 14-day modeled screens. The selected screen, illustrative buffer, as-of evidence, and interpretation boundary update together.
+Open `Liquidity` to switch between the governed 7-day and 14-day screens. Open `Payment friction` to switch the same four mutually exclusive cohorts between `Records`, `Exceptions`, and `Repair time`. Each control updates its collapsed summary and open detail panel together.
 
-Why: this shows sensitivity to the payment-intent horizon without implying transferability. Validated mobility remains `not established`, and the funded case remains `$0`, in both states.
-
-### Payment measure
-
-Switch the same four mutually exclusive cohorts between `Records`, `Exceptions`, and `Repair time`.
-
-Why: the deduplicated priority union represents 37.36% of supplied records but 74.32% of exceptions and 74.40% of repair minutes. The control changes the numerator, denominator, unit, chart, and explanation together. The 342-record overlap is always counted once.
+Why: controls stay next to the evidence they change. The liquidity screen never implies transferability, and the payment numerator, denominator, unit, chart, and explanation move together while the overlap is counted once.
 
 ### Metric guide
 
-Open the right-side guide from the top menu, any signal, or either evidence gate. Each topic exposes the definition, calculation and formula, data source, interpretation limit, and next action for the current filtered view.
+Open the right-side guide from the top menu or from any expanded section. The guide is methodology-only: `Definition`, `Formula / calculation`, `Data source`, and `Method limit`.
 
-Why: progressive disclosure keeps the executive view concise while allowing self-service interpretation and auditability.
+Current filtered values, interpretation, decision boundaries, and next actions remain in the inline sections and are not repeated in the guide.
 
-### Reset
+Why: the page answers “what is happening and what should I do?” while the guide answers “what does this mean and how is it calculated?”
 
-Reset clears search and filters and returns to the full-period, 14-day liquidity, and payment-record defaults.
+### Reset and keyboard behavior
+
+Reset clears search and filters, restores the full-period, 14-day liquidity and payment-record defaults, and collapses all detail sections.
+
+Native disclosure headers support `Enter` and `Space`. `Up`/`Down` or `Left`/`Right` moves between section headers, `Home`/`End` moves to the first or last header, and `Escape` collapses the open section and returns focus. Interactive targets remain at least 44 px.
 
 ## Evidence safeguards
 
@@ -85,7 +91,7 @@ The final UI test opens a temporary loopback server when the environment permits
 - `dashboard/index.html` — semantic dashboard structure
 - `dashboard/styles.css` — Figma-aligned responsive design
 - `dashboard/filter_model.js` — deterministic filtering, summaries, and search
-- `dashboard/app.js` — menu interactions, Metric guide, accessibility, and fail-closed loading
+- `dashboard/app.js` — accordion, search, filter, Metric guide, accessibility, and fail-closed interactions
 - `tests/test_dashboard_data.py` — analytical contract tests
 - `tests/test_dashboard_filter_model.js` — filter, search, date, and empty-scope tests
-- `tests/test_dashboard_ui.py` — structural, interaction, claim, safety, and local-asset tests
+- `tests/test_dashboard_ui.py` — structure, accordion exclusivity, keyboard, claim, safety, and local-asset tests
