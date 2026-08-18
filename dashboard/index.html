@@ -190,115 +190,136 @@
       </section>
 
       <main>
-        <section class="decision-banner" aria-labelledby="decision-title">
-          <div>
-            <h2 id="decision-title">Design and test; do not fund or execute yet.</h2>
-            <p id="decision-support">Evidence is loading.</p>
-          </div>
-          <span class="decision-badge">Portfolio-wide · Validation required</span>
-        </section>
+        <section id="signals" class="operation-list" aria-label="Treasury decisions and evidence signals">
+          <details id="detail-decision" class="operation-row decision-operation" name="dashboard-detail" data-inline-detail="decision">
+            <summary data-detail-summary="decision">
+              <span class="operation-kicker">Decision</span>
+              <span class="operation-copy">
+                <strong id="decision-title">Design and test; do not fund or execute yet.</strong>
+                <span id="decision-support">Evidence is loading.</span>
+              </span>
+              <span class="operation-status decision-badge">Portfolio-wide · Validation required</span>
+              <span class="summary-marker" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="operation-detail">
+              <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="decision">Loading current scope…</p></div>
+              <div class="detail-block"><span class="detail-label">Why this decision</span><p data-detail-evidence="decision">Loading decision evidence…</p></div>
+              <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="decision">Loading next action…</p></div>
+              <button class="detail-guide-button" type="button" data-open-drawer="overview" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+            </div>
+          </details>
 
-        <section id="signals" class="signal-grid" aria-label="Decision signals">
-          <article class="signal-card signal-visibility" aria-labelledby="visibility-title">
-            <div class="signal-heading">
-              <h2 id="visibility-title">Reporting visibility</h2>
-              <span>Signal 01</span>
-            </div>
-            <div class="kpi-block">
-              <strong id="visibility-kpi" class="kpi" aria-live="polite">—</strong>
-              <span>accounts are delayed</span>
-            </div>
-            <div class="account-split" aria-label="Same-day and delayed account split">
-              <div class="split-bar">
-                <span id="same-day-segment" class="split-segment same-day"><b id="same-day-label">—</b></span>
-                <span id="delayed-segment" class="split-segment delayed"><b id="delayed-label">—</b></span>
+          <details id="detail-visibility" class="operation-row visibility-operation" name="dashboard-detail" data-inline-detail="visibility">
+            <summary data-detail-summary="visibility">
+              <span class="operation-kicker">Signal 01</span>
+              <span class="operation-copy"><strong id="visibility-title">Reporting visibility</strong><span id="visibility-summary-boundary">Calendar-date proxy · not start-of-day or elapsed-24-hour visibility</span></span>
+              <span class="operation-metric"><strong id="visibility-kpi" aria-live="polite">—</strong><span>accounts delayed</span></span>
+              <span class="summary-marker" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="operation-detail signal-detail">
+              <div class="detail-main">
+                <div class="account-split" aria-label="Same-day and delayed account split">
+                  <div class="split-bar"><span id="same-day-segment" class="split-segment same-day"><b id="same-day-label">—</b></span><span id="delayed-segment" class="split-segment delayed"><b id="delayed-label">—</b></span></div>
+                  <p id="visibility-interpretation">Loading reporting-source evidence…</p>
+                </div>
+                <p class="interpretation">Focus the pilot on the highest-exposure portal and spreadsheet sources.</p>
+                <p id="visibility-boundary" class="boundary">Reporting evidence boundary is loading.</p>
               </div>
-              <p id="visibility-interpretation">Loading reporting-source evidence…</p>
+              <aside class="detail-aside">
+                <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="visibility">Loading current scope…</p></div>
+                <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="visibility">Loading next action…</p></div>
+                <button class="detail-guide-button" type="button" data-open-drawer="visibility" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+              </aside>
             </div>
-            <p class="interpretation">Focus the pilot on the highest-exposure portal and spreadsheet sources.</p>
-            <p id="visibility-boundary" class="boundary">Reporting evidence boundary is loading.</p>
-            <button class="card-action visibility-action" type="button" data-open-drawer="visibility" data-requires-data>
-              How visibility is calculated <span aria-hidden="true">→</span>
-            </button>
-          </article>
+          </details>
 
-          <article class="signal-card signal-liquidity" aria-labelledby="liquidity-title">
-            <div class="signal-heading">
-              <h2 id="liquidity-title">Liquidity</h2>
-              <span>Signal 02</span>
+          <details id="detail-liquidity" class="operation-row liquidity-operation" name="dashboard-detail" data-inline-detail="liquidity">
+            <summary data-detail-summary="liquidity">
+              <span class="operation-kicker">Signal 02</span>
+              <span class="operation-copy"><strong id="liquidity-title">Liquidity</strong><span id="liquidity-summary-boundary">Screening only · not surplus cash or transfer authority</span></span>
+              <span class="operation-metric"><strong id="funded-case-value">—</strong><span>funded case</span></span>
+              <span class="operation-context"><strong id="liquidity-summary-screen">—</strong><span id="mobility-status">Validated mobility is loading.</span></span>
+              <span class="summary-marker" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="operation-detail signal-detail">
+              <div class="detail-main">
+                <fieldset class="segmented-control" data-requires-data>
+                  <legend>Modeled screening sensitivity</legend>
+                  <label><input type="radio" name="liquidity-days" value="7"><span>7-day · <b id="screen-7-value">—</b></span></label>
+                  <label><input type="radio" name="liquidity-days" value="14" checked><span>14-day · <b id="screen-14-value">—</b></span></label>
+                </fieldset>
+                <p id="liquidity-interpretation" class="interpretation">Loading liquidity interpretation…</p>
+                <p id="liquidity-boundary" class="boundary" aria-live="polite">Liquidity evidence boundary is loading.</p>
+              </div>
+              <aside class="detail-aside">
+                <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="liquidity">Loading current scope…</p></div>
+                <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="liquidity">Loading next action…</p></div>
+                <button class="detail-guide-button" type="button" data-open-drawer="liquidity" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+              </aside>
             </div>
-            <div class="kpi-block mobility-kpi">
-              <strong id="funded-case-value" class="kpi">—</strong>
-              <span>funded-case mobility</span>
-              <small id="mobility-status">Validated mobility is loading.</small>
-            </div>
-            <fieldset class="segmented-control" data-requires-data>
-              <legend>Modeled screening sensitivity</legend>
-              <label>
-                <input type="radio" name="liquidity-days" value="7">
-                <span>7-day · <b id="screen-7-value">—</b></span>
-              </label>
-              <label>
-                <input type="radio" name="liquidity-days" value="14" checked>
-                <span>14-day · <b id="screen-14-value">—</b></span>
-              </label>
-            </fieldset>
-            <p id="liquidity-interpretation" class="interpretation">Loading liquidity interpretation…</p>
-            <p id="liquidity-boundary" class="boundary" aria-live="polite">Liquidity evidence boundary is loading.</p>
-            <button class="card-action liquidity-action" type="button" data-open-drawer="liquidity" data-requires-data>
-              How liquidity is calculated <span aria-hidden="true">→</span>
-            </button>
-          </article>
+          </details>
 
-          <article class="signal-card signal-payments" aria-labelledby="payments-title">
-            <div class="signal-heading">
-              <h2 id="payments-title">Payment friction</h2>
-              <span>Signal 03</span>
+          <details id="detail-payments" class="operation-row payments-operation" name="dashboard-detail" data-inline-detail="payments">
+            <summary data-detail-summary="payments">
+              <span class="operation-kicker">Signal 03</span>
+              <span class="operation-copy"><strong id="payments-title">Payment friction</strong><span id="payment-summary-boundary">Supplied records only · association, not causation</span></span>
+              <span class="operation-metric"><strong id="payment-kpi" aria-live="polite">—</strong><span id="payment-kpi-label">priority-union share</span></span>
+              <span class="summary-marker" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="operation-detail signal-detail">
+              <div class="detail-main">
+                <fieldset class="segmented-control payment-control" data-requires-data>
+                  <legend>Compare the same deduplicated cohorts by</legend>
+                  <label><input type="radio" name="payment-measure" value="records" checked><span>Records</span></label>
+                  <label><input type="radio" name="payment-measure" value="exceptions"><span>Exceptions</span></label>
+                  <label><input type="radio" name="payment-measure" value="repair_minutes"><span>Repair time</span></label>
+                </fieldset>
+                <div class="union-share" aria-label="Priority union share of selected measure"><span id="payment-union-bar" class="union-fill"></span><span id="payment-union-label" class="union-label">Loading payment evidence…</span></div>
+                <p id="payment-overlap" class="overlap-note">Overlap control is loading.</p>
+                <p id="payment-boundary" class="boundary">Payment evidence boundary is loading.</p>
+              </div>
+              <aside class="detail-aside">
+                <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="payments">Loading current scope…</p></div>
+                <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="payments">Loading next action…</p></div>
+                <button class="detail-guide-button" type="button" data-open-drawer="payments" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
+              </aside>
             </div>
-            <div class="kpi-block">
-              <strong id="payment-kpi" class="kpi" aria-live="polite">—</strong>
-              <span id="payment-kpi-label">priority-union share</span>
+          </details>
+
+          <h2 id="gates-title" class="sr-only">Open evidence gates</h2>
+
+          <details id="detail-capacity" class="operation-row gate-operation" name="dashboard-detail" data-inline-detail="capacity">
+            <summary data-detail-summary="capacity">
+              <span class="operation-kicker">Open gate 01</span>
+              <span class="operation-copy"><strong>Capacity value not fundable</strong><span id="capacity-summary">Loading capacity evidence…</span></span>
+              <span class="operation-status gate-status" id="capacity-filter-note">Enterprise-global management estimate · filters do not apply · not a combined capacity or P&amp;L baseline</span>
+              <span class="summary-marker" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="operation-detail">
+              <div class="detail-block"><span class="detail-label">Scope</span><p data-detail-scope="capacity">Enterprise-global management estimate · filters do not apply · not a combined capacity or P&amp;L baseline</p></div>
+              <div class="detail-block"><span class="detail-label">Evidence limit</span><p data-detail-evidence="capacity">Loading capacity evidence limit…</p></div>
+              <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="capacity">Loading next action…</p></div>
+              <button class="detail-guide-button" type="button" data-open-drawer="gates" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
             </div>
-            <fieldset class="segmented-control payment-control" data-requires-data>
-              <legend>Compare the same deduplicated cohorts by</legend>
-              <label><input type="radio" name="payment-measure" value="records" checked><span>Records</span></label>
-              <label><input type="radio" name="payment-measure" value="exceptions"><span>Exceptions</span></label>
-              <label><input type="radio" name="payment-measure" value="repair_minutes"><span>Repair time</span></label>
-            </fieldset>
-            <div class="union-share" aria-label="Priority union share of selected measure">
-              <span id="payment-union-bar" class="union-fill"></span>
-              <span id="payment-union-label" class="union-label">Loading payment evidence…</span>
+          </details>
+
+          <details id="detail-closures" class="operation-row gate-operation" name="dashboard-detail" data-inline-detail="closures">
+            <summary data-detail-summary="closures">
+              <span class="operation-kicker">Open gate 02</span>
+              <span class="operation-copy"><strong>Closure value not fundable</strong><span id="closure-summary">Loading closure evidence…</span></span>
+              <span id="closure-summary-boundary" class="operation-status gate-status">30 Jun 2026 snapshot · date filter does not apply · currency/region/entity/bank filters apply</span>
+              <span class="summary-marker" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="operation-detail">
+              <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="closures">Loading current scope…</p></div>
+              <div class="detail-block"><span class="detail-label">Evidence limit</span><p data-detail-evidence="closures">Loading closure evidence limit…</p></div>
+              <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="closures">Loading next action…</p></div>
+              <button class="detail-guide-button" type="button" data-open-drawer="gates" data-requires-data>Open full Metric guide <span aria-hidden="true">→</span></button>
             </div>
-            <p id="payment-overlap" class="overlap-note">Overlap control is loading.</p>
-            <p id="payment-boundary" class="boundary">Payment evidence boundary is loading.</p>
-            <button class="card-action payment-action" type="button" data-open-drawer="payments" data-requires-data>
-              How payment friction is calculated <span aria-hidden="true">→</span>
-            </button>
-          </article>
+          </details>
         </section>
 
-        <section class="guardrail-strip" aria-labelledby="gates-title">
-          <div class="guardrail-intro">
-            <span>Not yet fundable</span>
-            <h2 id="gates-title">Two evidence gates remain open</h2>
-          </div>
-          <button class="guardrail-card" type="button" data-open-drawer="gates" data-requires-data>
-            <strong>Capacity value not fundable</strong>
-            <em id="capacity-filter-note" class="global-baseline-note">Global baseline · filters do not apply</em>
-            <span id="capacity-summary">Loading capacity evidence…</span>
-          </button>
-          <button class="guardrail-card" type="button" data-open-drawer="gates" data-requires-data>
-            <strong>Closure value not fundable</strong>
-            <span id="closure-summary">Loading closure evidence…</span>
-          </button>
-        </section>
-
-        <footer class="evidence-footer">
-          <p>Review the Metric guide before using any figure in a funding or execution decision.</p>
-          <button class="footer-action" type="button" data-open-drawer="overview" data-requires-data>
-            Open Metric guide <span aria-hidden="true">→</span>
-          </button>
-        </footer>
+        <footer class="evidence-footer"><p>Review the Metric guide before using any figure in a funding or execution decision.</p></footer>
       </main>
     </div>
 
@@ -313,8 +334,8 @@
         </header>
 
         <div class="drawer-context">
-          <strong>Current scope</strong>
-          <p id="guide-scope-summary">All dates · All currencies · All regions · All entities · All banks</p>
+          <strong>Stable methodology</strong>
+          <p>Definitions, formulas, sources, and method limits do not change with dashboard filters.</p>
         </div>
 
         <div class="drawer-tabs" role="tablist" aria-label="Metric guide topic">

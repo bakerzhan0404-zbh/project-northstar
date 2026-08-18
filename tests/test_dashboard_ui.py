@@ -3,6 +3,7 @@
 import functools
 import http.server
 import json
+import subprocess
 import sys
 import threading
 import unittest
@@ -26,14 +27,29 @@ class StructureParser(HTMLParser):
         self.tags = []
         self.ids = []
         self.html_attrs = {}
+        self.details = []
+        self.summaries = []
+        self.summary_depth = 0
+        self.ids_in_summaries = set()
 
     def handle_starttag(self, tag, attrs):
         values = dict(attrs)
         self.tags.append((tag, values))
         if tag == "html":
             self.html_attrs = values
+        if tag == "details":
+            self.details.append(values)
+        if tag == "summary":
+            self.summaries.append(values)
+            self.summary_depth += 1
         if "id" in values:
             self.ids.append(values["id"])
+            if self.summary_depth:
+                self.ids_in_summaries.add(values["id"])
+
+    def handle_endtag(self, tag):
+        if tag == "summary":
+            self.summary_depth -= 1
 
 
 class DashboardUiTest(unittest.TestCase):
@@ -94,6 +110,17 @@ class DashboardUiTest(unittest.TestCase):
             "filter-empty-state",
             "active-filter-chips",
             "capacity-filter-note",
+            "detail-decision",
+            "detail-visibility",
+            "detail-liquidity",
+            "detail-payments",
+            "detail-capacity",
+            "detail-closures",
+            "visibility-summary-boundary",
+            "liquidity-summary-boundary",
+            "liquidity-summary-screen",
+            "payment-summary-boundary",
+            "closure-summary-boundary",
         }
         self.assertTrue(required_ids.issubset(self.parser.ids))
         self.assertIn('name="viewport"', self.index)
@@ -135,6 +162,59 @@ class DashboardUiTest(unittest.TestCase):
         self.assertIn(model_script, self.index)
         self.assertLess(self.index.index(model_script), self.index.index(app_script))
 
+    def test_body_uses_six_native_collapsed_operational_disclosures(self) -> None:
+        expected_topics = {
+            "decision",
+            "visibility",
+            "liquidity",
+            "payments",
+            "capacity",
+            "closures",
+        }
+        self.assertEqual(len(self.parser.details), 6)
+        self.assertEqual(len(self.parser.summaries), 6)
+        self.assertEqual(
+            {details.get("data-inline-detail") for details in self.parser.details},
+            expected_topics,
+        )
+        self.assertTrue(
+            all(details.get("name") == "dashboard-detail" for details in self.parser.details)
+        )
+        self.assertTrue(all("open" not in details for details in self.parser.details))
+        self.assertEqual(
+            {summary.get("data-detail-summary") for summary in self.parser.summaries},
+            expected_topics,
+        )
+        self.assertTrue(all("role" not in summary for summary in self.parser.summaries))
+        self.assertTrue(
+            all("aria-expanded" not in summary for summary in self.parser.summaries)
+        )
+        visible_qualifier_ids = {
+            "decision-title",
+            "visibility-kpi",
+            "visibility-summary-boundary",
+            "funded-case-value",
+            "liquidity-summary-boundary",
+            "liquidity-summary-screen",
+            "mobility-status",
+            "payment-kpi",
+            "payment-summary-boundary",
+            "capacity-filter-note",
+            "capacity-summary",
+            "closure-summary",
+            "closure-summary-boundary",
+        }
+        self.assertTrue(visible_qualifier_ids.issubset(self.parser.ids_in_summaries))
+        self.assertNotIn("signal-grid", self.index)
+        self.assertNotIn("signal-card", self.index)
+        self.assertIn(".operation-list", self.styles)
+        self.assertIn(".operation-row > summary", self.styles)
+
+        footer = self.index.split('<footer class="evidence-footer">', 1)[1].split(
+            "</footer>", 1
+        )[0]
+        self.assertNotIn("<button", footer)
+
     def test_interactions_use_native_controls_and_explicit_state(self) -> None:
         openers = [
             (tag, attrs)
@@ -158,6 +238,27 @@ class DashboardUiTest(unittest.TestCase):
         self.assertIn("FilterModel.validateState", self.script)
         self.assertIn("FilterModel.summarize", self.script)
 
+    def test_disclosure_keyboard_search_reset_and_failure_behaviors_are_explicit(self) -> None:
+        required = (
+            'detail.addEventListener("toggle"',
+            "closeAllInlineDetails({ except: detail })",
+            'event.key === "ArrowDown"',
+            'event.key === "ArrowUp"',
+            'event.key === "Home"',
+            'event.key === "End"',
+            'event.key === "Escape"',
+            "detail.open = false",
+            "closeAllInlineDetails();",
+            'entry.id.startsWith("inline:")',
+            "openInlineDetail",
+            'entry.id.startsWith("guide:")',
+            "detail.hidden = disabled",
+        )
+        for token in required:
+            self.assertIn(token, self.script)
+        self.assertNotIn('summary.setAttribute("aria-expanded"', self.script)
+        self.assertNotIn('summary.addEventListener("click"', self.script)
+
     def test_filters_fail_closed_and_empty_scopes_do_not_fake_rates(self) -> None:
         required = (
             'data.schema_version !== "2.0"',
@@ -175,6 +276,23 @@ class DashboardUiTest(unittest.TestCase):
         self.assertNotIn("share || 0", self.script)
         self.assertNotIn("share ?? 0", self.script)
 
+    def test_adaptive_usd_formatter_never_renders_nonzero_as_zero_millions(self) -> None:
+        node_script = """
+const { formatUsdCompact } = require('./dashboard/app.js');
+const values = [1568.19, 943.98, -943.98, 0.5, -0.5, 0, 38127490.73];
+process.stdout.write(JSON.stringify(values.map(formatUsdCompact)));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        formatted = json.loads(completed.stdout)
+        self.assertEqual(formatted, ["$1.6k", "$944", "−$944", "$0.5", "−$0.5", "$0", "$38.13m"])
+        self.assertNotIn("$0.00m", formatted)
+
     def test_search_uses_model_index_and_complete_keyboard_controls(self) -> None:
         required = (
             "FilterModel.buildSearchIndex",
@@ -189,18 +307,19 @@ class DashboardUiTest(unittest.TestCase):
             'entry.kind === "account"',
             "entry.values.entity_id",
             'document.addEventListener("pointerdown"',
+            'id: `inline:${topic}`',
+            'id: `guide:${topic}`',
         )
         for token in required:
             self.assertIn(token, self.script)
         self.assertNotIn("new RegExp", self.script)
 
-    def test_metric_guide_has_formulas_sources_and_filtered_context(self) -> None:
+    def test_metric_guide_contains_stable_methodology_without_live_values(self) -> None:
         required_sections = (
             'evidenceSection("Definition"',
-            'evidenceSection("Calculation"',
+            'evidenceSection("Formula / calculation"',
             'evidenceSection("Data source"',
-            'evidenceSection("Interpretation limit"',
-            'evidenceSection("Next action"',
+            'evidenceSection("Method limit"',
         )
         for token in required_sections:
             self.assertIn(token, self.script)
@@ -209,8 +328,15 @@ class DashboardUiTest(unittest.TestCase):
             self.script,
         )
         self.assertIn("definition.formula", self.script)
-        self.assertIn("currentSummary.visibility", self.script)
         self.assertNotIn("dashboardData.visibility.sources", self.script)
+        self.assertNotIn('evidenceSection("Next action"', self.script)
+        self.assertNotIn("topicValues(", self.script)
+        self.assertNotIn("metric-context", self.script)
+        self.assertEqual(self.script.count('section.append(make("h3", "", title))'), 1)
+        self.assertIn(
+            "Definitions, formulas, sources, and method limits do not change with dashboard filters.",
+            self.index,
+        )
 
         definitions = self.payload["definitions"]
         self.assertEqual(
@@ -225,7 +351,64 @@ class DashboardUiTest(unittest.TestCase):
             definitions["payments"]["formula"],
             "Priority share = priority-union measure ÷ matching overall measure; the manual-touch/cross-border overlap is counted once.",
         )
-        self.assertIn("Global baseline · filters do not apply", self.index)
+        self.assertIn(
+            "Enterprise-global management estimate · filters do not apply · not a combined capacity or P&amp;L baseline",
+            self.index,
+        )
+
+    def test_collapsed_operational_qualifiers_match_filter_applicability(self) -> None:
+        combined = "\n".join((self.index, self.script))
+        required = (
+            "Calendar-date proxy · not start-of-day or elapsed-24-hour visibility",
+            "-day screen · as of ${formatIsoDate(liquidity.as_of_date)}",
+            '${formatNumber(unionValue)} of ${formatNumber(totalValue)} ${config.label}',
+            "Supplied records only · association, not causation",
+            "Enterprise-global management estimate · filters do not apply · not a combined capacity or P&L baseline",
+            "h/month vs ${capacity.payment_file_repair_hours_monthly.toFixed(1)} h/month",
+            "30 Jun 2026 snapshot · date filter does not apply · currency/region/entity/bank filters apply",
+            "dimensionFilterContext(appliedFilters)",
+        )
+        for phrase in required:
+            self.assertIn(phrase, combined)
+        self.assertNotIn("Global baseline · filters do not apply", combined)
+
+    def test_liquidity_scope_uses_range_end_not_from_date(self) -> None:
+        self.assertIn(
+            "As of ${formatIsoDate(liquidity.as_of_date)} · trailing ${state.liquidityDays} calendar days · From date does not constrain this screen",
+            self.script,
+        )
+        render_liquidity = self.script.split("function renderLiquidity", 1)[1].split(
+            "function paymentMeasureData", 1
+        )[0]
+        liquidity_detail = render_liquidity.split(
+            'renderInlineDetail("liquidity"', 1
+        )[1]
+        self.assertIn("dimensionFilterContext(appliedFilters)", liquidity_detail)
+        self.assertNotIn("currentScopeText()", liquidity_detail)
+
+        node_script = """
+const fs = require('node:fs');
+const model = require('./dashboard/filter_model.js');
+const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const defaults = model.createDefaultState(data);
+const fullPeriod = model.summarize(data, defaults);
+const sameEndSingleDay = model.summarize(data, { ...defaults, dateFrom: defaults.dateTo });
+process.stdout.write(JSON.stringify({
+  sameLiquidity: JSON.stringify(fullPeriod.liquidity) === JSON.stringify(sameEndSingleDay.liquidity),
+  fullPayments: fullPeriod.payments.overall.records,
+  singleDayPayments: sameEndSingleDay.payments.overall.records,
+}));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        result = json.loads(completed.stdout)
+        self.assertTrue(result["sameLiquidity"])
+        self.assertNotEqual(result["fullPayments"], result["singleDayPayments"])
 
     def test_claims_keep_evidence_boundaries_visible(self) -> None:
         combined = "\n".join((self.index, self.script))

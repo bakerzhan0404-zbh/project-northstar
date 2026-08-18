@@ -53,6 +53,7 @@ input:focus-visible,
 input:focus-visible + span,
 select:focus-visible,
 [role="tab"]:focus-visible,
+[data-detail-summary]:focus-visible,
 .skip-link:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 2px;
@@ -570,6 +571,238 @@ button.filter-chip {
 main {
   display: grid;
   gap: 12px;
+}
+
+.operation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.operation-row {
+  min-width: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left-width: 5px;
+  border-radius: 12px;
+  overflow: clip;
+}
+
+.operation-row > summary {
+  display: grid;
+  min-height: 76px;
+  grid-template-columns: 96px minmax(260px, 1fr) minmax(180px, auto) 24px;
+  gap: 18px;
+  align-items: center;
+  padding: 13px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.operation-row > summary:focus-visible {
+  outline-offset: -4px;
+}
+
+.operation-row > summary::-webkit-details-marker {
+  display: none;
+}
+
+.operation-row > summary::marker {
+  content: "";
+}
+
+.operation-row[open] > summary {
+  background: #f8fafc;
+}
+
+.operation-kicker,
+.detail-label {
+  color: #6f7f8f;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.operation-copy,
+.operation-metric,
+.operation-context {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.operation-copy > strong {
+  font-size: 16px;
+  line-height: 21px;
+}
+
+.operation-copy > span,
+.operation-metric > span,
+.operation-context > span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 15px;
+}
+
+.operation-metric {
+  justify-items: end;
+  text-align: right;
+}
+
+.operation-metric > strong {
+  font-size: 25px;
+  line-height: 28px;
+  letter-spacing: -0.025em;
+}
+
+.operation-metric > strong.kpi-empty {
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0;
+}
+
+.operation-context {
+  max-width: 270px;
+}
+
+.operation-context > strong {
+  font-size: 13px;
+  line-height: 17px;
+}
+
+.operation-status {
+  justify-self: end;
+  max-width: 280px;
+  text-align: right;
+}
+
+.summary-marker {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  font-size: 18px;
+  transition: transform 160ms ease-out;
+}
+
+.operation-row[open] .summary-marker {
+  transform: rotate(180deg);
+}
+
+.decision-operation {
+  border-color: var(--navy);
+}
+
+.decision-operation > summary,
+.decision-operation[open] > summary {
+  color: #fff;
+  background: var(--navy);
+}
+
+.decision-operation .operation-copy > span {
+  color: #dde8f0;
+}
+
+.decision-operation .operation-kicker {
+  color: #d3e0ea;
+}
+
+.decision-operation .decision-badge {
+  color: #7a4b00;
+  background: #fff2d1;
+}
+
+.visibility-operation {
+  border-left-color: var(--teal);
+}
+
+.liquidity-operation {
+  border-left-color: var(--blue);
+}
+
+.liquidity-operation > summary {
+  grid-template-columns: 96px minmax(200px, 1fr) 110px minmax(240px, auto) 24px;
+}
+
+.payments-operation {
+  border-left-color: var(--orange);
+}
+
+.gate-operation {
+  border-color: var(--amber-border);
+  border-left-color: #d89b28;
+  background: var(--amber-bg);
+}
+
+.gate-operation > summary,
+.gate-operation[open] > summary {
+  background: var(--amber-bg);
+}
+
+.gate-status {
+  color: var(--amber-text);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.operation-detail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 14px;
+  align-items: stretch;
+  padding: 16px 18px 18px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.signal-detail {
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+}
+
+.detail-main,
+.detail-aside {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+}
+
+.detail-block {
+  min-width: 0;
+  padding: 11px 12px;
+  background: #f7f9fb;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+
+.detail-block p {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+.detail-action-block {
+  color: var(--blue-dark);
+  background: #f3f7fc;
+  border-color: #bdd0e8;
+}
+
+.detail-guide-button {
+  min-height: 44px;
+  align-self: end;
+  padding: 0 14px;
+  color: var(--navy);
+  background: var(--surface);
+  border: 1px solid var(--navy);
+  border-radius: var(--radius-control);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.signal-detail .detail-guide-button {
+  width: 100%;
 }
 
 .decision-banner {
@@ -1264,6 +1497,15 @@ main {
     grid-row: 1;
   }
 
+  .operation-row > summary {
+    grid-template-columns: 84px minmax(220px, 1fr) minmax(170px, auto) 24px;
+    gap: 14px;
+  }
+
+  .liquidity-operation > summary {
+    grid-template-columns: 84px minmax(180px, 1fr) 100px minmax(190px, auto) 24px;
+  }
+
   .signal-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1351,6 +1593,68 @@ main {
     border-bottom: 0;
     border-left: 0;
     border-radius: 16px 16px 0 0;
+  }
+
+  .operation-row > summary,
+  .liquidity-operation > summary {
+    grid-template-columns: 76px minmax(0, 1fr) 24px;
+    gap: 8px 12px;
+    align-items: start;
+    padding: 14px;
+  }
+
+  .operation-kicker {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    padding-top: 3px;
+  }
+
+  .operation-copy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .operation-metric,
+  .operation-context,
+  .operation-status {
+    grid-column: 2;
+    justify-self: start;
+    max-width: none;
+    text-align: left;
+  }
+
+  .operation-metric {
+    grid-row: 2;
+    justify-items: start;
+  }
+
+  .operation-context,
+  .operation-status {
+    grid-row: 3;
+  }
+
+  .liquidity-operation .operation-context {
+    grid-row: 3;
+  }
+
+  .liquidity-operation .operation-status {
+    grid-row: 4;
+  }
+
+  .summary-marker {
+    grid-column: 3;
+    grid-row: 1 / 5;
+    align-self: center;
+  }
+
+  .operation-detail,
+  .signal-detail {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .detail-guide-button {
+    width: 100%;
   }
 
   .decision-banner,
@@ -1445,6 +1749,41 @@ main {
 
   .filter-panel-actions .button {
     flex: 1 1 50%;
+  }
+
+  .operation-row > summary,
+  .liquidity-operation > summary {
+    grid-template-columns: minmax(0, 1fr) 24px;
+  }
+
+  .operation-kicker,
+  .operation-copy,
+  .operation-metric,
+  .operation-context,
+  .operation-status {
+    grid-column: 1;
+  }
+
+  .operation-kicker {
+    grid-row: 1;
+  }
+
+  .operation-copy {
+    grid-row: 2;
+  }
+
+  .operation-metric {
+    grid-row: 3;
+  }
+
+  .operation-context,
+  .operation-status {
+    grid-row: 4;
+  }
+
+  .summary-marker {
+    grid-column: 2;
+    grid-row: 1 / 5;
   }
 
   .signal-card {

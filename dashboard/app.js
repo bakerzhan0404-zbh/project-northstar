@@ -1,6 +1,6 @@
 "use strict";
 
-const FilterModel = window.NorthstarFilterModel;
+const FilterModel = typeof window !== "undefined" ? window.NorthstarFilterModel : null;
 
 const DEFAULT_VIEW = Object.freeze({
   liquidityDays: 14,
@@ -30,6 +30,15 @@ const PAYMENT_MEASURES = Object.freeze({
 });
 
 const GUIDE_TOPICS = Object.freeze(["overview", "visibility", "liquidity", "payments", "gates"]);
+const INLINE_TOPICS = Object.freeze(["decision", "visibility", "liquidity", "payments", "capacity", "closures"]);
+const INLINE_GUIDE_TOPIC = Object.freeze({
+  decision: "overview",
+  visibility: "visibility",
+  liquidity: "liquidity",
+  payments: "payments",
+  capacity: "gates",
+  closures: "gates",
+});
 const SEARCH_RESULT_LIMIT = 8;
 
 const state = { ...DEFAULT_VIEW };
@@ -78,20 +87,14 @@ function safePercentage(numerator, denominator) {
   return Math.round((numerator / denominator) * 10000) / 100;
 }
 
-function formatUsdMillions(value) {
-  if (!isFiniteNumber(value)) return "—";
-  const absolute = Math.abs(value) / 1_000_000;
-  const sign = value < 0 ? "−" : "";
-  return `${sign}$${absolute.toFixed(2)}m`;
-}
-
 function formatUsdCompact(value) {
   if (!isFiniteNumber(value)) return "—";
   const sign = value < 0 ? "−" : "";
   const absolute = Math.abs(value);
   if (absolute >= 1_000_000) return `${sign}$${(absolute / 1_000_000).toFixed(2)}m`;
   if (absolute >= 1_000) return `${sign}$${formatNumber(absolute / 1_000, 1)}k`;
-  return `${sign}$${formatNumber(absolute, 0)}`;
+  if (absolute >= 1 || absolute === 0) return `${sign}$${formatNumber(absolute, 0)}`;
+  return `${sign}$${new Intl.NumberFormat("en-US", { maximumSignificantDigits: 2 }).format(absolute)}`;
 }
 
 function plural(value, singular, pluralForm = `${singular}s`) {
@@ -128,6 +131,10 @@ function announce(message) {
 function setDataControlsDisabled(disabled) {
   getAll("[data-requires-data]").forEach((node) => {
     node.disabled = disabled;
+  });
+  getAll("[data-inline-detail]").forEach((detail) => {
+    if (disabled) detail.open = false;
+    detail.hidden = disabled;
   });
 }
 
@@ -207,6 +214,20 @@ function filterContext(filters, { includeAll = true } = {}) {
   return parts.join(" · ");
 }
 
+function dimensionFilterContext(filters, { includeAll = true } = {}) {
+  const parts = [];
+  const entries = [
+    [filters.currency, "All currencies"],
+    [filters.region, "All regions"],
+    [filters.entity ? entityLabel(filters.entity) : "", "All entities"],
+    [filters.bank, "All banks"],
+  ];
+  entries.forEach(([value, fallback]) => {
+    if (value || includeAll) parts.push(value || fallback);
+  });
+  return parts.join(" · ");
+}
+
 function activeFilterDescriptors(filters) {
   if (!defaultFilters) return [];
   const descriptors = [];
@@ -230,6 +251,30 @@ function currentScopeText() {
   return `${prefix} · ${plural(currentSummary.scope.account_count, "account")} · ${plural(currentSummary.payments.overall.records, "supplied payment record")}`;
 }
 
+function renderInlineDetail(topic, { scope, evidence, nextAction }) {
+  setText(`[data-detail-scope="${topic}"]`, scope);
+  if (evidence !== undefined) setText(`[data-detail-evidence="${topic}"]`, evidence);
+  setText(`[data-detail-action="${topic}"]`, nextAction);
+}
+
+function closeAllInlineDetails({ except = null } = {}) {
+  getAll("[data-inline-detail]").forEach((detail) => {
+    if (detail !== except) detail.open = false;
+  });
+}
+
+function openInlineDetail(topic, { focusSummary = true } = {}) {
+  if (!dashboardData || !INLINE_TOPICS.includes(topic)) return false;
+  const detail = get(`[data-inline-detail="${topic}"]`);
+  if (!detail || detail.hidden) return false;
+  closeAllInlineDetails({ except: detail });
+  detail.open = true;
+  const summary = get(`[data-detail-summary="${topic}"]`, detail);
+  if (focusSummary && summary) summary.focus();
+  if (summary) summary.scrollIntoView({ block: "nearest" });
+  return true;
+}
+
 function renderHeader() {
   const scopeState = currentSummary.scope.has_matches
     ? plural(currentSummary.scope.account_count, "account")
@@ -241,6 +286,11 @@ function renderHeader() {
   setText("#data-status", "Reconciled to supplied controls · source certification open");
   setText("#decision-title", dashboardData.decision.headline);
   setText("#decision-support", dashboardData.decision.next_step);
+  renderInlineDetail("decision", {
+    scope: `Portfolio-wide decision; filters do not change it. Diagnostic scope: ${currentScopeText()}`,
+    evidence: dashboardData.definitions.overview.meaning,
+    nextAction: dashboardData.decision.next_step,
+  });
 }
 
 function renderFilterChrome() {
@@ -251,7 +301,6 @@ function renderFilterChrome() {
   countNode.textContent = String(count);
   countNode.setAttribute("aria-label", `${count} active ${count === 1 ? "filter" : "filters"}`);
   setText("#filter-scope-summary", currentScopeText());
-  setText("#guide-scope-summary", currentScopeText());
   get("#clear-active-filters").hidden = count === 0;
 
   const chips = get("#active-filter-chips");
@@ -300,7 +349,12 @@ function renderVisibility() {
       `${plural(visibility.delayed_accounts, "selected account")} show at least one calendar-date reporting delay.`,
     );
   }
+  setText("#visibility-summary-boundary", "Calendar-date proxy · not start-of-day or elapsed-24-hour visibility");
   setText("#visibility-boundary", "Reporting-date proxy—not start-of-day or elapsed-24-hour performance.");
+  renderInlineDetail("visibility", {
+    scope: currentScopeText(),
+    nextAction: dashboardData.definitions.visibility.next_action,
+  });
 }
 
 function liquidityScenario(days) {
@@ -319,17 +373,23 @@ function renderLiquidity({ shouldAnnounce = false } = {}) {
 
   setText("#funded-case-value", dashboardData.liquidity.funded_case.display);
   setText("#mobility-status", "Validated mobility: not established by supplied data.");
-  setText("#screen-7-value", liquidityScenarioAvailable(7) ? formatUsdMillions(liquidityScenario(7).screen_usd) : "—");
-  setText("#screen-14-value", liquidityScenarioAvailable(14) ? formatUsdMillions(liquidityScenario(14).screen_usd) : "—");
+  setText("#screen-7-value", liquidityScenarioAvailable(7) ? formatUsdCompact(liquidityScenario(7).screen_usd) : "—");
+  setText("#screen-14-value", liquidityScenarioAvailable(14) ? formatUsdCompact(liquidityScenario(14).screen_usd) : "—");
+  setText(
+    "#liquidity-summary-screen",
+    selectedAvailable
+      ? `${formatUsdCompact(selected.screen_usd)} · ${state.liquidityDays}-day screen · as of ${formatIsoDate(liquidity.as_of_date)}`
+      : `${state.liquidityDays}-day screen unavailable · as of ${formatIsoDate(liquidity.as_of_date)}`,
+  );
 
   if (selectedAvailable) {
     setText(
       "#liquidity-interpretation",
-      `${formatUsdMillions(selected.screen_usd)} is the selected ${state.liquidityDays}-day modeled screen as of ${formatIsoDate(liquidity.as_of_date)}.`,
+      `${formatUsdCompact(selected.screen_usd)} is the selected ${state.liquidityDays}-day modeled screen as of ${formatIsoDate(liquidity.as_of_date)}.`,
     );
     setText(
       "#liquidity-boundary",
-      `${formatUsdMillions(selected.screen_usd)} is a ${state.liquidityDays}-day screening sensitivity—not surplus cash or transfer authorization.`,
+      `${formatUsdCompact(selected.screen_usd)} is a ${state.liquidityDays}-day screening sensitivity—not surplus cash or transfer authorization.`,
     );
   } else {
     setText(
@@ -345,12 +405,16 @@ function renderLiquidity({ shouldAnnounce = false } = {}) {
   getAll('input[name="liquidity-days"]').forEach((input) => {
     input.checked = Number(input.value) === state.liquidityDays;
   });
+  renderInlineDetail("liquidity", {
+    scope: `As of ${formatIsoDate(liquidity.as_of_date)} · trailing ${state.liquidityDays} calendar days · From date does not constrain this screen · ${dimensionFilterContext(appliedFilters)} · ${plural(currentSummary.scope.account_count, "account")}`,
+    nextAction: dashboardData.definitions.liquidity.next_action,
+  });
   if (get("#evidence-dialog").open && state.drawerTab === "liquidity") renderDrawerPanel("liquidity");
   updateResetState();
 
   if (shouldAnnounce) {
     const result = selectedAvailable
-      ? `Screening result ${formatUsdMillions(selected.screen_usd)}.`
+      ? `Screening result ${formatUsdCompact(selected.screen_usd)}.`
       : "Screening result unavailable for this scope.";
     announce(
       `${state.liquidityDays}-day screen selected. ${result} Validated mobility remains not established; funded case stays at ${dashboardData.liquidity.funded_case.display}.`,
@@ -378,7 +442,7 @@ function renderPayments({ shouldAnnounce = false } = {}) {
 
   if (hasComparableMeasure) {
     setText("#payment-kpi", formatPercent(share));
-    setText("#payment-kpi-label", config.headline);
+    setText("#payment-kpi-label", `${formatNumber(unionValue)} of ${formatNumber(totalValue)} ${config.label}`);
     get("#payment-union-bar").style.width = `${share}%`;
     setText(
       "#payment-union-label",
@@ -405,6 +469,10 @@ function renderPayments({ shouldAnnounce = false } = {}) {
   getAll('input[name="payment-measure"]').forEach((input) => {
     input.checked = input.value === state.paymentMeasure;
   });
+  renderInlineDetail("payments", {
+    scope: currentScopeText(),
+    nextAction: dashboardData.definitions.payments.next_action,
+  });
   if (get("#evidence-dialog").open && state.drawerTab === "payments") renderDrawerPanel("payments");
   updateResetState();
 
@@ -420,11 +488,17 @@ function renderGuardrails() {
   const capacity = dashboardData.guardrails.capacity;
   const closures = currentSummary.closures;
   const variance = (capacity.process_to_payment_ratio - 1) * 100;
-  setText("#capacity-filter-note", "Global baseline · filters do not apply");
+  const capacityScope = "Enterprise-global management estimate · filters do not apply · not a combined capacity or P&L baseline";
+  setText("#capacity-filter-note", capacityScope);
   setText(
     "#capacity-summary",
-    `${capacity.process_file_exception_repair_hours_monthly.toFixed(2)} h process estimate is ${variance.toFixed(0)}% above the ${capacity.payment_file_repair_hours_monthly.toFixed(2)} h payment-file estimate.`,
+    `${capacity.process_file_exception_repair_hours_monthly.toFixed(1)} h/month vs ${capacity.payment_file_repair_hours_monthly.toFixed(1)} h/month · process estimate ${variance.toFixed(0)}% higher.`,
   );
+  renderInlineDetail("capacity", {
+    scope: capacityScope,
+    evidence: "Management-estimated capacity is not observed labor, headcount, cashable savings, or a combined P&L baseline.",
+    nextAction: "Reconcile observed labor scope and removability before booking capacity value.",
+  });
   if (!currentSummary.scope.has_matches) {
     setText("#closure-summary", "No matching data for closure-validation candidates.");
   } else {
@@ -433,6 +507,13 @@ function renderGuardrails() {
       `${plural(closures.validation_candidates, "validation candidate")} · ${formatUsdCompact(closures.estimated_annual_fees_usd)} estimated annual fees · no approved closures.`,
     );
   }
+  renderInlineDetail("closures", {
+    scope: `30 Jun 2026 snapshot · date filter does not apply · currency/region/entity/bank filters apply · ${dimensionFilterContext(appliedFilters)} · ${plural(currentSummary.scope.account_count, "account")}`,
+    evidence: currentSummary.scope.has_matches
+      ? `${plural(closures.validation_candidates, "candidate")} in scope; local purpose, dependencies, signatories, continuity, closure cost, and fee removal remain unvalidated.`
+      : "No matching accounts; no closure value is calculated.",
+    nextAction: "Complete local account validation before approving a closure or booking fee removal.",
+  });
 }
 
 function evidenceSection(title, children, extraClass = "") {
@@ -445,16 +526,6 @@ function evidenceSection(title, children, extraClass = "") {
   return section;
 }
 
-function metricList(rows) {
-  const list = make("ul", "metric-list");
-  rows.forEach(([label, value]) => {
-    const item = make("li", "metric-row");
-    item.append(make("span", "", label), make("strong", "", value));
-    list.append(item);
-  });
-  return list;
-}
-
 function sourceList(files) {
   const list = make("ul", "source-list");
   files.forEach((file) => {
@@ -463,63 +534,6 @@ function sourceList(files) {
     list.append(item);
   });
   return list;
-}
-
-function topicValues(topic) {
-  if (topic === "overview") {
-    const hasMatches = currentSummary.scope.has_matches;
-    return [
-      ["Current scope", filterContext(appliedFilters)],
-      ["Accounts", hasMatches ? formatNumber(currentSummary.scope.account_count) : "—"],
-      ["Supplied payment records", hasMatches ? formatNumber(currentSummary.payments.overall.records) : "—"],
-      ["Decision", "Portfolio-wide; unchanged by filters"],
-    ];
-  }
-  if (topic === "visibility") {
-    const visibility = currentSummary.visibility;
-    const hasVisibility = visibility.accounts_total > 0;
-    return [
-      ["Selected accounts", hasVisibility ? formatNumber(visibility.accounts_total) : "—"],
-      ["Delayed accounts", hasVisibility ? formatNumber(visibility.delayed_accounts) : "—"],
-      ["Account-days", hasVisibility ? formatNumber(visibility.observations) : "—"],
-      ["Same-day account-day rate", formatPercent(visibility.same_day_rate_pct)],
-    ];
-  }
-  if (topic === "liquidity") {
-    const liquidity = currentSummary.liquidity;
-    const scenario = liquidityScenario(state.liquidityDays);
-    return [
-      ["As-of date", formatIsoDate(liquidity.as_of_date)],
-      ["Selected accounts", currentSummary.scope.has_matches ? formatNumber(currentSummary.scope.account_count) : "—"],
-      ["Gross positive estimated availability", formatUsdMillions(liquidity.positive_available_usd)],
-      ["Preliminary restrictions", formatUsdMillions(liquidity.restricted_positive_available_usd)],
-      ["Negative positions", formatUsdMillions(liquidity.negative_available_usd)],
-      [`${state.liquidityDays}-day illustrative buffer`, formatUsdMillions(scenario.buffer_usd)],
-      [`${state.liquidityDays}-day screening result`, formatUsdMillions(scenario.screen_usd)],
-      ["Validated mobility", "Not established"],
-      ["Funded case", dashboardData.liquidity.funded_case.display],
-    ];
-  }
-  if (topic === "payments") {
-    const { config, unionValue, totalValue, share } = paymentMeasureData();
-    const hasComparableMeasure = totalValue > 0 && isFiniteNumber(share);
-    return [
-      ["Selected measure", config.label],
-      ["Priority union", hasComparableMeasure ? formatNumber(unionValue) : "—"],
-      ["Matching total", hasComparableMeasure ? formatNumber(totalValue) : "—"],
-      ["Priority share", formatPercent(share)],
-      ["Matching supplied records", currentSummary.payments.overall.records > 0 ? formatNumber(currentSummary.payments.overall.records) : "—"],
-    ];
-  }
-  const capacity = dashboardData.guardrails.capacity;
-  const closures = currentSummary.closures;
-  return [
-    ["Capacity scope", "Global baseline · filters do not apply"],
-    ["Estimated manual process capacity", `${capacity.total_estimated_manual_hours_monthly.toFixed(2)} h/month`],
-    ["Closure-validation candidates", currentSummary.scope.has_matches ? formatNumber(closures.validation_candidates) : "—"],
-    ["Estimated candidate fees", currentSummary.scope.has_matches ? `${formatUsdCompact(closures.estimated_annual_fees_usd)} annually` : "—"],
-    ["Approved closures", "0"],
-  ];
 }
 
 function calculationContent(topic, definition) {
@@ -542,15 +556,12 @@ function renderGuidePanel(topic, panel) {
   const definitionContent = [
     make("p", "guide-topic-title", definition.title),
     make("p", "", definition.meaning),
-    make("p", "metric-context", `Current scope: ${currentScopeText()}`),
-    metricList(topicValues(topic)),
   ];
   panel.append(
     evidenceSection("Definition", definitionContent),
-    evidenceSection("Calculation", calculationContent(topic, definition)),
+    evidenceSection("Formula / calculation", calculationContent(topic, definition)),
     evidenceSection("Data source", sourceList(definition.sources)),
-    evidenceSection("Interpretation limit", definition.boundary, "boundary-section"),
-    evidenceSection("Next action", definition.next_action, "action-section"),
+    evidenceSection("Method limit", definition.boundary, "boundary-section"),
   );
 }
 
@@ -732,6 +743,7 @@ function resetView({ shouldAnnounce = true } = {}) {
   if (!dashboardData) return;
   state.liquidityDays = DEFAULT_VIEW.liquidityDays;
   state.paymentMeasure = DEFAULT_VIEW.paymentMeasure;
+  closeAllInlineDetails();
   clearSearch();
   closeFilterPanel({ restoreFocus: false });
   const validated = FilterModel.validateState(dashboardData, defaultFilters);
@@ -745,15 +757,41 @@ function resetView({ shouldAnnounce = true } = {}) {
 }
 
 function metricSearchDefinitions() {
-  return GUIDE_TOPICS.map((topic) => {
-    const definition = dashboardData.definitions[topic];
+  const inlineDefinitions = [
+    ["decision", "Decision", "Expand the portfolio-wide decision and validation direction."],
+    ["visibility", "Reporting visibility", "Expand the current filtered visibility result."],
+    ["liquidity", "Liquidity screening", "Expand the current filtered 7- or 14-day screening result."],
+    ["payments", "Payment friction", "Expand the current filtered payment-cohort result."],
+    ["capacity", "Capacity evidence gate", "Expand the global capacity evidence gate."],
+    ["closures", "Closure evidence gate", "Expand the current filtered closure candidates."],
+  ].map(([topic, label, description]) => {
+    const guideTopic = INLINE_GUIDE_TOPIC[topic];
+    const definition = dashboardData.definitions[guideTopic];
     return {
-      id: topic,
-      label: definition.title,
-      description: definition.meaning,
-      keywords: definition.search_aliases.join(" "),
+      id: `inline:${topic}`,
+      label,
+      description,
+      keywords: [definition.title, definition.meaning, ...definition.search_aliases].join(" "),
     };
   });
+  const methodologyDefinitions = GUIDE_TOPICS.map((topic) => {
+    const definition = dashboardData.definitions[topic];
+    return {
+      id: `guide:${topic}`,
+      label: `${definition.title} — method and sources`,
+      description: "Definition, formula/calculation, data source, and method limit.",
+      keywords: [
+        "definition formula calculation data source methodology method limit",
+        definition.title,
+        definition.calculation,
+        definition.formula,
+        definition.boundary,
+        definition.sources.join(" "),
+        definition.search_aliases.join(" "),
+      ].join(" "),
+    };
+  });
+  return inlineDefinitions.concat(methodologyDefinitions);
 }
 
 function closeSearch() {
@@ -779,7 +817,7 @@ function clearSearch() {
 }
 
 function searchGroupLabel(kind) {
-  if (kind === "metric") return "Metrics";
+  if (kind === "metric") return "Metrics & methodology";
   if (kind === "account") return "Accounts";
   return "Filter values";
 }
@@ -851,7 +889,12 @@ function chooseSearchResult(index) {
   const searchInput = get("#dashboard-search");
   if (entry.kind === "metric") {
     clearSearch();
-    openDrawer(GUIDE_TOPICS.includes(entry.id) ? entry.id : "overview", searchInput);
+    if (entry.id.startsWith("inline:")) {
+      openInlineDetail(entry.id.slice("inline:".length));
+    } else if (entry.id.startsWith("guide:")) {
+      const topic = entry.id.slice("guide:".length);
+      openDrawer(GUIDE_TOPICS.includes(topic) ? topic : "overview", searchInput);
+    }
     return;
   }
 
@@ -869,11 +912,13 @@ function chooseSearchResult(index) {
 }
 
 function updateResetState() {
+  const inlineDetailOpen = getAll("[data-inline-detail]").some((detail) => detail.open);
   const viewIsDefault =
     state.liquidityDays === DEFAULT_VIEW.liquidityDays &&
     state.paymentMeasure === DEFAULT_VIEW.paymentMeasure &&
     (!appliedFilters || isDefaultFilterState(appliedFilters)) &&
-    !(get("#dashboard-search") && get("#dashboard-search").value.trim());
+    !(get("#dashboard-search") && get("#dashboard-search").value.trim()) &&
+    !inlineDetailOpen;
   getAll("[data-reset]").forEach((button) => {
     button.disabled = !dashboardData || viewIsDefault;
   });
@@ -885,6 +930,37 @@ function bindEvents() {
   });
   getAll("[data-close-drawer]").forEach((button) => button.addEventListener("click", closeDrawer));
   getAll("[data-reset]").forEach((button) => button.addEventListener("click", () => resetView()));
+
+  const inlineDetails = getAll("[data-inline-detail]");
+  const detailSummaries = getAll("[data-detail-summary]");
+  inlineDetails.forEach((detail) => {
+    detail.addEventListener("toggle", () => {
+      if (detail.open) closeAllInlineDetails({ except: detail });
+      updateResetState();
+    });
+  });
+  detailSummaries.forEach((summary, index) => {
+    summary.addEventListener("keydown", (event) => {
+      let nextIndex = null;
+      if (event.key === "ArrowDown" || event.key === "ArrowRight") nextIndex = (index + 1) % detailSummaries.length;
+      if (event.key === "ArrowUp" || event.key === "ArrowLeft") nextIndex = (index - 1 + detailSummaries.length) % detailSummaries.length;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = detailSummaries.length - 1;
+      if (nextIndex !== null) {
+        event.preventDefault();
+        detailSummaries[nextIndex].focus();
+      }
+      if (event.key === "Escape") {
+        const detail = summary.closest("details");
+        if (detail && detail.open) {
+          event.preventDefault();
+          event.stopPropagation();
+          detail.open = false;
+          summary.focus();
+        }
+      }
+    });
+  });
 
   getAll('input[name="liquidity-days"]').forEach((input) => {
     input.addEventListener("change", () => {
@@ -1035,4 +1111,8 @@ async function initializeDashboard() {
   }
 }
 
-initializeDashboard();
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = Object.freeze({ formatUsdCompact });
+}
+
+if (typeof window !== "undefined" && typeof document !== "undefined") initializeDashboard();
