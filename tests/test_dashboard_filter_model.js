@@ -2,6 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const path = require("node:path");
 
 const FilterModel = require(path.join(__dirname, "..", "dashboard", "filter_model.js"));
@@ -387,6 +388,129 @@ test("default state reproduces the governed full-period controls", () => {
   assert.equal(summary.closures.estimated_annual_fees_usd, 7800);
   assert.equal(summary.closures.candidate_fee_share_pct, 14.53);
   assert.deepEqual(summary.closures.candidate_account_ids, ["AC0004", "AC0009", "AC0024", "AC0037"]);
+});
+
+test("regional facets reconcile the governed full-period dashboard data", () => {
+  const actualPayload = JSON.parse(fs.readFileSync(
+    path.join(__dirname, "..", "dashboard", "dashboard_data.json"),
+    "utf8",
+  ));
+  const summary = FilterModel.summarize(actualPayload);
+
+  assert.deepEqual(summary.regional.order, ["NA", "EMEA", "APAC"]);
+  assert.equal(summary.regional.selected_region, null);
+  assert.equal(summary.regional.region_filter_mode, "facet_override");
+  assert.deepEqual(summary.regional.basis, {
+    date_from: "2026-01-01",
+    date_to: "2026-06-30",
+    currency: null,
+    entity: null,
+    bank: null,
+    account_count: 55,
+    regions_represented: 3,
+  });
+
+  const controls = {
+    NA: {
+      label: "North America",
+      accounts: 16,
+      delayed: 7,
+      accountDays: 2896,
+      sameDay: 1629,
+      sameDayRate: 56.25,
+      records: 1934,
+      priority: 713,
+      priorityShare: 36.87,
+      screen7: 15861417.406434,
+      screen14: 14592195.604284,
+      candidates: 2,
+      fees: 4500,
+    },
+    EMEA: {
+      label: "Europe, Middle East and Africa",
+      accounts: 17,
+      delayed: 8,
+      accountDays: 3077,
+      sameDay: 1629,
+      sameDayRate: 52.94,
+      records: 2353,
+      priority: 958,
+      priorityShare: 40.71,
+      screen7: 18146838.600586,
+      screen14: 15481097.288276,
+      candidates: 1,
+      fees: 2400,
+    },
+    APAC: {
+      label: "Asia Pacific",
+      accounts: 22,
+      delayed: 8,
+      accountDays: 3982,
+      sameDay: 2534,
+      sameDayRate: 63.64,
+      records: 3313,
+      priority: 1168,
+      priorityShare: 35.26,
+      screen7: 8836531.775847,
+      screen14: 8054197.835004,
+      candidates: 1,
+      fees: 900,
+    },
+  };
+
+  summary.regional.rows.forEach((row) => {
+    const expected = controls[row.code];
+    assert.equal(row.label, expected.label);
+    assert.equal(row.status, "available");
+    assert.equal(row.selected, false);
+    assert.equal(row.account_count, expected.accounts);
+    assert.equal(row.visibility.delayed_accounts, expected.delayed);
+    assert.equal(row.visibility.account_days, expected.accountDays);
+    assert.equal(row.visibility.same_day_account_days, expected.sameDay);
+    assert.equal(row.visibility.same_day_rate_pct, expected.sameDayRate);
+    assert.equal(row.payments.records, expected.records);
+    assert.equal(row.payments.priority_union_records, expected.priority);
+    assert.equal(row.payments.priority_union_record_share_pct, expected.priorityShare);
+    assert.equal(row.liquidity.scenarios["7"].screen_usd, expected.screen7);
+    assert.equal(row.liquidity.scenarios["14"].screen_usd, expected.screen14);
+    assert.equal(row.closures.validation_candidates, expected.candidates);
+    assert.equal(row.closures.estimated_annual_fees_usd, expected.fees);
+  });
+
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.account_count, 0), 55);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.visibility.delayed_accounts, 0), 23);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.payments.records, 0), 7600);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.payments.priority_union_records, 0), 2839);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.closures.validation_candidates, 0), 4);
+});
+
+test("regional facets hold non-region filters constant while exposing region selection", () => {
+  const active = FilterModel.summarize(payload, { region: "EMEA" });
+  const emea = active.regional.rows.find((row) => row.code === "EMEA");
+  assert.equal(active.regional.selected_region, "EMEA");
+  assert.equal(emea.selected, true);
+  assert.equal(emea.account_count, active.scope.account_count);
+  assert.equal(emea.visibility.delayed_accounts, active.visibility.delayed_accounts);
+  assert.equal(emea.payments.records, active.payments.overall.records);
+  assert.equal(active.regional.rows.find((row) => row.code === "NA").status, "available");
+
+  const narrowed = FilterModel.summarize(payload, { currency: "EUR", bank: "Pacific Crown" });
+  assert.deepEqual(
+    narrowed.regional.rows.map((row) => [row.code, row.status, row.account_count]),
+    [
+      ["NA", "no_matching_accounts", 0],
+      ["EMEA", "available", 2],
+      ["APAC", "no_matching_accounts", 0],
+    ],
+  );
+  const narrowedEmea = narrowed.regional.rows[1];
+  assert.equal(narrowedEmea.visibility.delayed_accounts, 0);
+  assert.equal(narrowedEmea.payments.records, 79);
+  assert.equal(narrowedEmea.liquidity.scenarios["14"].screen_usd, 9571.396398);
+  assert.equal(narrowedEmea.closures.validation_candidates, 1);
+  assert.equal(narrowedEmea.closures.estimated_annual_fees_usd, 2400);
+  assert.equal(narrowed.regional.rows[0].visibility.same_day_rate_pct, null);
+  assert.equal(narrowed.regional.rows[0].liquidity.scenarios["14"].screen_usd, null);
 });
 
 test("liquidity visualization summaries reconcile account-floor waterfalls and preserve daily gaps", () => {

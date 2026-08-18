@@ -58,6 +58,12 @@
     "Spreadsheet",
   ]);
 
+  const REGION_METADATA = Object.freeze([
+    Object.freeze({ code: "NA", label: "North America" }),
+    Object.freeze({ code: "EMEA", label: "Europe, Middle East and Africa" }),
+    Object.freeze({ code: "APAC", label: "Asia Pacific" }),
+  ]);
+
   const LIQUIDITY_HORIZONS = Object.freeze(["7", "14"]);
   const MONEY_TOLERANCE_USD = 0.01;
 
@@ -81,6 +87,12 @@
       label: "Payment friction",
       description: "Records, exceptions, and repair time in the deduplicated priority union.",
       keywords: "manual touch cross-border wire priority cohort overlap repair minutes",
+    }),
+    Object.freeze({
+      id: "regional-footprint",
+      label: "Regional footprint",
+      description: "Governed account, reporting, and payment evidence across NA, EMEA, and APAC.",
+      keywords: "map geography geographic region regional North America EMEA APAC footprint",
     }),
     Object.freeze({
       id: "closure-candidates",
@@ -837,6 +849,118 @@
     };
   }
 
+  function summarizeRegionalFootprint(accounts, facts, state) {
+    const facetState = { ...state, region: "" };
+    const facetAccounts = selectedAccountsForState(accounts, facetState);
+    const facetAccountIds = new Set(facetAccounts.map((account) => account.account_id));
+    const facetAccountDays = facts.accountDays.filter((row) => (
+      facetAccountIds.has(row.account_id) && row.date >= state.dateFrom && row.date <= state.dateTo
+    ));
+    const facetPayments = facts.payments.filter((row) => (
+      facetAccountIds.has(row.account_id) && row.date >= state.dateFrom && row.date <= state.dateTo
+    ));
+
+    const rows = REGION_METADATA.map(({ code, label }) => {
+      const regionAccounts = facetAccounts.filter((account) => account.region === code);
+      const regionAccountIds = new Set(regionAccounts.map((account) => account.account_id));
+      const accountDays = facetAccountDays.filter((row) => regionAccountIds.has(row.account_id));
+      const asOfAccountDays = accountDays.filter((row) => row.date === state.dateTo);
+      const payments = facetPayments.filter((row) => regionAccountIds.has(row.account_id));
+      const visibility = summarizeVisibility(accountDays, regionAccounts);
+      const paymentSummary = summarizePayments(payments);
+      const liquidity = summarizeLiquidity(asOfAccountDays, regionAccounts.length, state.dateTo);
+      const closures = summarizeClosures(regionAccounts);
+      return {
+        code,
+        label,
+        selected: state.region === code,
+        status: regionAccounts.length > 0 ? "available" : "no_matching_accounts",
+        account_count: regionAccounts.length,
+        visibility: {
+          delayed_accounts: visibility.delayed_accounts,
+          delayed_account_share_pct: visibility.delayed_account_share_pct,
+          account_days: visibility.observations,
+          same_day_account_days: visibility.same_day_observations,
+          same_day_rate_pct: visibility.same_day_rate_pct,
+        },
+        payments: {
+          records: paymentSummary.overall.records,
+          exceptions: paymentSummary.overall.exceptions,
+          repair_minutes: paymentSummary.overall.repair_minutes,
+          priority_union_records: paymentSummary.priority_union.records,
+          priority_union_record_share_pct: paymentSummary.priority_union.record_share_pct,
+        },
+        liquidity: {
+          as_of_date: liquidity.as_of_date,
+          scenarios: Object.fromEntries(LIQUIDITY_HORIZONS.map((days) => [
+            days,
+            {
+              complete: liquidity.scenarios[days].complete,
+              screen_usd: liquidity.scenarios[days].screen_usd,
+            },
+          ])),
+        },
+        closures: {
+          snapshot_date: "2026-06-30",
+          validation_candidates: closures.validation_candidates,
+          estimated_annual_fees_usd: closures.estimated_annual_fees_usd,
+        },
+      };
+    });
+
+    invariant(
+      rows.reduce((total, row) => total + row.account_count, 0) === facetAccounts.length,
+      "Regional account counts do not reconcile to the facet scope",
+      "invalid_contract",
+    );
+    invariant(
+      rows.reduce((total, row) => total + row.visibility.account_days, 0) === facetAccountDays.length,
+      "Regional account-day counts do not reconcile to the facet scope",
+      "invalid_contract",
+    );
+    invariant(
+      rows.reduce((total, row) => total + row.payments.records, 0) === facetPayments.length,
+      "Regional payment counts do not reconcile to the facet scope",
+      "invalid_contract",
+    );
+
+    for (const days of LIQUIDITY_HORIZONS) {
+      const rowsWithAccounts = rows.filter((row) => row.account_count > 0);
+      const allRegionsComplete = rowsWithAccounts.length > 0 && rowsWithAccounts.every(
+        (row) => row.liquidity.scenarios[days].complete,
+      );
+      const facetAsOfRows = facetAccountDays.filter((row) => row.date === state.dateTo);
+      const facetLiquidity = summarizeLiquidity(facetAsOfRows, facetAccounts.length, state.dateTo);
+      if (allRegionsComplete && facetLiquidity.scenarios[days].complete) {
+        const regionalScreen = roundToSix(rowsWithAccounts.reduce(
+          (total, row) => total + row.liquidity.scenarios[days].screen_usd,
+          0,
+        ));
+        invariant(
+          nearlyEqual(regionalScreen, facetLiquidity.scenarios[days].screen_usd),
+          `${days}-day regional screens do not reconcile to the facet scope`,
+          "invalid_contract",
+        );
+      }
+    }
+
+    return {
+      selected_region: state.region || null,
+      region_filter_mode: "facet_override",
+      order: REGION_METADATA.map(({ code }) => code),
+      basis: {
+        date_from: state.dateFrom,
+        date_to: state.dateTo,
+        currency: state.currency || null,
+        entity: state.entity || null,
+        bank: state.bank || null,
+        account_count: facetAccounts.length,
+        regions_represented: rows.filter((row) => row.account_count > 0).length,
+      },
+      rows,
+    };
+  }
+
   function summarize(payload, candidateState = {}) {
     const accounts = accountsFromPayload(payload);
     const facts = factsFromPayload(payload, accounts);
@@ -865,6 +989,7 @@
       liquidity,
       payments: summarizePayments(payments),
       closures: summarizeClosures(selectedAccounts),
+      regional: summarizeRegionalFootprint(accounts, facts, state),
     };
   }
 
@@ -954,6 +1079,7 @@
   return Object.freeze({
     FilterModelError,
     PRIORITY_COHORTS,
+    REGION_METADATA,
     DEFAULT_METRIC_DEFINITIONS,
     createDefaultState,
     resetState: createDefaultState,
