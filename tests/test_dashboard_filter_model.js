@@ -45,6 +45,17 @@ function compact(columns, objects) {
   };
 }
 
+function findCompactRow(table, criteria) {
+  const indexes = Object.fromEntries(
+    Object.keys(criteria).map((column) => [column, table.columns.indexOf(column)]),
+  );
+  const row = table.rows.find((values) => (
+    Object.entries(criteria).every(([column, expected]) => values[indexes[column]] === expected)
+  ));
+  assert.ok(row, `Expected compact row matching ${JSON.stringify(criteria)}`);
+  return row;
+}
+
 function distribute(total, count, index) {
   if (count === 0) return 0;
   const base = Math.floor(total / count);
@@ -314,19 +325,139 @@ test("default state reproduces the governed full-period controls", () => {
   assert.equal(summary.visibility.observations, 9955);
   assert.equal(summary.visibility.same_day_accounts, 32);
   assert.equal(summary.visibility.delayed_accounts, 23);
+  assert.equal(summary.visibility.same_day_account_share_pct, 58.18);
+  assert.equal(summary.visibility.delayed_account_share_pct, 41.82);
+  assert.deepEqual(
+    summary.visibility.by_method.map((method) => ({
+      method: method.method,
+      accounts: method.accounts_total,
+      account_share_pct: method.account_share_pct,
+      observations: method.observations,
+      maximum_delay_days: method.maximum_delay_days,
+    })),
+    [
+      { method: "API", accounts: 30, account_share_pct: 54.55, observations: 5430, maximum_delay_days: 0 },
+      { method: "Host-to-host", accounts: 1, account_share_pct: 1.82, observations: 181, maximum_delay_days: 0 },
+      { method: "Portal", accounts: 9, account_share_pct: 16.36, observations: 1629, maximum_delay_days: 1 },
+      { method: "Spreadsheet", accounts: 15, account_share_pct: 27.27, observations: 2715, maximum_delay_days: 2 },
+    ],
+  );
   assert.equal(summary.payments.overall.records, 7600);
   assert.equal(summary.payments.overall.exceptions, 479);
   assert.equal(summary.payments.overall.repair_minutes, 20080);
+  assert.equal(summary.payments.overall.exception_rate_pct, 6.3);
   assert.equal(summary.payments.priority_union.records, 2839);
   assert.equal(summary.payments.priority_union.exceptions, 356);
   assert.equal(summary.payments.priority_union.repair_minutes, 14939);
   assert.equal(summary.payments.priority_union.record_share_pct, 37.36);
   assert.equal(summary.payments.priority_union.exception_share_pct, 74.32);
   assert.equal(summary.payments.priority_union.repair_share_pct, 74.4);
+  assert.equal(summary.payments.priority_union.exception_rate_pct, 12.54);
+  assert.deepEqual(summary.payments.cohort_order, [
+    "Manual touch only",
+    "Manual touch + cross-border wire",
+    "Cross-border wire only",
+    "Neither priority cohort",
+  ]);
+  assert.deepEqual(summary.payments.cohorts["Manual touch only"], {
+    records: 2839,
+    exceptions: 356,
+    repair_minutes: 14939,
+    record_contribution_pct: 37.36,
+    exception_contribution_pct: 74.32,
+    repair_contribution_pct: 74.4,
+    exception_rate_pct: 12.54,
+  });
+  assert.deepEqual(summary.payments.cohorts["Manual touch + cross-border wire"], {
+    records: 0,
+    exceptions: 0,
+    repair_minutes: 0,
+    record_contribution_pct: 0,
+    exception_contribution_pct: 0,
+    repair_contribution_pct: 0,
+    exception_rate_pct: null,
+  });
   assert.equal(summary.liquidity.scenarios["7"].screen_usd, 42844787.78);
   assert.equal(summary.liquidity.scenarios["14"].screen_usd, 38127490.73);
+  assert.equal(summary.closures.accounts_total, 55);
   assert.equal(summary.closures.validation_candidates, 4);
+  assert.equal(summary.closures.non_candidates, 51);
+  assert.equal(summary.closures.candidate_share_pct, 7.27);
+  assert.equal(summary.closures.total_annual_fees_usd, 53700);
   assert.equal(summary.closures.estimated_annual_fees_usd, 7800);
+  assert.equal(summary.closures.candidate_fee_share_pct, 14.53);
+  assert.deepEqual(summary.closures.candidate_account_ids, ["AC0004", "AC0009", "AC0024", "AC0037"]);
+});
+
+test("liquidity visualization summaries reconcile account-floor waterfalls and preserve daily gaps", () => {
+  const liquidity = FilterModel.summarize(payload).liquidity;
+  assert.deepEqual(Object.keys(liquidity.waterfalls), ["7", "14"]);
+  assert.deepEqual(
+    liquidity.waterfalls["7"].steps.map((step) => ({
+      key: step.key,
+      role: step.role,
+      delta_usd: step.delta_usd,
+      total_usd: step.total_usd,
+    })),
+    [
+      {
+        key: "gross_positive_estimated_availability",
+        role: "starting_total",
+        delta_usd: 57801215.46,
+        total_usd: 57801215.46,
+      },
+      {
+        key: "preliminary_restrictions",
+        role: "deduction",
+        delta_usd: -8053700.97,
+        total_usd: 49747514.49,
+      },
+      {
+        key: "negative_positions",
+        role: "deduction",
+        delta_usd: -2138293.09,
+        total_usd: 47609221.4,
+      },
+      {
+        key: "apparent_net_before_buffer",
+        role: "subtotal",
+        delta_usd: null,
+        total_usd: 47609221.4,
+      },
+      {
+        key: "effective_buffer_after_account_floors",
+        role: "deduction",
+        delta_usd: -4764433.62,
+        total_usd: 42844787.78,
+      },
+      {
+        key: "modeled_screen",
+        role: "resulting_total",
+        delta_usd: null,
+        total_usd: 42844787.78,
+      },
+    ],
+  );
+  assert.equal(liquidity.waterfalls["7"].raw_buffer_usd, 5485896.33);
+  assert.equal(liquidity.waterfalls["7"].effective_buffer_deduction_usd, 4764433.62);
+  assert.equal(liquidity.waterfalls["7"].unapplied_buffer_due_to_floor_usd, 721462.71);
+  assert.equal(liquidity.waterfalls["14"].raw_buffer_usd, 10828186.91);
+  assert.equal(liquidity.waterfalls["14"].effective_buffer_deduction_usd, 9481730.67);
+  assert.equal(liquidity.waterfalls["14"].unapplied_buffer_due_to_floor_usd, 1346456.24);
+  assert.equal(liquidity.waterfalls["14"].steps.at(-1).total_usd, 38127490.73);
+
+  assert.equal(liquidity.trend.length, 181);
+  assert.equal(liquidity.trend[0].date, "2026-01-01");
+  assert.equal(liquidity.trend[0].base_complete, true);
+  assert.equal(liquidity.trend[0].scenarios["7"].screen_usd, null);
+  assert.equal(liquidity.trend[0].scenarios["14"].screen_usd, null);
+  assert.equal(liquidity.trend.filter((point) => point.scenarios["7"].complete).length, 175);
+  assert.equal(liquidity.trend.find((point) => point.scenarios["7"].complete).date, "2026-01-07");
+  assert.equal(liquidity.trend.filter((point) => point.scenarios["14"].complete).length, 168);
+  assert.equal(liquidity.trend.find((point) => point.scenarios["14"].complete).date, "2026-01-14");
+  assert.equal(liquidity.trend.at(-1).date, "2026-06-30");
+  assert.equal(liquidity.trend.at(-1).scenarios["7"].screen_usd, 42844787.78);
+  assert.equal(liquidity.trend.at(-1).scenarios["14"].screen_usd, 38127490.73);
 });
 
 test("single-select dimension filters combine with AND semantics", () => {
@@ -339,28 +470,77 @@ test("single-select dimension filters combine with AND semantics", () => {
   assert.equal(summary.visibility.accounts_total, 2);
   assert.equal(summary.visibility.observations, 362);
   assert.equal(summary.visibility.same_day_observations, 362);
+  assert.deepEqual(
+    summary.visibility.by_method.map((method) => [method.method, method.accounts_total, method.account_share_pct]),
+    [
+      ["API", 1, 50],
+      ["Host-to-host", 1, 50],
+      ["Portal", 0, 0],
+      ["Spreadsheet", 0, 0],
+    ],
+  );
   assert.equal(summary.payments.overall.records, 79);
   assert.equal(summary.payments.overall.exceptions, 3);
   assert.equal(summary.payments.overall.repair_minutes, 120);
+  assert.equal(summary.payments.overall.exception_rate_pct, 3.8);
   assert.equal(summary.payments.priority_union.records, 19);
   assert.equal(summary.payments.priority_union.exceptions, 1);
   assert.equal(summary.payments.priority_union.repair_minutes, 53);
   assert.equal(summary.payments.priority_union.record_share_pct, 24.05);
   assert.equal(summary.payments.priority_union.exception_share_pct, 33.33);
   assert.equal(summary.payments.priority_union.repair_share_pct, 44.17);
+  assert.equal(summary.payments.priority_union.exception_rate_pct, 5.26);
+  assert.deepEqual(summary.payments.cohorts["Manual touch only"], {
+    records: 19,
+    exceptions: 1,
+    repair_minutes: 53,
+    record_contribution_pct: 24.05,
+    exception_contribution_pct: 33.33,
+    repair_contribution_pct: 44.17,
+    exception_rate_pct: 5.26,
+  });
+  assert.deepEqual(summary.payments.cohorts["Neither priority cohort"], {
+    records: 60,
+    exceptions: 2,
+    repair_minutes: 67,
+    record_contribution_pct: 75.95,
+    exception_contribution_pct: 66.67,
+    repair_contribution_pct: 55.83,
+    exception_rate_pct: 3.33,
+  });
   assert.equal(summary.liquidity.scenarios["7"].screen_usd, 9571.396398);
   assert.equal(summary.liquidity.scenarios["14"].screen_usd, 9571.396398);
+  assert.equal(summary.liquidity.waterfalls["7"].effective_buffer_deduction_usd, 0);
+  assert.equal(summary.liquidity.waterfalls["14"].effective_buffer_deduction_usd, 0);
+  assert.equal(summary.liquidity.waterfalls["14"].steps.at(-1).total_usd, 9571.396398);
+  assert.equal(summary.closures.accounts_total, 2);
   assert.equal(summary.closures.validation_candidates, 1);
+  assert.equal(summary.closures.non_candidates, 1);
+  assert.equal(summary.closures.candidate_share_pct, 50);
+  assert.equal(summary.closures.total_annual_fees_usd, 3300);
   assert.equal(summary.closures.estimated_annual_fees_usd, 2400);
+  assert.equal(summary.closures.candidate_fee_share_pct, 72.73);
+  assert.deepEqual(summary.closures.candidate_accounts, [{
+    account_id: "AC0024",
+    entity_id: "E006",
+    entity_name: "Aurelius Germany",
+    region: "EMEA",
+    currency: "EUR",
+    bank_name: "Pacific Crown",
+    visibility_method: "Host-to-host",
+    annual_fee_usd: 2400,
+  }]);
 });
 
 test("an account with no supplied payments returns null shares rather than a false zero rate", () => {
   const summary = FilterModel.summarize(payload, { entity: "E006", bank: "Pacific Crown" });
   assert.deepEqual(summary.scope.account_ids, ["AC0024"]);
   assert.equal(summary.payments.overall.records, 0);
+  assert.equal(summary.payments.overall.exception_rate_pct, null);
   assert.equal(summary.payments.priority_union.record_share_pct, null);
   assert.equal(summary.payments.priority_union.exception_share_pct, null);
   assert.equal(summary.payments.priority_union.repair_share_pct, null);
+  assert.equal(summary.payments.priority_union.exception_rate_pct, null);
 });
 
 test("inclusive June and single-day date ranges retain both endpoints", () => {
@@ -388,6 +568,8 @@ test("inclusive June and single-day date ranges retain both endpoints", () => {
   assert.equal(singleDay.payments.overall.repair_minutes, 53);
   assert.equal(singleDay.liquidity.as_of_date, "2026-06-30");
   assert.equal(singleDay.liquidity.scenarios["14"].screen_usd, 38127490.73);
+  assert.equal(singleDay.liquidity.trend.length, 1);
+  assert.equal(singleDay.liquidity.trend[0].date, "2026-06-30");
 });
 
 test("liquidity horizons become available independently on their first complete dates", () => {
@@ -435,10 +617,51 @@ test("empty intersections preserve null rates and incomplete liquidity", () => {
   const summary = FilterModel.summarize(payload, { region: "EMEA", currency: "JPY" });
   assert.equal(summary.scope.has_matches, false);
   assert.equal(summary.visibility.same_day_rate_pct, null);
+  assert.equal(summary.visibility.same_day_account_share_pct, null);
+  assert.equal(summary.visibility.delayed_account_share_pct, null);
+  assert.deepEqual(
+    summary.visibility.by_method.map((method) => [method.method, method.accounts_total, method.account_share_pct]),
+    [
+      ["API", 0, null],
+      ["Host-to-host", 0, null],
+      ["Portal", 0, null],
+      ["Spreadsheet", 0, null],
+    ],
+  );
   assert.equal(summary.payments.priority_union.record_share_pct, null);
+  assert.equal(summary.payments.overall.exception_rate_pct, null);
+  assert.equal(summary.payments.priority_union.exception_rate_pct, null);
+  for (const cohort of summary.payments.cohort_order) {
+    assert.equal(summary.payments.cohorts[cohort].record_contribution_pct, null);
+    assert.equal(summary.payments.cohorts[cohort].exception_contribution_pct, null);
+    assert.equal(summary.payments.cohorts[cohort].repair_contribution_pct, null);
+    assert.equal(summary.payments.cohorts[cohort].exception_rate_pct, null);
+  }
   assert.equal(summary.liquidity.complete, false);
   assert.equal(summary.liquidity.scenarios["7"].screen_usd, null);
   assert.equal(summary.liquidity.scenarios["14"].screen_usd, null);
+  for (const horizon of ["7", "14"]) {
+    assert.equal(summary.liquidity.waterfalls[horizon].complete, false);
+    assert.equal(summary.liquidity.waterfalls[horizon].raw_buffer_usd, null);
+    assert.ok(summary.liquidity.waterfalls[horizon].steps.every((step) => (
+      step.delta_usd === null && step.total_usd === null
+    )));
+  }
+  assert.equal(summary.liquidity.trend.length, 181);
+  assert.ok(summary.liquidity.trend.every((point) => (
+    point.base_complete === false
+      && point.positive_available_usd === null
+      && point.scenarios["7"].screen_usd === null
+      && point.scenarios["14"].screen_usd === null
+  )));
+  assert.equal(summary.closures.accounts_total, 0);
+  assert.equal(summary.closures.validation_candidates, 0);
+  assert.equal(summary.closures.non_candidates, 0);
+  assert.equal(summary.closures.candidate_share_pct, null);
+  assert.equal(summary.closures.total_annual_fees_usd, 0);
+  assert.equal(summary.closures.estimated_annual_fees_usd, 0);
+  assert.equal(summary.closures.candidate_fee_share_pct, null);
+  assert.deepEqual(summary.closures.candidate_accounts, []);
 });
 
 test("liquidity summary deliberately excludes mobility and funded-case claims", () => {
@@ -499,6 +722,13 @@ test("a missing 14-day value preserves complete base and 7-day results", () => {
   assert.equal(summary.liquidity.scenarios["14"].complete, false);
   assert.equal(summary.liquidity.scenarios["14"].buffer_usd, null);
   assert.equal(summary.liquidity.scenarios["14"].screen_usd, null);
+  assert.equal(summary.liquidity.waterfalls["7"].complete, true);
+  assert.equal(summary.liquidity.waterfalls["14"].complete, false);
+  assert.ok(summary.liquidity.waterfalls["14"].steps.every((step) => (
+    step.delta_usd === null && step.total_usd === null
+  )));
+  assert.equal(summary.liquidity.trend.at(-1).scenarios["7"].complete, true);
+  assert.equal(summary.liquidity.trend.at(-1).scenarios["14"].complete, false);
 });
 
 test("unknown priority cohort values fail closed", () => {
@@ -509,4 +739,86 @@ test("unknown priority cohort values fail closed", () => {
     () => FilterModel.summarize(invalid),
     /Unknown priority cohort/u,
   );
+});
+
+test("visualization fact domains and reconciliations fail closed on mutation", () => {
+  const mutations = [
+    {
+      label: "unknown visibility method",
+      change(invalid) {
+        invalid.filtering.dimensions.accounts[0].visibility_method = "Email";
+      },
+      message: /Unknown visibility method/u,
+    },
+    {
+      label: "fractional reporting delay",
+      change(invalid) {
+        const table = invalid.filtering.facts.account_days;
+        const row = findCompactRow(table, { date: "2026-01-01", account_id: "AC0001" });
+        row[table.columns.indexOf("reporting_delay_days")] = 1.5;
+      },
+      message: /reporting_delay_days must be an integer from 0 to 3/u,
+    },
+    {
+      label: "restriction above positive availability",
+      change(invalid) {
+        const table = invalid.filtering.facts.account_days;
+        const row = findCompactRow(table, { date: "2026-01-01", account_id: "AC0001" });
+        row[table.columns.indexOf("restricted_positive_available_usd")] = 2;
+      },
+      message: /restrictions exceed positive availability/u,
+    },
+    {
+      label: "positive negative-position value",
+      change(invalid) {
+        const table = invalid.filtering.facts.account_days;
+        const row = findCompactRow(table, { date: "2026-01-01", account_id: "AC0001" });
+        row[table.columns.indexOf("negative_available_usd")] = 1;
+      },
+      message: /negative availability must be nonpositive/u,
+    },
+    {
+      label: "negative payment buffer",
+      change(invalid) {
+        const table = invalid.filtering.facts.account_days;
+        const row = findCompactRow(table, { date: "2026-06-30", account_id: "AC0002" });
+        row[table.columns.indexOf("unflagged_payment_buffer_7d_usd")] = -1;
+      },
+      message: /unflagged_payment_buffer_7d_usd must be nonnegative/u,
+    },
+    {
+      label: "screen inconsistent with account floor",
+      change(invalid) {
+        const table = invalid.filtering.facts.account_days;
+        const row = findCompactRow(table, { date: "2026-06-30", account_id: "AC0002" });
+        row[table.columns.indexOf("net_screen_contribution_7d_usd")] = 1;
+      },
+      message: /7-day screen does not reconcile to the account-level floor/u,
+    },
+    {
+      label: "missing account-day row",
+      change(invalid) {
+        invalid.filtering.facts.account_days.rows.pop();
+      },
+      message: /one row per account and calendar date/u,
+    },
+    {
+      label: "fractional repair minutes",
+      change(invalid) {
+        const table = invalid.filtering.facts.payments;
+        table.rows[0][table.columns.indexOf("repair_minutes")] = 0.5;
+      },
+      message: /repair_minutes must be an integer/u,
+    },
+  ];
+
+  for (const mutation of mutations) {
+    const invalid = structuredClone(payload);
+    mutation.change(invalid);
+    assert.throws(
+      () => FilterModel.summarize(invalid),
+      mutation.message,
+      mutation.label,
+    );
+  }
 });

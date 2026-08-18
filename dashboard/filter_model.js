@@ -51,6 +51,16 @@
     "Neither priority cohort",
   ]);
 
+  const VISIBILITY_METHODS = Object.freeze([
+    "API",
+    "Host-to-host",
+    "Portal",
+    "Spreadsheet",
+  ]);
+
+  const LIQUIDITY_HORIZONS = Object.freeze(["7", "14"]);
+  const MONEY_TOLERANCE_USD = 0.01;
+
   const OUTSIDE_PRIORITY_UNION = "Neither priority cohort";
 
   const DEFAULT_METRIC_DEFINITIONS = Object.freeze([
@@ -149,6 +159,29 @@
     return value;
   }
 
+  function roundToSix(value) {
+    return Math.round(value * 1000000) / 1000000;
+  }
+
+  function roundToCents(value) {
+    return Math.round(value * 100) / 100;
+  }
+
+  function nearlyEqual(left, right, tolerance = MONEY_TOLERANCE_USD) {
+    return Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) <= tolerance;
+  }
+
+  function isoDateRange(start, end) {
+    const dates = [];
+    const cursor = new Date(`${start}T00:00:00Z`);
+    const final = new Date(`${end}T00:00:00Z`);
+    while (cursor <= final) {
+      dates.push(cursor.toISOString().slice(0, 10));
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+    return dates;
+  }
+
   function periodFromPayload(payload) {
     invariant(isPlainObject(payload), "Dashboard payload must be an object", "invalid_contract");
     invariant(isPlainObject(payload.meta), "Dashboard payload is missing meta", "invalid_contract");
@@ -187,6 +220,11 @@
         ),
         annual_fee_usd: requireFinite(account.annual_fee_usd, `Account ${index} annual_fee_usd`, { minimum: 0 }),
       };
+      invariant(
+        VISIBILITY_METHODS.includes(normalized.visibility_method),
+        `Unknown visibility method: ${normalized.visibility_method}`,
+        "invalid_contract",
+      );
       invariant(!identifiers.has(normalized.account_id), `Duplicate account_id: ${normalized.account_id}`, "invalid_contract");
       identifiers.add(normalized.account_id);
       return normalized;
@@ -239,10 +277,80 @@
       invariant(!seenAccountDays.has(key), `Duplicate account-day fact: ${row.date} ${row.account_id}`, "invalid_contract");
       seenAccountDays.add(key);
       row.reporting_delay_days = requireFinite(row.reporting_delay_days, `account_days row ${index} reporting_delay_days`, { minimum: 0 });
-      for (const field of ACCOUNT_DAY_FIELDS.slice(3)) {
-        row[field] = requireFinite(row[field], `account_days row ${index} ${field}`, { nullable: true });
+      invariant(
+        Number.isInteger(row.reporting_delay_days) && row.reporting_delay_days <= 3,
+        `account_days row ${index} reporting_delay_days must be an integer from 0 to 3`,
+        "invalid_contract",
+      );
+      row.positive_available_usd = requireFinite(
+        row.positive_available_usd,
+        `account_days row ${index} positive_available_usd`,
+        { minimum: 0 },
+      );
+      row.restricted_positive_available_usd = requireFinite(
+        row.restricted_positive_available_usd,
+        `account_days row ${index} restricted_positive_available_usd`,
+        { minimum: 0 },
+      );
+      row.negative_available_usd = requireFinite(
+        row.negative_available_usd,
+        `account_days row ${index} negative_available_usd`,
+      );
+      invariant(
+        row.restricted_positive_available_usd <= row.positive_available_usd,
+        `account_days row ${index} restrictions exceed positive availability`,
+        "invalid_contract",
+      );
+      invariant(
+        row.negative_available_usd <= 0,
+        `account_days row ${index} negative availability must be nonpositive`,
+        "invalid_contract",
+      );
+
+      for (const days of LIQUIDITY_HORIZONS) {
+        const bufferField = `unflagged_payment_buffer_${days}d_usd`;
+        const screenField = `net_screen_contribution_${days}d_usd`;
+        row[bufferField] = requireFinite(row[bufferField], `account_days row ${index} ${bufferField}`, { nullable: true });
+        row[screenField] = requireFinite(row[screenField], `account_days row ${index} ${screenField}`, { nullable: true });
+        if (row[bufferField] !== null) {
+          invariant(
+            row[bufferField] >= 0,
+            `account_days row ${index} ${bufferField} must be nonnegative`,
+            "invalid_contract",
+          );
+        }
+        if (row[bufferField] !== null && row[screenField] !== null) {
+          const unflaggedPositive = row.positive_available_usd - row.restricted_positive_available_usd;
+          const unflaggedScreen = row[screenField] - row.negative_available_usd;
+          const effectiveBuffer = unflaggedPositive - unflaggedScreen;
+          invariant(
+            unflaggedScreen >= -MONEY_TOLERANCE_USD,
+            `account_days row ${index} ${days}-day unflagged screen is negative`,
+            "invalid_contract",
+          );
+          invariant(
+            effectiveBuffer >= -MONEY_TOLERANCE_USD && effectiveBuffer <= row[bufferField] + MONEY_TOLERANCE_USD,
+            `account_days row ${index} ${days}-day screen does not reconcile to the account-level floor`,
+            "invalid_contract",
+          );
+        }
       }
     });
+    const expectedDates = isoDateRange(period.start, period.end);
+    invariant(
+      accountDays.length === accounts.length * expectedDates.length,
+      "filtering.facts.account_days must contain one row per account and calendar date",
+      "invalid_contract",
+    );
+    for (const date of expectedDates) {
+      for (const account of accounts) {
+        invariant(
+          seenAccountDays.has(`${date}\u0000${account.account_id}`),
+          `Missing account-day fact: ${date} ${account.account_id}`,
+          "invalid_contract",
+        );
+      }
+    }
 
     const payments = decodeCompactTable(
       payload.filtering.facts.payments,
@@ -259,6 +367,11 @@
       invariant(validCohorts.has(row.priority_cohort), `Unknown priority cohort: ${row.priority_cohort}`, "invalid_contract");
       row.exception_flag = requireBoolean(row.exception_flag, `payments row ${index} exception_flag`);
       row.repair_minutes = requireFinite(row.repair_minutes, `payments row ${index} repair_minutes`, { minimum: 0 });
+      invariant(
+        Number.isInteger(row.repair_minutes),
+        `payments row ${index} repair_minutes must be an integer`,
+        "invalid_contract",
+      );
     });
     return { accountDays, payments };
   }
@@ -346,13 +459,17 @@
     return Math.round((numerator / denominator) * 10000) / 100;
   }
 
-  function summarizeVisibility(rows) {
+  function summarizeVisibilityRows(rows) {
     const maximumDelayByAccount = new Map();
     let sameDayObservations = 0;
+    let oneDayDelayedObservations = 0;
+    let twoPlusDayDelayedObservations = 0;
     let withinOneDayObservations = 0;
     for (const row of rows) {
       const delay = row.reporting_delay_days;
       if (delay === 0) sameDayObservations += 1;
+      if (delay === 1) oneDayDelayedObservations += 1;
+      if (delay >= 2) twoPlusDayDelayedObservations += 1;
       if (delay <= 1) withinOneDayObservations += 1;
       maximumDelayByAccount.set(
         row.account_id,
@@ -367,12 +484,68 @@
       observations: rows.length,
       same_day_accounts: sameDayAccounts,
       delayed_accounts: delayedAccounts,
+      same_day_account_share_pct: percentage(sameDayAccounts, maximumDelayByAccount.size),
+      delayed_account_share_pct: percentage(delayedAccounts, maximumDelayByAccount.size),
       same_day_observations: sameDayObservations,
       delayed_observations: rows.length - sameDayObservations,
+      one_day_delayed_observations: oneDayDelayedObservations,
+      two_plus_day_delayed_observations: twoPlusDayDelayedObservations,
       within_one_day_observations: withinOneDayObservations,
       same_day_rate_pct: percentage(sameDayObservations, rows.length),
       within_one_day_rate_pct: percentage(withinOneDayObservations, rows.length),
+      maximum_delay_days: delays.length > 0 ? Math.max(...delays) : null,
     };
+  }
+
+  function summarizeVisibility(rows, accounts) {
+    const accountMethod = new Map(accounts.map((account) => [account.account_id, account.visibility_method]));
+    const rowsByMethod = new Map(VISIBILITY_METHODS.map((method) => [method, []]));
+    for (const row of rows) {
+      const method = accountMethod.get(row.account_id);
+      invariant(method && rowsByMethod.has(method), `Visibility row has no governed method: ${row.account_id}`, "invalid_contract");
+      rowsByMethod.get(method).push(row);
+    }
+
+    const overall = summarizeVisibilityRows(rows);
+    invariant(
+      overall.accounts_total === accounts.length,
+      "Visibility summary does not cover every selected account",
+      "invalid_contract",
+    );
+    const byMethod = VISIBILITY_METHODS.map((method) => {
+      const methodSummary = summarizeVisibilityRows(rowsByMethod.get(method));
+      const expectedAccounts = accounts.filter((account) => account.visibility_method === method).length;
+      invariant(
+        methodSummary.accounts_total === expectedAccounts,
+        `Visibility method ${method} does not cover every selected account`,
+        "invalid_contract",
+      );
+      return {
+        method,
+        account_share_pct: percentage(methodSummary.accounts_total, overall.accounts_total),
+        ...methodSummary,
+      };
+    });
+
+    const reconciledFields = [
+      "accounts_total",
+      "same_day_accounts",
+      "delayed_accounts",
+      "observations",
+      "same_day_observations",
+      "delayed_observations",
+      "one_day_delayed_observations",
+      "two_plus_day_delayed_observations",
+      "within_one_day_observations",
+    ];
+    for (const field of reconciledFields) {
+      invariant(
+        byMethod.reduce((total, row) => total + row[field], 0) === overall[field],
+        `Visibility method ${field} does not reconcile to the selected total`,
+        "invalid_contract",
+      );
+    }
+    return { ...overall, by_method: byMethod };
   }
 
   function completeSum(rows, field) {
@@ -381,7 +554,109 @@
       if (typeof row[field] !== "number" || !Number.isFinite(row[field])) return null;
       total += row[field];
     }
-    return Math.round(total * 1000000) / 1000000;
+    return roundToSix(total);
+  }
+
+  function liquidityWaterfallSteps(values = {}) {
+    return [
+      {
+        key: "gross_positive_estimated_availability",
+        label: "Gross positive estimated availability",
+        role: "starting_total",
+        delta_usd: values.gross ?? null,
+        total_usd: values.gross ?? null,
+      },
+      {
+        key: "preliminary_restrictions",
+        label: "Preliminary restrictions",
+        role: "deduction",
+        delta_usd: values.restrictionDelta ?? null,
+        total_usd: values.afterRestrictions ?? null,
+      },
+      {
+        key: "negative_positions",
+        label: "Negative positions",
+        role: "deduction",
+        delta_usd: values.negative ?? null,
+        total_usd: values.apparentNetBeforeBuffer ?? null,
+      },
+      {
+        key: "apparent_net_before_buffer",
+        label: "Apparent net before illustrative buffer",
+        role: "subtotal",
+        delta_usd: null,
+        total_usd: values.apparentNetBeforeBuffer ?? null,
+      },
+      {
+        key: "effective_buffer_after_account_floors",
+        label: "Effective buffer after account-level floors",
+        role: "deduction",
+        delta_usd: values.bufferDelta ?? null,
+        total_usd: values.screen ?? null,
+      },
+      {
+        key: "modeled_screen",
+        label: "Modeled screening result",
+        role: "resulting_total",
+        delta_usd: null,
+        total_usd: values.screen ?? null,
+      },
+    ];
+  }
+
+  function summarizeLiquidityWaterfall(sums, baseComplete, scenarioComplete, days) {
+    if (!baseComplete || !scenarioComplete) {
+      return {
+        complete: false,
+        raw_buffer_usd: null,
+        effective_buffer_deduction_usd: null,
+        unapplied_buffer_due_to_floor_usd: null,
+        steps: liquidityWaterfallSteps(),
+      };
+    }
+
+    const gross = sums.positive_available_usd;
+    const restrictions = sums.restricted_positive_available_usd;
+    const negative = sums.negative_available_usd;
+    const rawBuffer = sums[`unflagged_payment_buffer_${days}d_usd`];
+    const screen = sums[`net_screen_contribution_${days}d_usd`];
+    const afterRestrictions = roundToSix(gross - restrictions);
+    const apparentNetBeforeBuffer = roundToSix(afterRestrictions + negative);
+    let effectiveBuffer = roundToSix(apparentNetBeforeBuffer - screen);
+    if (Math.abs(effectiveBuffer) <= MONEY_TOLERANCE_USD) effectiveBuffer = 0;
+    invariant(
+      effectiveBuffer >= -MONEY_TOLERANCE_USD && effectiveBuffer <= rawBuffer + MONEY_TOLERANCE_USD,
+      `${days}-day aggregate screen does not reconcile to the account-level floor`,
+      "invalid_contract",
+    );
+    invariant(
+      nearlyEqual(apparentNetBeforeBuffer - effectiveBuffer, screen),
+      `${days}-day waterfall does not reconcile to the modeled screen`,
+      "invalid_contract",
+    );
+    let unappliedBuffer = roundToSix(rawBuffer - effectiveBuffer);
+    if (Math.abs(unappliedBuffer) <= MONEY_TOLERANCE_USD) unappliedBuffer = 0;
+    invariant(
+      unappliedBuffer >= -MONEY_TOLERANCE_USD,
+      `${days}-day unapplied buffer cannot be negative`,
+      "invalid_contract",
+    );
+
+    return {
+      complete: true,
+      raw_buffer_usd: rawBuffer,
+      effective_buffer_deduction_usd: effectiveBuffer,
+      unapplied_buffer_due_to_floor_usd: Math.max(0, unappliedBuffer),
+      steps: liquidityWaterfallSteps({
+        gross,
+        restrictionDelta: roundToSix(-restrictions),
+        afterRestrictions,
+        negative,
+        apparentNetBeforeBuffer,
+        bufferDelta: roundToSix(-effectiveBuffer),
+        screen,
+      }),
+    };
   }
 
   function summarizeLiquidity(accountRows, selectedAccountCount, dateTo) {
@@ -423,6 +698,12 @@
         for (const field of fields) sums[field] = null;
       }
     }
+    const waterfalls = Object.fromEntries(
+      LIQUIDITY_HORIZONS.map((days) => [
+        days,
+        summarizeLiquidityWaterfall(sums, baseComplete, scenarioComplete[days], days),
+      ]),
+    );
     return {
       as_of_date: dateTo,
       account_count: completeAccountSet.size,
@@ -444,7 +725,30 @@
           screen_usd: sums.net_screen_contribution_14d_usd,
         },
       },
+      waterfalls,
     };
+  }
+
+  function summarizeLiquidityTrend(rows, selectedAccountCount, dateFrom, dateTo) {
+    const rowsByDate = new Map();
+    for (const row of rows) {
+      if (!rowsByDate.has(row.date)) rowsByDate.set(row.date, []);
+      rowsByDate.get(row.date).push(row);
+    }
+    return isoDateRange(dateFrom, dateTo).map((date) => {
+      const snapshot = summarizeLiquidity(rowsByDate.get(date) || [], selectedAccountCount, date);
+      return {
+        date,
+        account_count: snapshot.account_count,
+        panel_complete: snapshot.panel_complete,
+        base_complete: snapshot.base_complete,
+        complete: snapshot.complete,
+        positive_available_usd: snapshot.positive_available_usd,
+        restricted_positive_available_usd: snapshot.restricted_positive_available_usd,
+        negative_available_usd: snapshot.negative_available_usd,
+        scenarios: snapshot.scenarios,
+      };
+    });
   }
 
   function emptyMeasure() {
@@ -469,15 +773,67 @@
     priorityUnion.record_share_pct = percentage(priorityUnion.records, overall.records);
     priorityUnion.exception_share_pct = percentage(priorityUnion.exceptions, overall.exceptions);
     priorityUnion.repair_share_pct = percentage(priorityUnion.repair_minutes, overall.repair_minutes);
-    return { overall, priority_union: priorityUnion, cohorts };
+    overall.exception_rate_pct = percentage(overall.exceptions, overall.records);
+    priorityUnion.exception_rate_pct = percentage(priorityUnion.exceptions, priorityUnion.records);
+    for (const cohort of PRIORITY_COHORTS) {
+      const measure = cohorts[cohort];
+      measure.record_contribution_pct = percentage(measure.records, overall.records);
+      measure.exception_contribution_pct = percentage(measure.exceptions, overall.exceptions);
+      measure.repair_contribution_pct = percentage(measure.repair_minutes, overall.repair_minutes);
+      measure.exception_rate_pct = percentage(measure.exceptions, measure.records);
+    }
+    for (const field of ["records", "exceptions", "repair_minutes"]) {
+      invariant(
+        PRIORITY_COHORTS.reduce((total, cohort) => total + cohorts[cohort][field], 0) === overall[field],
+        `Payment cohort ${field} does not reconcile to the selected total`,
+        "invalid_contract",
+      );
+      invariant(
+        PRIORITY_COHORTS
+          .filter((cohort) => cohort !== OUTSIDE_PRIORITY_UNION)
+          .reduce((total, cohort) => total + cohorts[cohort][field], 0) === priorityUnion[field],
+        `Payment priority-union ${field} does not reconcile to the selected cohorts`,
+        "invalid_contract",
+      );
+    }
+    return {
+      overall,
+      priority_union: priorityUnion,
+      cohort_order: [...PRIORITY_COHORTS],
+      cohorts,
+    };
   }
 
   function summarizeClosures(accounts) {
-    const candidates = accounts.filter((account) => account.closure_validation_candidate);
+    const orderedAccounts = [...accounts].sort((left, right) => left.account_id.localeCompare(right.account_id, "en-US"));
+    const candidates = orderedAccounts.filter((account) => account.closure_validation_candidate);
+    const totalAnnualFees = roundToCents(orderedAccounts.reduce((total, account) => total + account.annual_fee_usd, 0));
+    const candidateAnnualFees = roundToCents(candidates.reduce((total, account) => total + account.annual_fee_usd, 0));
+    invariant(candidates.length <= orderedAccounts.length, "Closure candidates exceed selected accounts", "invalid_contract");
+    invariant(
+      candidateAnnualFees <= totalAnnualFees + MONEY_TOLERANCE_USD,
+      "Closure candidate fees exceed selected account fees",
+      "invalid_contract",
+    );
     return {
+      accounts_total: orderedAccounts.length,
       validation_candidates: candidates.length,
-      estimated_annual_fees_usd: Math.round(candidates.reduce((total, account) => total + account.annual_fee_usd, 0) * 100) / 100,
-      candidate_account_ids: candidates.map((account) => account.account_id).sort((left, right) => left.localeCompare(right, "en-US")),
+      non_candidates: orderedAccounts.length - candidates.length,
+      candidate_share_pct: percentage(candidates.length, orderedAccounts.length),
+      total_annual_fees_usd: totalAnnualFees,
+      estimated_annual_fees_usd: candidateAnnualFees,
+      candidate_fee_share_pct: percentage(candidateAnnualFees, totalAnnualFees),
+      candidate_account_ids: candidates.map((account) => account.account_id),
+      candidate_accounts: candidates.map((account) => ({
+        account_id: account.account_id,
+        entity_id: account.entity_id,
+        entity_name: account.entity_name,
+        region: account.region,
+        currency: account.currency,
+        bank_name: account.bank_name,
+        visibility_method: account.visibility_method,
+        annual_fee_usd: account.annual_fee_usd,
+      })),
     };
   }
 
@@ -495,6 +851,9 @@
       selectedAccountIds.has(row.account_id) && row.date >= state.dateFrom && row.date <= state.dateTo
     ));
 
+    const liquidity = summarizeLiquidity(asOfAccountDays, selectedAccounts.length, state.dateTo);
+    liquidity.trend = summarizeLiquidityTrend(accountDays, selectedAccounts.length, state.dateFrom, state.dateTo);
+
     return {
       state,
       scope: {
@@ -502,8 +861,8 @@
         account_ids: selectedAccounts.map((account) => account.account_id).sort((left, right) => left.localeCompare(right, "en-US")),
         has_matches: selectedAccounts.length > 0,
       },
-      visibility: summarizeVisibility(accountDays),
-      liquidity: summarizeLiquidity(asOfAccountDays, selectedAccounts.length, state.dateTo),
+      visibility: summarizeVisibility(accountDays, selectedAccounts),
+      liquidity,
       payments: summarizePayments(payments),
       closures: summarizeClosures(selectedAccounts),
     };
