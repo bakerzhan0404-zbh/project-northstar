@@ -102,6 +102,44 @@ class DashboardDataTest(unittest.TestCase):
             7800.0,
         )
 
+    def test_quality_summary_uses_governed_checks_and_controls(self) -> None:
+        quality = build_dashboard_data(self.frames)["quality"]
+        self.assertEqual(
+            quality["status"],
+            "reconciled_to_supplied_controls_source_certification_open",
+        )
+        self.assertEqual(
+            quality["w1_checks"],
+            {
+                "passed": 52,
+                "total": 52,
+                "label": "Week 1 structural checks",
+            },
+        )
+        self.assertEqual(
+            quality["w2_controls"],
+            {
+                "reconciled": 13,
+                "total": 13,
+                "label": "Week 2 reconciliation controls",
+            },
+        )
+        self.assertEqual(quality["source_artifacts"], len(INPUT_FILES))
+        self.assertEqual(
+            [(row["key"], row["value"]) for row in quality["population_controls"]],
+            [
+                ("entities", 16),
+                ("accounts", 55),
+                ("balance_observations", 9955),
+                ("payment_records", 7600),
+                ("fx_rows", 1810),
+                ("process_activities", 9),
+            ],
+        )
+        self.assertIn(
+            "does not certify source completeness", quality["decision_boundary"]
+        )
+
     def test_filter_catalog_preserves_na_and_control_counts(self) -> None:
         self.assertIn("NA", set(self.frames["accounts"]["region"]))
         self.assertFalse(self.frames["accounts"]["region"].isna().any())
@@ -214,7 +252,15 @@ class DashboardDataTest(unittest.TestCase):
         definitions = build_dashboard_data(self.frames)["definitions"]
         self.assertEqual(
             set(definitions),
-            {"overview", "visibility", "liquidity", "payments", "regions", "gates"},
+            {
+                "overview",
+                "quality",
+                "visibility",
+                "liquidity",
+                "payments",
+                "regions",
+                "gates",
+            },
         )
         required = {
             "title",

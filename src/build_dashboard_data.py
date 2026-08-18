@@ -128,6 +128,11 @@ REPAIR_BOUNDARY = (
     "Source scope and removability are unresolved; no combined capacity or P&L "
     "baseline"
 )
+QUALITY_BOUNDARY = (
+    "Passing internal checks establishes structural consistency and reconciliation "
+    "only; it does not certify source completeness, semantic accuracy, operational "
+    "timing, causation, or decision authority"
+)
 CLOSURE_BOUNDARY = (
     "Local purpose, dependencies, signatories, service continuity, closure cost, "
     "and fee removal are not validated"
@@ -1262,6 +1267,54 @@ def _build_filtering_contract(
     }
 
 
+def _build_quality_contract(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
+    checks = frames["w1_checks"]
+    passed = checks["passed"].astype(str).str.lower().map(
+        {"true": True, "false": False}
+    )
+    reconciliation = frames["w2_reconciliation"]
+    population_specs = (
+        ("entities", "Entities"),
+        ("accounts", "Accounts"),
+        ("balance_observations", "Account-days"),
+        ("payment_records", "Payment records"),
+        ("fx_rows", "FX rows"),
+        ("process_activities", "Process activities"),
+    )
+    population_controls = []
+    for metric, label in population_specs:
+        row = _metric_row(
+            reconciliation, INPUT_FILES["w2_reconciliation"], metric
+        )
+        population_controls.append(
+            {
+                "key": metric,
+                "label": label,
+                "value": _as_int(row["value"], f"quality control {metric}"),
+                "unit": str(row["unit"]),
+                "evidence_label": str(row["evidence_label"]),
+            }
+        )
+    return {
+        "status": "reconciled_to_supplied_controls_source_certification_open",
+        "display_status": "Reconciled to supplied controls",
+        "certification_status": "Source certification open",
+        "w1_checks": {
+            "passed": int(passed.sum()),
+            "total": len(checks),
+            "label": "Week 1 structural checks",
+        },
+        "w2_controls": {
+            "reconciled": len(reconciliation),
+            "total": len(reconciliation),
+            "label": "Week 2 reconciliation controls",
+        },
+        "source_artifacts": len(INPUT_FILES),
+        "population_controls": population_controls,
+        "decision_boundary": QUALITY_BOUNDARY,
+    }
+
+
 def _build_definitions() -> Dict[str, Any]:
     return {
         "overview": {
@@ -1290,6 +1343,34 @@ def _build_definitions() -> Dict[str, Any]:
             ),
             "search_aliases": [
                 "dashboard guide", "methodology", "scope", "how to read"
+            ],
+        },
+        "quality": {
+            "title": "Data quality and evidence",
+            "meaning": (
+                "Summarizes internal structural checks, reconciled Week 2 controls, "
+                "governed source artifacts, and the remaining certification boundary."
+            ),
+            "calculation": (
+                "Count passing Week 1 checks, reconciled Week 2 controls, and governed "
+                "source artifacts; present population controls without combining them into a score."
+            ),
+            "formula": (
+                "Status = all required internal checks pass and all declared control totals "
+                "reconcile; no composite data-quality score is calculated."
+            ),
+            "sources": [
+                INPUT_FILES["w1_checks"],
+                INPUT_FILES["w1_metrics"],
+                INPUT_FILES["w2_reconciliation"],
+            ],
+            "boundary": QUALITY_BOUNDARY,
+            "next_action": (
+                "Complete source-owner certification and resolve semantic or operational "
+                "evidence gaps before treating internal consistency as decision authority."
+            ),
+            "search_aliases": [
+                "data quality", "evidence", "controls", "checks", "sources", "lineage"
             ],
         },
         "visibility": {
@@ -1652,6 +1733,7 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
         )
     candidates = accounts.loc[candidate_flag].sort_values("account_id")
     filtering = _build_filtering_contract(frames)
+    quality = _build_quality_contract(frames)
     definitions = _build_definitions()
 
     payload: Dict[str, Any] = {
@@ -1671,6 +1753,7 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
                 "certify mobility before booking value."
             ),
         },
+        "quality": quality,
         "visibility": {
             "accounts_total": _as_int(
                 visibility_overall["accounts"], "visibility accounts"
