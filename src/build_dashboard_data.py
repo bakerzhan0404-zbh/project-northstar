@@ -1371,6 +1371,41 @@ def _build_definitions() -> Dict[str, Any]:
                 "exceptions", "repair time", "manual touch", "cross-border wire"
             ],
         },
+        "regions": {
+            "title": "Regional footprint",
+            "meaning": (
+                "Shows governed account, reporting, payment, and closure-diagnostic "
+                "evidence across the supplied NA, EMEA, and APAC classifications."
+            ),
+            "calculation": (
+                "Hold the selected date, currency, entity, and bank filters constant, "
+                "then recalculate each row with its region classification."
+            ),
+            "formula": (
+                "Regional measure = the governed measure recomputed for accounts whose "
+                "region equals NA, EMEA, or APAC; regional rows reconcile to the facet scope."
+            ),
+            "sources": [
+                INPUT_FILES["account_day_facts"],
+                INPUT_FILES["payment_facts"],
+                INPUT_FILES["accounts"],
+            ],
+            "boundary": (
+                "Each comparison row overrides the active region while currency, entity, "
+                "and bank remain applied. Matching-account counts do not use the date filter; "
+                "delayed-account and payment evidence use the selected inclusive period; "
+                "closure candidates use the fixed 30 June 2026 snapshot. Markers are schematic "
+                "classifications—not bank, account, cash, legal-domicile, or transfer-path "
+                "locations—and the map is not live."
+            ),
+            "next_action": (
+                "Select a region, then inspect visibility, liquidity, and payment evidence "
+                "with each measure's own decision boundary."
+            ),
+            "search_aliases": [
+                "map", "regional footprint", "North America", "NA", "EMEA", "APAC"
+            ],
+        },
         "gates": {
             "title": "Open evidence gates",
             "meaning": (

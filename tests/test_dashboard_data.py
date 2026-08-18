@@ -214,7 +214,7 @@ class DashboardDataTest(unittest.TestCase):
         definitions = build_dashboard_data(self.frames)["definitions"]
         self.assertEqual(
             set(definitions),
-            {"overview", "visibility", "liquidity", "payments", "gates"},
+            {"overview", "visibility", "liquidity", "payments", "regions", "gates"},
         )
         required = {
             "title",

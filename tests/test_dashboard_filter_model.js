@@ -479,9 +479,13 @@ test("regional facets reconcile the governed full-period dashboard data", () => 
 
   assert.equal(summary.regional.rows.reduce((total, row) => total + row.account_count, 0), 55);
   assert.equal(summary.regional.rows.reduce((total, row) => total + row.visibility.delayed_accounts, 0), 23);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.visibility.same_day_account_days, 0), 5792);
   assert.equal(summary.regional.rows.reduce((total, row) => total + row.payments.records, 0), 7600);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.payments.exceptions, 0), 479);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.payments.repair_minutes, 0), 20080);
   assert.equal(summary.regional.rows.reduce((total, row) => total + row.payments.priority_union_records, 0), 2839);
   assert.equal(summary.regional.rows.reduce((total, row) => total + row.closures.validation_candidates, 0), 4);
+  assert.equal(summary.regional.rows.reduce((total, row) => total + row.closures.estimated_annual_fees_usd, 0), 7800);
 });
 
 test("regional facets hold non-region filters constant while exposing region selection", () => {
@@ -737,6 +741,15 @@ test("invalid dates and array-valued dimensions fail before summary derivation",
   );
 });
 
+test("unknown account regions fail closed even when a filter excludes the mutated account", () => {
+  const invalid = structuredClone(payload);
+  invalid.filtering.dimensions.accounts[0].region = "LATAM";
+  assert.throws(
+    () => FilterModel.summarize(invalid, { currency: "EUR" }),
+    /Unknown account region: LATAM/u,
+  );
+});
+
 test("empty intersections preserve null rates and incomplete liquidity", () => {
   const summary = FilterModel.summarize(payload, { region: "EMEA", currency: "JPY" });
   assert.equal(summary.scope.has_matches, false);
@@ -786,6 +799,16 @@ test("empty intersections preserve null rates and incomplete liquidity", () => {
   assert.equal(summary.closures.estimated_annual_fees_usd, 0);
   assert.equal(summary.closures.candidate_fee_share_pct, null);
   assert.deepEqual(summary.closures.candidate_accounts, []);
+  assert.equal(summary.regional.basis.account_count, 22);
+  assert.equal(summary.regional.basis.regions_represented, 1);
+  assert.deepEqual(
+    summary.regional.rows.map((row) => [row.code, row.status, row.account_count, row.selected]),
+    [
+      ["NA", "no_matching_accounts", 0, false],
+      ["EMEA", "no_matching_accounts", 0, true],
+      ["APAC", "available", 22, false],
+    ],
+  );
 });
 
 test("liquidity summary deliberately excludes mobility and funded-case claims", () => {

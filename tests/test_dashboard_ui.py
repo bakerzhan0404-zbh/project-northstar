@@ -1,8 +1,10 @@
 """Structural and integration checks for the interactive dashboard UI."""
 
 import functools
+import hashlib
 import http.server
 import json
+import struct
 import subprocess
 import sys
 import threading
@@ -111,6 +113,7 @@ class DashboardUiTest(unittest.TestCase):
             "visibility-kpi",
             "funded-case-value",
             "payment-kpi",
+            "regional-kpi",
             "evidence-dialog",
             "drawer-close",
             "dashboard-announcer",
@@ -118,6 +121,7 @@ class DashboardUiTest(unittest.TestCase):
             "panel-visibility",
             "panel-liquidity",
             "panel-payments",
+            "panel-regions",
             "panel-gates",
             "dashboard-search",
             "dashboard-search-results",
@@ -138,12 +142,14 @@ class DashboardUiTest(unittest.TestCase):
             "detail-visibility",
             "detail-liquidity",
             "detail-payments",
+            "detail-regions",
             "detail-capacity",
             "detail-closures",
             "visibility-summary-boundary",
             "liquidity-summary-boundary",
             "liquidity-summary-screen",
             "payment-summary-boundary",
+            "regional-summary-boundary",
             "closure-summary-boundary",
             "decision-evidence-chips",
             "decision-composite-note",
@@ -157,6 +163,12 @@ class DashboardUiTest(unittest.TestCase):
             "payment-ring",
             "payment-cohort-stack",
             "payment-cohort-legend",
+            "regional-map-base",
+            "regional-map-markers",
+            "regional-map-empty",
+            "regional-evidence-table",
+            "regional-evidence-table-body",
+            "regional-all-button",
             "capacity-comparison-bars",
             "closure-candidate-table",
             "closure-candidate-table-body",
@@ -201,17 +213,18 @@ class DashboardUiTest(unittest.TestCase):
         self.assertIn(model_script, self.index)
         self.assertLess(self.index.index(model_script), self.index.index(app_script))
 
-    def test_body_uses_six_native_collapsed_operational_disclosures(self) -> None:
+    def test_body_uses_seven_native_collapsed_operational_disclosures(self) -> None:
         expected_topics = {
             "decision",
             "visibility",
             "liquidity",
             "payments",
+            "regions",
             "capacity",
             "closures",
         }
-        self.assertEqual(len(self.parser.inline_details), 6)
-        self.assertEqual(len(self.parser.inline_summaries), 6)
+        self.assertEqual(len(self.parser.inline_details), 7)
+        self.assertEqual(len(self.parser.inline_summaries), 7)
         self.assertEqual(
             {details.get("data-inline-detail") for details in self.parser.inline_details},
             expected_topics,
@@ -238,6 +251,10 @@ class DashboardUiTest(unittest.TestCase):
             "mobility-status",
             "payment-kpi",
             "payment-summary-boundary",
+            "regional-kpi",
+            "regional-summary-boundary",
+            "regional-summary-context",
+            "regional-selection-status",
             "capacity-filter-note",
             "capacity-summary",
             "closure-summary",
@@ -306,6 +323,14 @@ class DashboardUiTest(unittest.TestCase):
                 "payment-cohort-legend",
                 "payment-cohort-empty",
             },
+            "regions": {
+                "regional-map-base",
+                "regional-map-markers",
+                "regional-map-empty",
+                "regional-evidence-table",
+                "regional-evidence-table-body",
+                "regional-all-button",
+            },
             "capacity": {"capacity-comparison-bars"},
             "closures": {
                 "closure-candidate-table",
@@ -324,13 +349,52 @@ class DashboardUiTest(unittest.TestCase):
         self.assertTrue(canvas.get("aria-label"))
         self.assertIn("View trend data table", self.index)
         self.assertIn("<caption>", self.index)
-        self.assertEqual(self.index.count("Definition, formula &amp; source"), 6)
+        self.assertEqual(self.index.count("Definition, formula &amp; source"), 7)
         self.assertIn("Separate signals—not a composite score.", self.index)
         self.assertIn(".analytics-card", self.styles)
         self.assertIn("background: var(--analytics);", self.styles)
         self.assertIn(".composition-ring", self.styles)
         self.assertIn(".cohort-stack", self.styles)
         self.assertIn(".waterfall-list", self.styles)
+        self.assertIn(".regional-map-stage", self.styles)
+
+    def test_regional_map_uses_a_local_public_domain_asset_and_semantic_controls(self) -> None:
+        tags_by_id = {
+            attrs["id"]: (tag, attrs)
+            for tag, attrs in self.parser.tags
+            if "id" in attrs
+        }
+        image_tag, image = tags_by_id["regional-map-base"]
+        self.assertEqual(image_tag, "img")
+        self.assertEqual(image.get("src"), "assets/world-map.png")
+        self.assertEqual(image.get("alt"), "")
+        self.assertEqual(image.get("aria-hidden"), "true")
+        self.assertEqual(image.get("width"), "1280")
+        self.assertEqual(image.get("height"), "650")
+        self.assertNotIn("http", image.get("src", ""))
+
+        asset = DASHBOARD / "assets" / "world-map.png"
+        contents = asset.read_bytes()
+        self.assertEqual(contents[:8], b"\x89PNG\r\n\x1a\n")
+        self.assertEqual(contents[12:16], b"IHDR")
+        self.assertEqual(struct.unpack(">II", contents[16:24]), (1280, 650))
+        self.assertEqual(
+            hashlib.sha256(contents).hexdigest(),
+            "7097dc120bc4c45f15e1a116e2fd4b5b72dd84e45bec10063edd5fa5439e2154",
+        )
+
+        marker_tag, marker_group = tags_by_id["regional-map-markers"]
+        self.assertEqual(marker_tag, "div")
+        self.assertEqual(marker_group.get("role"), "group")
+        self.assertIn("Filter dashboard by region", marker_group.get("aria-label", ""))
+        table_tag, _ = tags_by_id["regional-evidence-table"]
+        self.assertEqual(table_tag, "table")
+        self.assertIn(
+            "Regional diagnostic comparison within the current non-region filters",
+            self.index,
+        )
+        self.assertIn("Schematic account coverage · supplied diagnostics · not a live cash map", self.index)
+        self.assertIn("Schematic region positions—not bank, account, cash, legal-domicile, or transfer-path locations", self.index)
 
     def test_disclosure_keyboard_search_reset_and_failure_behaviors_are_explicit(self) -> None:
         required = (
@@ -365,11 +429,14 @@ class DashboardUiTest(unittest.TestCase):
             "renderPaymentAnalytics({ config, unionValue, totalValue, share });",
             "renderCapacityComparison(capacity);",
             "renderClosureCandidateTable(closures);",
+            "renderRegionalFootprint(regional);",
+            "renderRegions();",
             "currentSummary.visibility",
             "visibility.by_method.forEach",
             "currentSummary.liquidity.trend",
             "payments.cohort_order",
             "closures.candidate_accounts",
+            "currentSummary.regional",
             "clearVisualizationOutputs();",
             "replaceChildren()",
             'detail.dataset.inlineDetail === "liquidity"',
@@ -396,6 +463,12 @@ class DashboardUiTest(unittest.TestCase):
         self.assertIn("Share of all matching ${config.label}", self.script)
         self.assertIn("supplied payment-file monthly average", self.index)
         self.assertIn("Estimated annual fee (USD)", self.index)
+        self.assertIn("applyRegionalSelection", self.script)
+        self.assertIn('region_filter_mode: "facet_override"', (DASHBOARD / "filter_model.js").read_text(encoding="utf-8"))
+        regional_renderer = self.script.split("function renderRegionalFootprint", 1)[1].split(
+            "function renderClosureCandidateTable", 1
+        )[0]
+        self.assertNotIn("liquidity", regional_renderer)
 
     def test_filters_fail_closed_and_empty_scopes_do_not_fake_rates(self) -> None:
         required = (
@@ -461,6 +534,7 @@ const jan7 = model.summarize(data, {
   dateTo: '2026-01-07',
 });
 const paymentRows = visual.paymentCohortVisualRows(base.payments, 'records');
+const zeroPaymentRegion = zeroPayments.regional.rows.find(row => row.status === 'available');
 process.stdout.write(JSON.stringify({
   visibilityOrder: filtered.visibility.by_method.map(row => row.method),
   visibilityAccounts: filtered.visibility.by_method.map(row => row.accounts_total),
@@ -476,6 +550,12 @@ process.stdout.write(JSON.stringify({
   baseVisibilityAction: visual.visibilityActionText(base.visibility, true),
   filteredVisibilityAction: visual.visibilityActionText(filtered.visibility, true),
   emptyVisibilityAction: visual.visibilityActionText(empty.visibility, false),
+  zeroRegionalPayment: visual.regionalPaymentText(zeroPaymentRegion),
+  missingRegionalDelay: visual.regionalDelayedText({
+    status: 'available',
+    visibility: { delayed_account_share_pct: null },
+  }),
+  unavailableMarkerSize: visual.regionalMarkerSize(0, 22),
 }));
 """
         completed = subprocess.run(
@@ -514,6 +594,15 @@ process.stdout.write(JSON.stringify({
             result["emptyVisibilityAction"],
             "No visibility action is derived for an empty scope.",
         )
+        self.assertEqual(
+            result["zeroRegionalPayment"],
+            "0 supplied records · share unavailable",
+        )
+        self.assertEqual(
+            result["missingRegionalDelay"],
+            "No supplied account-day evidence",
+        )
+        self.assertEqual(result["unavailableMarkerSize"], 52)
 
     def test_search_uses_model_index_and_complete_keyboard_controls(self) -> None:
         required = (
@@ -528,6 +617,7 @@ process.stdout.write(JSON.stringify({
             'entry.kind === "dimension"',
             'entry.kind === "account"',
             "entry.values.entity_id",
+            "window.requestAnimationFrame(() => searchInput.focus())",
             'document.addEventListener("pointerdown"',
             'id: `inline:${topic}`',
             'id: `guide:${topic}`',
@@ -535,6 +625,35 @@ process.stdout.write(JSON.stringify({
         for token in required:
             self.assertIn(token, self.script)
         self.assertNotIn("new RegExp", self.script)
+
+        node_script = """
+const { orderSearchResultsForDisplay } = require('./dashboard/app.js');
+const results = [
+  { id: 'inline:regions', kind: 'metric', label: 'Regional footprint' },
+  { id: 'region:EMEA', kind: 'dimension', label: 'EMEA' },
+  { id: 'account:AC0024', kind: 'account', label: 'AC0024' },
+];
+process.stdout.write(JSON.stringify({
+  exact: orderSearchResultsForDisplay(results, ' EMEA ').map((entry) => entry.id),
+  metric: orderSearchResultsForDisplay(results, 'map').map((entry) => entry.id),
+}));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        ordered = json.loads(completed.stdout)
+        self.assertEqual(
+            ordered["exact"],
+            ["region:EMEA", "inline:regions", "account:AC0024"],
+        )
+        self.assertEqual(
+            ordered["metric"],
+            ["inline:regions", "region:EMEA", "account:AC0024"],
+        )
 
     def test_metric_guide_contains_stable_methodology_without_live_values(self) -> None:
         required_sections = (
@@ -573,6 +692,10 @@ process.stdout.write(JSON.stringify({
             definitions["payments"]["formula"],
             "Priority share = priority-union measure ÷ matching overall measure; the manual-touch/cross-border overlap is counted once.",
         )
+        self.assertEqual(
+            definitions["regions"]["formula"],
+            "Regional measure = the governed measure recomputed for accounts whose region equals NA, EMEA, or APAC; regional rows reconcile to the facet scope.",
+        )
         self.assertIn(
             "Enterprise-global management estimate · filters do not apply · not a combined capacity or P&amp;L baseline",
             self.index,
@@ -589,6 +712,8 @@ process.stdout.write(JSON.stringify({
             "h/month vs ${capacity.payment_file_repair_hours_monthly.toFixed(1)} h/month",
             "30 Jun 2026 snapshot · date filter does not apply · currency/region/entity/bank filters apply",
             "dimensionFilterContext(appliedFilters)",
+            "Schematic account coverage · supplied diagnostics · not a live cash map",
+            "regionalFacetContext(appliedFilters)",
         )
         for phrase in required:
             self.assertIn(phrase, combined)
@@ -698,6 +823,7 @@ process.stdout.write(JSON.stringify({
                 "/filter_model.js",
                 "/app.js",
                 "/dashboard_data.json",
+                "/assets/world-map.png",
             ):
                 with urllib.request.urlopen(base + relative, timeout=5) as response:
                     self.assertEqual(response.status, 200)

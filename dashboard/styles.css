@@ -739,6 +739,14 @@ main {
   border-left-color: var(--orange);
 }
 
+.regional-operation {
+  border-left-color: var(--purple);
+}
+
+.regional-operation > summary {
+  grid-template-columns: 96px minmax(200px, 1fr) 120px minmax(220px, auto) 24px;
+}
+
 .gate-operation {
   border-color: var(--amber-border);
   border-left-color: #d89b28;
@@ -998,6 +1006,199 @@ main {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.regional-analytics {
+  display: grid;
+  gap: 12px;
+}
+
+.regional-map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.regional-map-toolbar p {
+  color: var(--analytics-muted);
+  font-size: 10px;
+  line-height: 15px;
+}
+
+.regional-all-button,
+.regional-marker,
+.regional-table-action {
+  min-height: 44px;
+  color: #fff;
+  background: #1d3b59;
+  border: 1px solid #56718c;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.regional-all-button {
+  flex: 0 0 auto;
+  padding: 0 14px;
+}
+
+.regional-all-button[aria-pressed="true"] {
+  color: var(--navy);
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgb(132 116 245 / 52%);
+}
+
+.regional-map-figure {
+  display: grid;
+  gap: 8px;
+}
+
+.regional-map-stage {
+  position: relative;
+  aspect-ratio: 1280 / 650;
+  overflow: hidden;
+  background: #10283f;
+  border: 1px solid #526a81;
+  border-radius: 10px;
+}
+
+#regional-map-base {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(1) grayscale(1) brightness(1.35);
+  mix-blend-mode: screen;
+  opacity: 0.48;
+}
+
+.regional-map-markers {
+  position: absolute;
+  inset: 0;
+}
+
+.regional-marker {
+  --marker-size: 64px;
+  position: absolute;
+  left: var(--marker-left);
+  top: var(--marker-top);
+  display: grid;
+  width: var(--marker-size);
+  min-width: 52px;
+  height: var(--marker-size);
+  min-height: 52px;
+  padding: 7px;
+  place-content: center;
+  color: #fff;
+  background: var(--marker-color, var(--blue));
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgb(19 34 54 / 28%);
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.regional-marker strong,
+.regional-marker span,
+.regional-marker small {
+  display: block;
+  line-height: 1.15;
+}
+
+.regional-marker strong {
+  font-size: 12px;
+}
+
+.regional-marker span,
+.regional-marker small {
+  margin-top: 2px;
+  font-size: 10px;
+}
+
+.regional-marker small {
+  color: #fff;
+}
+
+.regional-marker[aria-pressed="true"] {
+  color: #fff;
+  background: var(--navy);
+  border-color: #fff;
+  box-shadow: 0 0 0 4px #8474f5, 0 4px 14px rgb(19 34 54 / 32%);
+}
+
+.regional-marker[aria-pressed="true"] small {
+  color: #fff;
+}
+
+.regional-marker[aria-disabled="true"] {
+  color: #45586b;
+  background: #d4dde5;
+  border-color: #8fa0af;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.regional-marker[aria-disabled="true"] small {
+  color: #45586b;
+}
+
+.regional-map-figure figcaption {
+  color: var(--analytics-muted);
+  font-size: 9px;
+  line-height: 14px;
+}
+
+.regional-table-wrap {
+  border: 1px solid var(--analytics-border);
+  border-radius: 8px;
+}
+
+.regional-evidence-table {
+  min-width: 760px;
+}
+
+.regional-evidence-table th[scope="row"] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  color: #fff;
+  background: var(--analytics-deep);
+  text-transform: none;
+}
+
+.regional-evidence-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.regional-table-scroll-hint {
+  display: none;
+  color: var(--analytics-muted);
+  font-size: 9px;
+}
+
+.regional-table-action {
+  min-height: 44px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+.regional-table-action[aria-pressed="true"] {
+  color: var(--navy);
+  background: #fff;
+  border-color: #fff;
+}
+
+.regional-table-action:disabled {
+  color: #8fa0af;
+  background: #263e57;
+  border-color: #455c73;
+  cursor: not-allowed;
 }
 
 .composition-legend b,
@@ -1787,7 +1988,7 @@ main {
 
 .drawer-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -2030,6 +2231,14 @@ main {
     grid-template-columns: 84px minmax(180px, 1fr) 100px minmax(190px, auto) 24px;
   }
 
+  .regional-operation > summary {
+    grid-template-columns: 84px minmax(180px, 1fr) 100px minmax(180px, auto) 24px;
+  }
+
+  .regional-detail {
+    grid-template-columns: 1fr;
+  }
+
   .visibility-visual-grid,
   .payments-visual-grid {
     grid-template-columns: minmax(160px, 0.8fr) minmax(240px, 1.6fr);
@@ -2126,7 +2335,8 @@ main {
   }
 
   .operation-row > summary,
-  .liquidity-operation > summary {
+  .liquidity-operation > summary,
+  .regional-operation > summary {
     grid-template-columns: 76px minmax(0, 1fr) 24px;
     gap: 8px 12px;
     align-items: start;
@@ -2167,6 +2377,10 @@ main {
     grid-row: 3;
   }
 
+  .regional-operation .operation-context {
+    grid-row: 3;
+  }
+
   .liquidity-operation .operation-status {
     grid-row: 4;
   }
@@ -2187,6 +2401,57 @@ main {
   .visibility-visual-grid,
   .payments-visual-grid {
     grid-template-columns: 1fr;
+  }
+
+  .regional-map-stage {
+    min-height: 0;
+    aspect-ratio: auto;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+  }
+
+  .regional-table-scroll-hint {
+    display: block;
+  }
+
+  #regional-map-base {
+    display: none;
+  }
+
+  .regional-map-markers {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .regional-marker {
+    position: static;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 68px;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 10px;
+    align-items: center;
+    justify-content: start;
+    padding: 11px 13px;
+    border-radius: 9px;
+    text-align: left;
+    transform: none;
+  }
+
+  .regional-marker strong {
+    grid-row: 1 / 3;
+    font-size: 15px;
+  }
+
+  .regional-marker span,
+  .regional-marker small {
+    margin: 0;
+    font-size: 10px;
   }
 
   .composition-figure {
@@ -2311,7 +2576,8 @@ main {
   }
 
   .operation-row > summary,
-  .liquidity-operation > summary {
+  .liquidity-operation > summary,
+  .regional-operation > summary {
     grid-template-columns: minmax(0, 1fr) 24px;
   }
 
@@ -2357,6 +2623,18 @@ main {
   .analytics-heading > p {
     max-width: none;
     text-align: left;
+  }
+
+  .regional-map-toolbar {
+    display: grid;
+  }
+
+  .regional-all-button {
+    width: 100%;
+  }
+
+  .regional-map-markers {
+    grid-template-columns: 1fr;
   }
 
   .composition-figure {

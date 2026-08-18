@@ -233,6 +233,11 @@
         annual_fee_usd: requireFinite(account.annual_fee_usd, `Account ${index} annual_fee_usd`, { minimum: 0 }),
       };
       invariant(
+        REGION_METADATA.some(({ code }) => code === normalized.region),
+        `Unknown account region: ${normalized.region}`,
+        "invalid_contract",
+      );
+      invariant(
         VISIBILITY_METHODS.includes(normalized.visibility_method),
         `Unknown visibility method: ${normalized.visibility_method}`,
         "invalid_contract",
@@ -859,6 +864,11 @@
     const facetPayments = facts.payments.filter((row) => (
       facetAccountIds.has(row.account_id) && row.date >= state.dateFrom && row.date <= state.dateTo
     ));
+    const facetVisibility = summarizeVisibility(facetAccountDays, facetAccounts);
+    const facetPaymentSummary = summarizePayments(facetPayments);
+    const facetClosures = summarizeClosures(facetAccounts);
+    const facetAsOfRows = facetAccountDays.filter((row) => row.date === state.dateTo);
+    const facetLiquidity = summarizeLiquidity(facetAsOfRows, facetAccounts.length, state.dateTo);
 
     const rows = REGION_METADATA.map(({ code, label }) => {
       const regionAccounts = facetAccounts.filter((account) => account.region === code);
@@ -923,14 +933,35 @@
       "Regional payment counts do not reconcile to the facet scope",
       "invalid_contract",
     );
+    const integerReconciliations = [
+      ["delayed accounts", rows.reduce((total, row) => total + row.visibility.delayed_accounts, 0), facetVisibility.delayed_accounts],
+      ["same-day account-days", rows.reduce((total, row) => total + row.visibility.same_day_account_days, 0), facetVisibility.same_day_observations],
+      ["payment exceptions", rows.reduce((total, row) => total + row.payments.exceptions, 0), facetPaymentSummary.overall.exceptions],
+      ["payment repair minutes", rows.reduce((total, row) => total + row.payments.repair_minutes, 0), facetPaymentSummary.overall.repair_minutes],
+      ["priority-union records", rows.reduce((total, row) => total + row.payments.priority_union_records, 0), facetPaymentSummary.priority_union.records],
+      ["closure candidates", rows.reduce((total, row) => total + row.closures.validation_candidates, 0), facetClosures.validation_candidates],
+    ];
+    integerReconciliations.forEach(([label, regionalTotal, facetTotal]) => {
+      invariant(
+        regionalTotal === facetTotal,
+        `Regional ${label} do not reconcile to the facet scope`,
+        "invalid_contract",
+      );
+    });
+    invariant(
+      nearlyEqual(
+        rows.reduce((total, row) => total + row.closures.estimated_annual_fees_usd, 0),
+        facetClosures.estimated_annual_fees_usd,
+      ),
+      "Regional closure candidate fees do not reconcile to the facet scope",
+      "invalid_contract",
+    );
 
     for (const days of LIQUIDITY_HORIZONS) {
       const rowsWithAccounts = rows.filter((row) => row.account_count > 0);
       const allRegionsComplete = rowsWithAccounts.length > 0 && rowsWithAccounts.every(
         (row) => row.liquidity.scenarios[days].complete,
       );
-      const facetAsOfRows = facetAccountDays.filter((row) => row.date === state.dateTo);
-      const facetLiquidity = summarizeLiquidity(facetAsOfRows, facetAccounts.length, state.dateTo);
       if (allRegionsComplete && facetLiquidity.scenarios[days].complete) {
         const regionalScreen = roundToSix(rowsWithAccounts.reduce(
           (total, row) => total + row.liquidity.scenarios[days].screen_usd,

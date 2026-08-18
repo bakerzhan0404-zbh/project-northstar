@@ -360,6 +360,52 @@
             </div>
           </details>
 
+          <details id="detail-regions" class="operation-row regional-operation" name="dashboard-detail" data-inline-detail="regions">
+            <summary data-detail-summary="regions">
+              <span class="operation-kicker">Scope lens</span>
+              <span class="operation-copy"><strong id="regional-title">Regional footprint</strong><span id="regional-summary-boundary">Schematic account coverage · supplied diagnostics · not a live cash map</span></span>
+              <span class="operation-metric"><strong id="regional-kpi" aria-live="polite">—</strong><span id="regional-kpi-label">regions represented</span></span>
+              <span class="operation-context"><strong id="regional-summary-context">Loading regional evidence…</strong><span id="regional-selection-status">All regions</span></span>
+              <span class="summary-marker" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="operation-detail signal-detail regional-detail">
+              <div class="detail-main">
+                <section class="analytics-card regional-analytics" aria-labelledby="regional-map-title">
+                  <div class="analytics-heading"><div><span class="analytics-eyebrow">Region facet</span><h3 id="regional-map-title">Supplied regional footprint</h3></div><p id="regional-facet-basis">Each row overrides region; other filters remain applied</p></div>
+                  <div class="regional-map-toolbar">
+                    <p>Select a region to apply it across the dashboard. Marker size represents matching account count.</p>
+                    <button id="regional-all-button" class="regional-all-button" type="button" aria-pressed="true" data-region-value="" data-requires-data>All regions</button>
+                  </div>
+                  <figure class="regional-map-figure" aria-labelledby="regional-map-caption">
+                    <div class="regional-map-stage">
+                      <img id="regional-map-base" src="assets/world-map.png" width="1280" height="650" alt="" aria-hidden="true" decoding="async">
+                      <div id="regional-map-markers" class="regional-map-markers" role="group" aria-label="Filter dashboard by region"></div>
+                    </div>
+                    <figcaption id="regional-map-caption">Desktop marker size compares matching accounts; mobile selector cards show the same direct counts. Fixed-size unavailable anchors preserve regional context. Positions are broad regional anchors, not precise locations.</figcaption>
+                  </figure>
+                  <p id="regional-map-empty" class="visual-empty" role="status" hidden>No accounts match the current currency, entity, and bank filters.</p>
+                  <div class="responsive-table-wrap regional-table-wrap">
+                    <p class="regional-table-scroll-hint">Scroll horizontally for all columns →</p>
+                    <table id="regional-evidence-table" class="analytics-table regional-evidence-table">
+                      <caption>Regional diagnostic comparison within the current non-region filters</caption>
+                      <thead><tr><th scope="col">Region</th><th scope="col" class="numeric">Matching accounts</th><th scope="col">Accounts delayed</th><th scope="col">Priority-union payment records</th><th scope="col" class="numeric">Closure-validation candidates</th><th scope="col">Apply region</th></tr></thead>
+                      <tbody id="regional-evidence-table-body"></tbody>
+                    </table>
+                  </div>
+                  <p class="chart-boundary">Matching-account counts use currency, entity, and bank dimensions and do not use the date filter. Delayed-account and payment columns also use the selected inclusive period. Closure candidates use the fixed 30 Jun 2026 snapshot and ignore the date filter.</p>
+                </section>
+                <p id="regional-interpretation" class="interpretation">Loading regional interpretation…</p>
+                <p id="regional-boundary" class="boundary">Schematic region positions—not bank, account, cash, legal-domicile, or transfer-path locations.</p>
+              </div>
+              <aside class="detail-aside">
+                <div class="detail-block"><span class="detail-label">Current scope</span><p data-detail-scope="regions">Loading current scope…</p></div>
+                <div class="detail-block"><span class="detail-label">Evidence limit</span><p data-detail-evidence="regions">Loading regional evidence limit…</p></div>
+                <div class="detail-block detail-action-block"><span class="detail-label">Next action</span><p data-detail-action="regions">Loading next action…</p></div>
+                <button class="detail-guide-button" type="button" data-open-drawer="regions" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
+              </aside>
+            </div>
+          </details>
+
           <h2 id="gates-title" class="sr-only">Open evidence gates</h2>
 
           <details id="detail-capacity" class="operation-row gate-operation" name="dashboard-detail" data-inline-detail="capacity">
@@ -433,6 +479,7 @@
           <button id="tab-visibility" role="tab" type="button" aria-controls="panel-visibility" aria-selected="false" tabindex="-1" data-tab="visibility">Visibility</button>
           <button id="tab-liquidity" role="tab" type="button" aria-controls="panel-liquidity" aria-selected="false" tabindex="-1" data-tab="liquidity">Liquidity</button>
           <button id="tab-payments" role="tab" type="button" aria-controls="panel-payments" aria-selected="false" tabindex="-1" data-tab="payments">Payments</button>
+          <button id="tab-regions" role="tab" type="button" aria-controls="panel-regions" aria-selected="false" tabindex="-1" data-tab="regions">Regions</button>
           <button id="tab-gates" role="tab" type="button" aria-controls="panel-gates" aria-selected="false" tabindex="-1" data-tab="gates">Evidence gates</button>
         </div>
 
@@ -441,6 +488,7 @@
           <section id="panel-visibility" class="drawer-panel" role="tabpanel" aria-labelledby="tab-visibility" hidden></section>
           <section id="panel-liquidity" class="drawer-panel" role="tabpanel" aria-labelledby="tab-liquidity" hidden></section>
           <section id="panel-payments" class="drawer-panel" role="tabpanel" aria-labelledby="tab-payments" hidden></section>
+          <section id="panel-regions" class="drawer-panel" role="tabpanel" aria-labelledby="tab-regions" hidden></section>
           <section id="panel-gates" class="drawer-panel" role="tabpanel" aria-labelledby="tab-gates" hidden></section>
         </div>
 

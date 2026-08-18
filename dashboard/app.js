@@ -35,13 +35,14 @@ const PAYMENT_MEASURES = Object.freeze({
   },
 });
 
-const GUIDE_TOPICS = Object.freeze(["overview", "visibility", "liquidity", "payments", "gates"]);
-const INLINE_TOPICS = Object.freeze(["decision", "visibility", "liquidity", "payments", "capacity", "closures"]);
+const GUIDE_TOPICS = Object.freeze(["overview", "visibility", "liquidity", "payments", "regions", "gates"]);
+const INLINE_TOPICS = Object.freeze(["decision", "visibility", "liquidity", "payments", "regions", "capacity", "closures"]);
 const INLINE_GUIDE_TOPIC = Object.freeze({
   decision: "overview",
   visibility: "visibility",
   liquidity: "liquidity",
   payments: "payments",
+  regions: "regions",
   capacity: "gates",
   closures: "gates",
 });
@@ -65,6 +66,11 @@ const METHOD_COLORS = Object.freeze([
   VISUAL_COLORS.purple,
   VISUAL_COLORS.orange,
 ]);
+const REGION_PRESENTATION = Object.freeze({
+  NA: Object.freeze({ left: 25, top: 41, color: "#3b6fb6" }),
+  EMEA: Object.freeze({ left: 52, top: 43, color: "#267a6e" }),
+  APAC: Object.freeze({ left: 78, top: 57, color: "#6655d9" }),
+});
 
 const state = { ...DEFAULT_VIEW };
 let dashboardData = null;
@@ -219,7 +225,7 @@ function showDataFailure() {
   closeFilterPanel({ restoreFocus: false });
   setText("#dashboard-scope", "Week 1–2 diagnostic snapshot · supplied data unavailable");
   setText("#data-status", "Unavailable — validation failed");
-  ["#visibility-kpi", "#funded-case-value", "#payment-kpi"].forEach((selector) => setText(selector, "Unavailable"));
+  ["#visibility-kpi", "#funded-case-value", "#payment-kpi", "#regional-kpi"].forEach((selector) => setText(selector, "Unavailable"));
   setText("#mobility-status", "No current result published.");
   setText("#liquidity-boundary", "Data unavailable — validation did not complete.");
   setText("#payment-boundary", "Data unavailable — validation did not complete.");
@@ -259,6 +265,15 @@ function dimensionFilterContext(filters, { includeAll = true } = {}) {
     if (value || includeAll) parts.push(value || fallback);
   });
   return parts.join(" · ");
+}
+
+function regionalFacetContext(filters) {
+  return [
+    formatDateRange(filters.dateFrom, filters.dateTo),
+    filters.currency || "All currencies",
+    filters.entity ? entityLabel(filters.entity) : "All entities",
+    filters.bank || "All banks",
+  ].join(" · ");
 }
 
 function activeFilterDescriptors(filters) {
@@ -924,6 +939,229 @@ function appendTableCell(row, tag, text, className = "") {
   return cell;
 }
 
+function regionalMarkerSize(accountCount, maximumAccountCount) {
+  if (!isFiniteNumber(accountCount) || accountCount <= 0 || maximumAccountCount <= 0) return 52;
+  return 64 + Math.round(Math.sqrt(accountCount / maximumAccountCount) * 20);
+}
+
+function focusRegionalControl(region, source) {
+  window.requestAnimationFrame(() => {
+    const selector = region
+      ? `[data-region-${source}-action="${region}"]`
+      : "#regional-all-button";
+    const control = get(selector);
+    if (control) control.focus();
+  });
+}
+
+function applyRegionalSelection(region, source = "marker") {
+  if (!dashboardData || !appliedFilters) return false;
+  if (appliedFilters.region === region) {
+    const selectedRow = region && currentSummary
+      ? currentSummary.regional.rows.find((item) => item.code === region)
+      : null;
+    announce(
+      selectedRow && selectedRow.status !== "available"
+        ? `${selectedRow.label} is applied, but no accounts match the other active filters.`
+        : region
+          ? `${region} is already selected.`
+          : "All regions are already selected.",
+    );
+    return true;
+  }
+  const row = region && currentSummary
+    ? currentSummary.regional.rows.find((item) => item.code === region)
+    : null;
+  if (row && row.status !== "available") {
+    announce(`${row.label} is unavailable under the other active filters.`);
+    return false;
+  }
+  const label = row ? row.label : "All regions";
+  const applied = applyFilterCandidate(
+    { ...appliedFilters, region },
+    { closePanel: true, message: `${label} ${region ? "region" : "scope"} applied.` },
+  );
+  if (applied) focusRegionalControl(region, source);
+  return applied;
+}
+
+function bindRegionalMarkerKeyboard(buttons) {
+  buttons.forEach((button, index) => {
+    button.addEventListener("keydown", (event) => {
+      let nextIndex = null;
+      if (["ArrowRight", "ArrowDown"].includes(event.key)) nextIndex = (index + 1) % buttons.length;
+      if (["ArrowLeft", "ArrowUp"].includes(event.key)) nextIndex = (index - 1 + buttons.length) % buttons.length;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = buttons.length - 1;
+      if (nextIndex === null) return;
+      event.preventDefault();
+      buttons[nextIndex].focus();
+    });
+  });
+}
+
+function regionalDelayedText(row) {
+  if (row.status !== "available") return "No matching data";
+  if (!isFiniteNumber(row.visibility.delayed_account_share_pct)) return "No supplied account-day evidence";
+  return `${formatNumber(row.visibility.delayed_accounts)} / ${formatNumber(row.account_count)} · ${formatPercent(row.visibility.delayed_account_share_pct)}`;
+}
+
+function regionalPaymentText(row) {
+  if (row.status !== "available") return "—";
+  const share = row.payments.priority_union_record_share_pct;
+  if (row.payments.records === 0 || !isFiniteNumber(share)) return "0 supplied records · share unavailable";
+  return `${formatNumber(row.payments.priority_union_records)} / ${formatNumber(row.payments.records)} · ${formatPercent(share)}`;
+}
+
+function makeRegionalAction(row, source) {
+  const button = make("button", source === "marker" ? "regional-marker" : "regional-table-action");
+  button.type = "button";
+  button.dataset[`region${source[0].toUpperCase()}${source.slice(1)}Action`] = row.code;
+  button.setAttribute("aria-pressed", String(row.selected));
+  const available = row.status === "available";
+  if (!available) button.setAttribute("aria-disabled", "true");
+  const action = row.selected ? `${row.label} selected` : `Filter to ${row.label}`;
+  button.setAttribute(
+    "aria-label",
+    available
+      ? `${action}: ${plural(row.account_count, "matching account")}, ${plural(row.visibility.delayed_accounts, "delayed account")}.`
+      : row.selected
+        ? `${row.label} applied but no accounts match the other active filters.`
+        : `${row.label} unavailable: no accounts match the other active filters.`,
+  );
+  if (available || source === "marker") {
+    button.addEventListener("click", () => applyRegionalSelection(row.code, source));
+  }
+  return button;
+}
+
+function renderRegionalFootprint(regional) {
+  const markerGroup = get("#regional-map-markers");
+  const table = get("#regional-evidence-table");
+  const tableWrap = get(".regional-table-wrap");
+  const tableBody = get("#regional-evidence-table-body");
+  const empty = get("#regional-map-empty");
+  const allButton = get("#regional-all-button");
+  markerGroup.replaceChildren();
+  tableBody.replaceChildren();
+
+  const availableRows = regional.rows.filter((row) => row.status === "available");
+  const maximumAccountCount = Math.max(0, ...availableRows.map((row) => row.account_count));
+  const hasAnyRegion = availableRows.length > 0;
+  empty.hidden = hasAnyRegion;
+  table.hidden = !hasAnyRegion;
+  tableWrap.hidden = !hasAnyRegion;
+  allButton.setAttribute("aria-pressed", String(!regional.selected_region));
+
+  const markerButtons = [];
+  regional.rows.forEach((row) => {
+    const presentation = REGION_PRESENTATION[row.code];
+    if (!presentation) throw new Error(`Missing regional map position: ${row.code}`);
+    const marker = makeRegionalAction(row, "marker");
+    marker.style.setProperty("--marker-left", `${presentation.left}%`);
+    marker.style.setProperty("--marker-top", `${presentation.top}%`);
+    marker.style.setProperty("--marker-color", presentation.color);
+    marker.style.setProperty("--marker-size", `${regionalMarkerSize(row.account_count, maximumAccountCount)}px`);
+    marker.append(
+      make("strong", "", row.code),
+      make(
+        "span",
+        "",
+        row.status === "available"
+          ? plural(row.account_count, "account")
+          : row.selected
+            ? "Applied · no matches"
+            : "Unavailable",
+      ),
+      make(
+        "small",
+        "",
+        row.status === "available"
+          ? (row.selected ? "Selected" : "Select region")
+          : "0 matching accounts",
+      ),
+    );
+    markerGroup.append(marker);
+    markerButtons.push(marker);
+
+    const tableRow = make("tr");
+    const heading = appendTableCell(tableRow, "th", `${row.code} · ${row.label}`);
+    heading.scope = "row";
+    appendTableCell(tableRow, "td", row.status === "available" ? formatNumber(row.account_count) : "—", "numeric");
+    appendTableCell(tableRow, "td", regionalDelayedText(row));
+    appendTableCell(tableRow, "td", regionalPaymentText(row));
+    const closureText = row.status !== "available"
+      ? "—"
+      : row.closures.validation_candidates === 0
+        ? "0 · No candidates"
+        : formatNumber(row.closures.validation_candidates);
+    appendTableCell(tableRow, "td", closureText, "numeric");
+    const actionCell = appendTableCell(tableRow, "td", "");
+    const actionButton = makeRegionalAction(row, "table");
+    actionButton.textContent = row.status !== "available"
+      ? (row.selected ? "Applied · no matches" : "Unavailable")
+      : row.selected
+        ? `${row.code} selected`
+        : `Filter to ${row.code}`;
+    actionButton.disabled = row.status !== "available";
+    actionCell.append(actionButton);
+    tableBody.append(tableRow);
+  });
+  bindRegionalMarkerKeyboard(markerButtons);
+}
+
+function renderRegions() {
+  const regional = currentSummary.regional;
+  const selectedScopeHasData = currentSummary.scope.has_matches;
+  const facetHasData = regional.basis.account_count > 0;
+  const activeRegionHasNoMatches = Boolean(regional.selected_region && !selectedScopeHasData);
+  const representedRegionCount = regional.selected_region && selectedScopeHasData
+    ? 1
+    : regional.basis.regions_represented;
+  setKpiEmpty("#regional-kpi", !facetHasData);
+  setText("#regional-kpi", facetHasData ? formatNumber(representedRegionCount) : "—");
+  setText(
+    "#regional-kpi-label",
+    facetHasData
+      ? activeRegionHasNoMatches
+        ? `${representedRegionCount === 1 ? "comparable region" : "comparable regions"}`
+        : `${representedRegionCount === 1 ? "region" : "regions"} represented`
+      : "No matching regional data",
+  );
+  setText(
+    "#regional-summary-context",
+    selectedScopeHasData
+      ? `${plural(currentSummary.scope.account_count, "selected account")} · Week 1–2 scope`
+      : facetHasData
+        ? `${plural(regional.basis.account_count, "comparable account")} · other filters held constant`
+        : "No matching data",
+  );
+  setText(
+    "#regional-selection-status",
+    regional.selected_region
+      ? `${regional.selected_region} applied${selectedScopeHasData ? "" : " · no matches"}`
+      : "All regions",
+  );
+  setText(
+    "#regional-facet-basis",
+    `Comparison basis: each row overrides region · ${regionalFacetContext(appliedFilters)}`,
+  );
+  setText(
+    "#regional-interpretation",
+    "Use the region selector to test whether reporting and payment signals persist in a narrower operating scope.",
+  );
+  setText(
+    "#regional-boundary",
+    "Schematic region positions—not bank, account, cash, legal-domicile, or transfer-path locations. Liquidity is intentionally not plotted here.",
+  );
+  renderInlineDetail("regions", {
+    scope: `Regional facet holds date, currency, entity, and bank constant while each row overrides region · ${regionalFacetContext(appliedFilters)}`,
+    evidence: "Supplied Week 1–2 diagnostic classifications only. The map is not live and does not locate cash, accounts, banks, owners, or transfer paths.",
+    nextAction: "Select a region, then inspect Reporting visibility, Liquidity, and Payment friction with their own evidence limits.",
+  });
+  renderRegionalFootprint(regional);
+}
+
 function renderClosureCandidateTable(closures) {
   const table = get("#closure-candidate-table");
   const body = get("#closure-candidate-table-body");
@@ -964,6 +1202,8 @@ function clearVisualizationOutputs(message = "Data unavailable — validation di
     "#capacity-comparison-bars",
     "#liquidity-trend-table-body",
     "#closure-candidate-table-body",
+    "#regional-map-markers",
+    "#regional-evidence-table-body",
   ].forEach((selector) => {
     const node = get(selector);
     if (node) node.replaceChildren();
@@ -973,6 +1213,8 @@ function clearVisualizationOutputs(message = "Data unavailable — validation di
   setText("#decision-visibility-chip", "Unavailable");
   setText("#decision-liquidity-chip", "Unavailable");
   setText("#decision-payments-chip", "Unavailable");
+  setText("#regional-summary-context", "Unavailable");
+  setText("#regional-selection-status", "No current result published.");
   setText("#trend-7-endpoint", "—");
   setText("#trend-14-endpoint", "—");
   const canvas = get("#liquidity-trend-canvas");
@@ -983,6 +1225,8 @@ function clearVisualizationOutputs(message = "Data unavailable — validation di
   }
   const closureTable = get("#closure-candidate-table");
   if (closureTable) closureTable.hidden = true;
+  const regionalTable = get("#regional-evidence-table");
+  if (regionalTable) regionalTable.hidden = true;
   getAll(".trend-data-disclosure").forEach((detail) => {
     detail.open = false;
   });
@@ -1271,6 +1515,7 @@ function metricSearchDefinitions() {
     ["visibility", "Reporting visibility", "Expand the current filtered visibility result."],
     ["liquidity", "Liquidity screening", "Expand the current filtered 7- or 14-day screening result."],
     ["payments", "Payment friction", "Expand the current filtered payment-cohort result."],
+    ["regions", "Regional footprint", "Expand the governed NA, EMEA, and APAC regional facet."],
     ["capacity", "Capacity evidence gate", "Expand the global capacity evidence gate."],
     ["closures", "Closure evidence gate", "Expand the current filtered closure candidates."],
   ].map(([topic, label, description]) => {
@@ -1331,6 +1576,25 @@ function searchGroupLabel(kind) {
   return "Filter values";
 }
 
+function normalizedSearchLabel(value) {
+  return String(value ?? "")
+    .normalize("NFKD")
+    .toLocaleLowerCase("en-US")
+    .trim()
+    .replace(/\s+/gu, " ");
+}
+
+function orderSearchResultsForDisplay(results, query) {
+  const normalizedQuery = normalizedSearchLabel(query);
+  const exactDimensionMatch = results.some((entry) => (
+    entry.kind === "dimension" && normalizedSearchLabel(entry.label) === normalizedQuery
+  ));
+  const kindOrder = exactDimensionMatch
+    ? ["dimension", "metric", "account"]
+    : ["metric", "dimension", "account"];
+  return kindOrder.flatMap((kind) => results.filter((entry) => entry.kind === kind));
+}
+
 function setActiveSearchResult(index) {
   if (searchResults.length === 0) return;
   activeSearchIndex = (index + searchResults.length) % searchResults.length;
@@ -1356,7 +1620,10 @@ function renderSearchResults(query) {
     return;
   }
 
-  searchResults = FilterModel.querySearchIndex(searchIndex, trimmed, { limit: SEARCH_RESULT_LIMIT });
+  searchResults = orderSearchResultsForDisplay(
+    FilterModel.querySearchIndex(searchIndex, trimmed, { limit: SEARCH_RESULT_LIMIT }),
+    trimmed,
+  );
   resultBox.hidden = false;
   get("#dashboard-search").setAttribute("aria-expanded", "true");
   if (searchResults.length === 0) {
@@ -1365,7 +1632,7 @@ function renderSearchResults(query) {
     return;
   }
 
-  const kinds = ["metric", "dimension", "account"];
+  const kinds = [...new Set(searchResults.map((entry) => entry.kind))];
   kinds.forEach((kind) => {
     const entries = searchResults.filter((entry) => entry.kind === kind);
     if (entries.length === 0) return;
@@ -1417,7 +1684,8 @@ function chooseSearchResult(index) {
     candidate.bank = entry.values.bank_name;
   }
   clearSearch();
-  applyFilterCandidate(candidate, { message: `${entry.label} applied.` });
+  const applied = applyFilterCandidate(candidate, { message: `${entry.label} applied.` });
+  if (applied) window.requestAnimationFrame(() => searchInput.focus());
 }
 
 function updateResetState() {
@@ -1441,6 +1709,7 @@ function bindEvents() {
   });
   getAll("[data-close-drawer]").forEach((button) => button.addEventListener("click", closeDrawer));
   getAll("[data-reset]").forEach((button) => button.addEventListener("click", () => resetView()));
+  get("#regional-all-button").addEventListener("click", () => applyRegionalSelection("", "marker"));
   setupLiquidityTrendResizeHandling();
 
   const inlineDetails = getAll("[data-inline-detail]");
@@ -1604,6 +1873,7 @@ function renderAll() {
   renderVisibility();
   renderLiquidity();
   renderPayments();
+  renderRegions();
   renderGuardrails();
   if (get("#evidence-dialog").open) renderDrawerPanel(state.drawerTab);
   updateResetState();
@@ -1644,6 +1914,10 @@ if (typeof module !== "undefined" && module.exports) {
     lastFiniteTrendValue,
     paymentCohortVisualRows,
     visibilityActionText,
+    regionalMarkerSize,
+    regionalDelayedText,
+    regionalPaymentText,
+    orderSearchResultsForDisplay,
   });
 }
 
