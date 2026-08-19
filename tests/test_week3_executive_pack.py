@@ -231,10 +231,10 @@ def main() -> None:
             "**Overall status:** Amber" in weekly
             and "all execution-evidence gates remain `OPEN`" in weekly
         ),
-        "submission index identifies deck render as pending rather than complete": (
-            "interim steering-deck render and integrated final QA remain pending"
-            in index
-            and "to be added after render-and-visual QA" in index
+        "submission index reports the render without claiming polish-gate closure": (
+            "steering deck rendered and visually reviewed" in index
+            and "strict polish gate still open" in index
+            and "project-northstar-week3-interim-steering.pptx" in index
         ),
         "submission index lists all executive-control artifacts": all(
             path.name in index
