@@ -1,6 +1,7 @@
 """Executable content controls for the Week 3 executive control pack."""
 
 import re
+import csv
 from pathlib import Path
 
 
@@ -23,6 +24,26 @@ GOVERNED_LABELS = {
     "`ANALYST-ASSUMPTION`",
     "`ANALYST-JUDGMENT`",
 }
+
+
+def csv_scores_consistent(path: Path) -> bool:
+    """Risk CSV parses rectangularly and every score is likelihood x impact."""
+    if not path.exists():
+        return False
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    if not rows:
+        return False
+    for row in rows:
+        try:
+            likelihood = int(row["likelihood_1_to_5"])
+            impact = int(row["impact_1_to_5"])
+            score = int(row["score"])
+        except (KeyError, TypeError, ValueError):
+            return False
+        if likelihood * impact != score:
+            return False
+    return True
 
 
 def load_text(path: Path) -> str:
@@ -234,7 +255,8 @@ def main() -> None:
         "submission index reports the render without claiming polish-gate closure": (
             "steering deck rendered and visually reviewed" in index
             and "strict polish gate still open" in index
-            and "project-northstar-week3-interim-steering.pptx" in index
+            and "W3_interim_steering_deck.pdf" in index
+            and "W3_interim_steering_deck.pptx" in index
         ),
         "submission index lists all executive-control artifacts": all(
             path.name in index
@@ -270,6 +292,17 @@ def main() -> None:
         ),
         "no forbidden executive overclaim is present": not any(
             overclaim_hits.values()
+        ),
+        "registers are supplied as CSV per the consulting standards": all(
+            (W3 / name).exists()
+            for name in ("W3_risk_register.csv", "W3_source_log.csv", "W3_assumptions_register.csv")
+        ),
+        "risk register CSV is well formed and scores equal likelihood times impact": (
+            csv_scores_consistent(W3 / "W3_risk_register.csv")
+        ),
+        "the rendered deck ships with the pack in both formats": all(
+            (W3 / name).exists()
+            for name in ("W3_interim_steering_deck.pdf", "W3_interim_steering_deck.pptx")
         ),
     }
 
