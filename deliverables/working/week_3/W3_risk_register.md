@@ -1,0 +1,38 @@
+# Week 3 — Recommendation Risk Register
+
+**Prepared by:** Baker
+**Prepared date:** 18 August 2026
+**Status:** Working management risk register; all named client owners are proposed
+**Classification:** Confidential — risks combine `ACG-DATA`, `ANALYST-CALC`, and `ANALYST-JUDGMENT`
+
+Likelihood and impact use a proposed 1–5 scale; score is `likelihood × impact`. These scores prioritize management attention only. They are not quantified risk exposure or risk value.
+
+No mitigation, contingency, owner, or status in this analyst register records client approval for launch, production change, cash movement, closure, labor action, benefit recognition, spend, procurement, or scale.
+
+| ID | Risk description | Type | Likelihood | Impact | Score | Early-warning indicator / trigger | Mitigation | Contingency / decision consequence | Proposed owner | Status | Evidence label |
+|---|---|---|---:|---:|---:|---|---|---|---|---|---|
+| R017 | The `87 / 72 / 60` option scores are treated as proof of value or readiness | Recommendation | 3 | 5 | 15 | Deck or decision language drops “provisional,” “design,” or the open gates | Keep gate-then-score, evidence labels, rationale, and limitations beside the score | Withdraw execution language; return to direction-only review | Baker / CFO | Open | `ANALYST-JUDGMENT` |
+| R018 | An open non-compensating gate is averaged away by perceived strategic upside | Governance | 4 | 5 | 20 | Funding, launch, or scale is discussed without authoritative data, control, service, local-right, resilience, rollback, owner, and cost evidence | Require signed gate checklist before each later decision | No-go or narrow scope; a failed critical gate blocks the affected option | CFO / control owners | Open | `ANALYST-JUDGMENT` |
+| R019 | The `$38.13m` 14-day screen is presented as movable, idle, or surplus cash | Analytical / benefit | 4 | 5 | 20 | Screen value appears in a funded benefit or transfer instruction | Keep current validated/funded/recognized cash at `$0`; require VG01–VG05 | Remove cash value and shift work to account-level certification | Group Treasurer / Finance | Open | `ANALYST-CALC` |
+| R020 | The visibility frame is generalized from 10 purposive accounts to the full 55-account population | Analytical / delivery | 3 | 4 | 12 | Cohort result is reported as a portfolio rate or readiness claim | Complete the all-55 census; retain method, selection rule, exclusions, and denominators | Limit inference to selected accounts; redesign or expand evidence collection | Group Treasurer / data owner | Open | `ANALYST-JUDGMENT` |
+| R021 | `AC0040` enters an unsafe intervention despite being APAC, Payroll, and restricted | Service / local rights | 3 | 5 | 15 | Enhanced review, shadow-only flag, or local approval is bypassed | Keep enhanced control review and shadow-only treatment; permit documented substitution | Remove or substitute the account; preserve coverage limitation | APAC Regional Finance / control owner | Open | `ACG-DATA` / `ANALYST-JUDGMENT` |
+| R022 | The 120-record payment frame is interpreted as a prevalence, causal, or enterprise-benefit sample | Analytical | 4 | 4 | 16 | Sample rates are extrapolated to ACG or used to size automation/labor savings | Label purposive case-control design; require reasons, documents, events, criticality, and comparator review | Stop extrapolation; report only evidence-linked patterns | Shared Services Lead / data owner | Open | `ANALYST-CALC` / `ANALYST-JUDGMENT` |
+| R023 | `Completed` controls or 50 exact matches are treated as clean outcomes | Analytical / control | 3 | 4 | 12 | Control rows are called settled/error-free or ten deviations are omitted | State that `Completed` is supplied status only; review all 10 documented deviations | Rebuild pairs or limit the comparison; do not claim causal effect | Shared Services Lead | Open | `ACG-DATA` / `ANALYST-CALC` |
+| R024 | A pilot or production change disrupts payroll, tax, refunds, or critical suppliers | Delivery / control | 3 | 5 | 15 | Missing service definition, blackout approval, emergency rights, or rehearsed four-hour rollback | Keep both charters design-only; approve service/control gates and rollback separately | No-go, stop, and revert to the approved prior process | BU Finance / CIO / process owner | Open | `ANALYST-JUDGMENT` |
+| R025 | Cash, P&L, capacity, and risk are added into a false total benefit | Business case | 3 | 5 | 15 | One “total value” combines balances, annual fees, hours, or qualitative risk | Maintain four non-additive ledgers and Finance recognition gates | Reject the calculation and rebuild by value type | Finance | Open | `ANALYST-JUDGMENT` |
+| R026 | Risk exposure is read as zero because current recognized risk value is `$0` | Business case / communication | 3 | 4 | 12 | Management language says “no risk” or uses `$0` as exposure | Keep exposure and value `NOT QUANTIFIED`; use `$0` only for the recognized-value ledger entry | Remove monetization; report control/incident evidence only | Management control owner / Finance | Open | `ANALYST-CALC` |
+| R027 | The `$1.0–$1.5m` ceiling is treated as a cost estimate, approved budget, or spend authority | Affordability | 4 | 5 | 20 | A return calculation uses the ceiling as cost or a workstream receives an inferred allocation | Complete CR01–CR10 with sourced low/base/high timing and ownership | Do not calculate returns or decide funding; return for staged approval if cost exceeds the ceiling | CFO / Finance / Procurement | Open | `ACG-DATA` / `ANALYST-JUDGMENT` |
+| R028 | A validation-case output is presented as an investable case | Benefit / governance | 4 | 5 | 20 | ROI, NPV, payback, funding recommendation, or booked benefit appears before evidence gates close | Keep cash/P&L/capacity recognized value at `$0`, risk unquantified, and return metrics unavailable | Withdraw the investment request and complete value/cost evidence | Finance / value owners | Open | `ANALYST-CALC` |
+| R029 | Federated coordination proceeds without global data/control ownership or minimum integration readiness | Operating model / technology | 3 | 5 | 15 | No accountable global owner, interface plan, or retirement-aware architecture is agreed | Time-box owner and architecture decisions; keep modular interfaces and local rights | Switch to local stabilization with the common data/control minimum | CFO / Group Treasurer / CIO | Open | `ANALYST-JUDGMENT` |
+| R030 | Public cases or the Informatica data-quality article are treated as proof of ACG performance or solution fit | Evidence | 2 | 4 | 8 | External concepts substitute for ACG data, controls, or value evidence | Use public material only as context; retain publisher, limitation, and access status | Remove the unsupported claim or reclassify it as a hypothesis | Baker | Monitoring | `JPM-PUBLIC` / `PUBLIC-CONTEXT` |
+
+## Highest-priority control actions
+
+1. Keep every later go/no-go behind the non-compensating gate checklist; all execution-evidence gates remain `OPEN`.
+2. Prevent value leakage in communication: `$38.13m` is a screen, recognized cash/P&L/capacity is `$0`, and risk remains `NOT QUANTIFIED`.
+3. Complete CR01–CR10 before testing affordability or returns; the `$1.0–$1.5m` ceiling is not a cost.
+4. Preserve the documented fallback: use local stabilization if global ownership, minimum integration readiness, or affordability fails.
+
+## Relationship to Week 2 risks
+
+Week 2 risks R001–R016 remain active unless explicitly closed by client evidence. This register sharpens the risks created by the Week 3 recommendation, pilot frames, and validation case; it does not claim that prior risks are resolved.
