@@ -40,30 +40,55 @@ placeholder scan, and narration/asset resolution.
 
 ## Open gates
 
-| Gate | Result | Nature |
+A density pass on all ten slides cut hard text overflow from 6 shapes to 1 and
+visual-review clip warnings from 9 to 4. What remains does not respond to source
+edits.
+
+| Gate | Before | After | Nature |
+|---|---|---|---|
+| Text overflow | 6 shapes (slides 3, 8) | 1 shape (slide 3) | Remaining box is 0.22" tall; one text line needs 0.39" |
+| Visual clip risk | 9 warnings, up to 583% | 4 warnings, up to 128% | Fixed column and rail heights |
+| Design font floors | 49 warnings | 49 warnings | Renderer/preset mismatch — see below |
+
+Geometry, overlap, placeholder, whitespace, preflight, planning, and
+narration/asset resolution all pass with zero issues.
+
+### The font floors are a preset contract mismatch, not deck density
+
+The `data-heavy-boardroom` preset declares `title_min = 30 pt`,
+`body_min = 15 pt`, and `caption_min = 10 pt`, and `design_rules_qa.py` gates
+against those values. The `pptxgenjs` renderer does not produce text at those
+sizes on content slides:
+
+| Warning | Count | Renderer behaviour |
 |---|---|---|
-| Text overflow | 6 shapes on slides 3 and 8 | Content density; fixable at source |
-| Body/table/chart font floors | 17 warnings | Content density; fixable at source |
-| Title font floor | 9 warnings | Not reachable from source — see below |
-| Caption font floor | 23 warnings | Mostly chrome — see below |
+| `title_font_too_small` | 9 | `titleFontForLength()` returns 26 pt at most, 24 pt above 42 characters. No content-slide title reaches 30 pt at any length. |
+| `caption_font_too_small` | 24 | Page-number (`N/10`, 8.4 pt) and source-line (8.0 pt) chrome the outline does not control. |
+| `table_font_too_small` | 8 | Table body text sits in a fixed 8.0–8.9 pt band. Cutting cell text on slides 2, 4, 7, and 9 did not move it. |
+| `body_font_too_small` | 7 | Generated readout panels are fixed at 12 pt; timeline band bodies at 8.8 pt. |
+| `chart_label_font_too_small` | 1 | Chart axis labels are fixed at 8.0 pt against a 9.0 pt floor. |
 
-### Title and caption floors are a preset contract mismatch
+Every one of these was verified as unresponsive to content edits. This is a
+mismatch inside the presentation skill between a preset's declared typography
+tokens and its own renderer's output. It is recorded here rather than worked
+around: no skill file was modified, and no threshold was relaxed to manufacture
+a pass.
 
-The `data-heavy-boardroom` preset declares `title_min = 30 pt` and
-`caption_min = 10 pt`, and `design_rules_qa.py` gates against those values. The
-`pptxgenjs` renderer sizes every content-slide title through
-`titleFontForLength()`, which returns **26 pt at most and 24 pt above 42
-characters**. No content-slide title can reach 30 pt at any length, so these nine
-warnings cannot be cleared by editing the deck. The caption warnings are
-dominated by renderer chrome — the `N/10` page number at 8.4 pt and the source
-line at 8.0 pt — which the outline does not control either.
+### Content changed by the density pass
 
-This is a mismatch inside the presentation skill between a preset's declared
-typography tokens and its own renderer's output. It is recorded here rather than
-worked around, and no skill file was modified.
+Slide 3's fact rail is 0.988" wide, so `label · detail` pairs could not fit; the
+details were dropped and labels reduced to `Cases`, `Gates`, and `Ready`, with
+the framing carried by the subtitle and caption. Slide 8's comparison bullets
+were cut roughly in half. Table cells on slides 2, 4, 7, and 9 and timeline
+bodies on slide 10 were shortened. Evidence-boundary language was preserved
+throughout: the `$38.13m` screen wording, `$0` recognized value, `NOT
+QUANTIFIED` risk, the `$1.0-$1.5m` ceiling, the score-is-judgment framing, and
+the no-authorization list all remain intact.
 
 ## Acceptance boundary
 
 The deliverable is a rendered, visually inspected 10-slide PPTX. It is not
 claimed to have passed the skill's strict polish gate: `manual_review_passed.flag`
 is absent and `report_delivery_readiness.py` has not returned a clean result.
+Clearing the remaining gate requires a change to the presentation skill, not to
+this deck.
