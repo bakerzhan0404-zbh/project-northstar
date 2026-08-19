@@ -24,8 +24,8 @@ Develop a transparent strategic direction, future-state operating model, two bou
 | W3-01 | What rules must every credible option satisfy? | `W3_design_principles.md` | 18 Aug | Five Week 2 findings and stakeholder constraints | Complete — analyst proposal |
 | W3-02 | Which ambition levels are coherent and which direction is preferred? | `W3_strategic_options.md`; reproducible score and sensitivity outputs | 20 Aug | W3-01; weights fixed before scores | Complete — conditional analyst direction |
 | W3-03 | How should cash positioning and payments operate? | `W3_future_state_operating_model.md`; process/RACI/control design | 21 Aug | W3-02; owner and specialist validation | Complete — proposed design; client validation open |
-| W3-04 | What two bounded tests can close the evidence gaps? | Visibility and payment pilot charters; deterministic selection frames | 21 Aug | Authoritative data/source-document readiness | In progress — charters complete; selection frames pending |
-| W3-05 | What value is defensible? | `W3_business_case.md`; assumptions/sensitivity table; reproducible model | 22 Aug | Mobility, actual cost, observed-time, fee, and Finance evidence | Not started — validation case only |
+| W3-04 | What two bounded tests can close the evidence gaps? | Visibility and payment pilot charters; deterministic selection frames | 21 Aug | Authoritative data/source-document readiness | Complete — visibility v2/payment v3 frames: 10/10 base account review with `AC0040`-only enhanced shadow review; 8+7 issue-mode coverage and 50 exact/10 documented payment matches; launch evidence open |
+| W3-05 | What value is defensible? | `W3_business_case.md`; assumptions/sensitivity table; reproducible model | 22 Aug | Mobility, actual cost, observed-time, fee, and Finance evidence | Complete — validation case; all value and return gates remain open |
 | W3-06 | What should the CFO align now? | Maximum-ten-slide interim source deck and five CFO answers | 23 Aug | W3-01–05 | Not started |
 | W3-07 | Is the pack complete, traceable, and reproducible? | Logs/registers, weekly update, submission index, full regression | 23 Aug | All modules | Not started |
 
@@ -34,7 +34,7 @@ Develop a transparent strategic direction, future-state operating model, two bou
 1. Lock design principles before option scoring.
 2. Lock criteria and weights before reviewing option totals.
 3. Apply non-compensating data, control, service, local-right, resilience, ownership, and rollback gates before using weighted scores.
-4. Design the operating model and pilot charters without implying execution approval.
+4. Design the operating model and pilot charters without implying execution approval. The visibility frame keeps all ten accounts under base readiness/control review and `AC0040` alone under enhanced shadow review. Each payment cohort uses eight exception/status and seven late-only cases—an even-as-possible coverage split with the odd case assigned to the larger source mode—plus 15 flag-negative controls whose supplied status is `Completed`; Pending remains in the source population but is excluded as an unresolved comparator. This is analyst judgment, not prevalence weighting or certification of settlement.
 5. Require the initial stage to fit the $1.0–$1.5m envelope or return for staged approval; the envelope is not a cost estimate or authority to spend.
 6. Build four separate ledgers for cash release, annual P&L, capacity, and risk; show missing cost/ramp evidence explicitly.
 7. Stress the direction at the `$21m` mobility screen, two closure candidates, and 50 hours/month capacity hypothesis. None becomes funded value under current evidence.
@@ -54,7 +54,7 @@ Develop a transparent strategic direction, future-state operating model, two bou
 - Three options cover organization, governance, process, data, technology, controls, service, and deliberate exclusions.
 - Option weights sum to 100%, scores are 1–5 with rationale, sensitivities are reproducible, and switching conditions are explicit.
 - A critical-gate failure cannot be averaged away; no option is labeled execution-ready under current evidence.
-- Future-state processes, RACI, controls, emergency rights, service levels, and two complete pilot charters are internally consistent.
+- Future-state processes, RACI, controls, emergency rights, service levels, and two complete pilot charters are internally consistent with the governed visibility v2/payment v3 frames: 10/10 visibility accounts require base review, `AC0040` alone requires enhanced shadow review, and every payment cohort contains 8 exception/status cases, 7 late-only cases, and 15 flag-negative `Completed` controls.
 - Cash release, P&L, capacity, and risk remain separate; all uncertified funded values remain zero.
 - Costs, ramp, ROI, and payback remain unavailable rather than invented when source evidence is absent.
 - Every option states whether its initial stage can fit the $1.0–$1.5m envelope; absent a validated cost range, execution funding remains unavailable.
