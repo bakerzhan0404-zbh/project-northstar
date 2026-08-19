@@ -1,5 +1,10 @@
 # Week 3 Interim Steering Deck — Workspace Notes
 
+> **Superseded 19 August 2026.** This workspace is the planning record only.
+> The delivered deck is built by `src/week3_steering_deck.py` in the Week 2
+> checkpoint house style. See `renderer_dependency_status.md`. The evidence
+> and language rules below still govern the argument.
+
 ## Source-of-truth order
 
 1. `deliverables/working/week_3/W3_interim_steering_deck.md` holds the complete ten-slide narrative, speaker notes, and file-level provenance.
