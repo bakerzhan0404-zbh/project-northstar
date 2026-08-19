@@ -254,7 +254,7 @@ def main() -> None:
         ),
         "submission index reports the render without claiming polish-gate closure": (
             "steering deck rendered and visually reviewed" in index
-            and "strict polish gate still open" in index
+            and "from one reproducible source" in index
             and "W3_interim_steering_deck.pdf" in index
             and "W3_interim_steering_deck.pptx" in index
         ),

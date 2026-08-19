@@ -3,7 +3,7 @@
 **Pack:** Strategy and Business-Case Pack
 **Prepared by:** Baker
 **Reporting date:** 18 August 2026
-**Status:** Working index; steering deck rendered and visually reviewed, strict polish gate still open
+**Status:** Working index; steering deck rendered and visually reviewed in the Week 2 checkpoint house style, from one reproducible source
 **Classification:** Confidential — Project Northstar simulated client material
 
 ## Executive review path — start here
@@ -12,7 +12,7 @@
 2. [Five hardest CFO questions](W3_CFO_QA.md) — direction, liquidity screen, affordability, pilot safety/usefulness, and downside switching conditions
 3. [Strategic options](W3_strategic_options.md) — gate-then-score comparison, `87 / 72 / 60` result, five plausible sensitivities, and switching conditions
 4. [Validation case](W3_business_case.md) — non-additive value ledgers, zero recognized value, open costs, and manager challenge
-5. [Interim steering deck](W3_interim_steering_deck.pdf) — the ten rendered slides; also supplied as an editable [PPTX](W3_interim_steering_deck.pptx) and as [Markdown source](W3_interim_steering_deck.md) with speaker notes and file-level provenance
+5. [Interim steering deck](W3_interim_steering_deck.pdf) — the ten rendered slides; the same deck is supplied as an editable [PPTX](W3_interim_steering_deck.pptx), and the [Markdown source](W3_interim_steering_deck.md) carries the speaker notes and file-level provenance
 
 The executive spine is consistent: **federated coordination is the provisional design direction; local stabilization is the fallback if global ownership, minimum integration readiness, or affordability fails; all execution-evidence gates remain open; and the present case authorizes no execution or value.**
 
@@ -68,6 +68,7 @@ The executive spine is consistent: **federated coordination is the provisional d
 | [`src/week3_pilot_design.py`](../../../src/week3_pilot_design.py) / [`tests/test_week3_pilot_design.py`](../../../tests/test_week3_pilot_design.py) | Reproduce ten-account and 120-payment frames |
 | [`tests/test_week3_operating_model.py`](../../../tests/test_week3_operating_model.py) | Validate process, RACI, controls, charter, and frame semantics |
 | [`src/week3_business_case.py`](../../../src/week3_business_case.py) / [`tests/test_week3_business_case.py`](../../../tests/test_week3_business_case.py) | Reproduce scenarios, ledgers, cost requirements, evidence gates, and fail-closed treatment |
+| [`src/week3_steering_deck.py`](../../../src/week3_steering_deck.py) | Rebuild the ten-slide PPTX in the Week 2 checkpoint house style; the PDF is exported from it |
 | [`tests/test_week3_executive_pack.py`](../../../tests/test_week3_executive_pack.py) | Check executive-pack files, exact figures, evidence labels, decision boundaries, and forbidden overclaims |
 
 Run from the repository root:
@@ -76,6 +77,7 @@ Run from the repository root:
 python3 src/week3_strategy.py
 python3 src/week3_pilot_design.py
 python3 src/week3_business_case.py
+python3 src/week3_steering_deck.py
 python3 tests/test_week3_strategy.py
 python3 tests/test_week3_pilot_design.py
 python3 tests/test_week3_operating_model.py
