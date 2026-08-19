@@ -62,17 +62,40 @@
       "tables": [
         {
           "title": "Diagnostic readout",
-          "headers": ["Evidence", "Supports", "Does not support"],
-          "rows": [
-            ["23 / 55 delayed; portal + sheet", "Target source / timestamp controls", "Start-of-day performance or cause"],
-            ["$38.13m 14-day screen at 30 Jun", "Test mobility / buffer evidence", "Cash, surplus, transfer authority"],
-            ["7,600 extract; union 2,839", "Bound a payment diagnostic", "Certified ACG-wide population"],
-            ["356 exceptions; 14,939 repair min", "Prioritize root-cause evidence", "Cause, removal, P&L, headcount"]
+          "headers": [
+            "Evidence",
+            "Supports",
+            "Does not support"
           ],
-          "column_weights": [0.29, 0.29, 0.42],
+          "rows": [
+            [
+              "23 / 55 delayed; portal + sheet",
+              "Source / timestamp controls",
+              "Start-of-day performance or cause"
+            ],
+            [
+              "$38.13m 14-day screen, 30 Jun",
+              "Mobility / buffer evidence",
+              "Cash, surplus, transfer authority"
+            ],
+            [
+              "7,600 extract; union 2,839",
+              "A bounded payment diagnostic",
+              "Certified ACG-wide population"
+            ],
+            [
+              "356 exceptions; 14,939 min",
+              "Root-cause prioritization",
+              "Cause, removal, P&L, headcount"
+            ]
+          ],
+          "column_weights": [
+            0.29,
+            0.29,
+            0.42
+          ],
           "footnotes": [
-            "Reporting-date delay is a proxy; association is not causation.",
-            "$38.13m is a screen, not cash."
+            "Delay is a proxy, not causation; $38.13m is a screen, not cash."
           ]
         }
       ],
@@ -96,11 +119,19 @@
       "chart": {
         "type": "bar",
         "title": "Weighted strategic-option score / 100",
-        "categories": ["Local", "Federated", "Global"],
+        "categories": [
+          "Local",
+          "Federated",
+          "Global"
+        ],
         "series": [
           {
             "name": "Weighted score",
-            "values": [72, 87, 60]
+            "values": [
+              72,
+              87,
+              60
+            ]
           }
         ],
         "options": {
@@ -111,18 +142,15 @@
       "facts": [
         {
           "value": "5",
-          "label": "Declared sensitivity cases",
-          "detail": "Federated leads each case"
+          "label": "Cases"
         },
         {
           "value": "7",
-          "label": "Non-compensating gates",
-          "detail": "All remain open"
+          "label": "Gates"
         },
         {
           "value": "0",
-          "label": "Execution-ready options",
-          "detail": "Design discussion only"
+          "label": "Ready"
         }
       ],
       "caption": "Advance federated detailed design; retain local fallback; hold global pending evidence.",
@@ -142,16 +170,44 @@
       "role_layout_variant": "dense",
       "title": "One global spine can preserve local rights while tightening the decision chain",
       "subtitle": "Common standards and evidence; governed regional/local validation and execution",
-      "headers": ["Decision-chain layer", "Enterprise responsibility", "Regional / local right and proof"],
-      "rows": [
-        ["1 · Standards", "Treasury: policy, definitions, KPI", "Local: calendar, restriction, purpose"],
-        ["2 · Position / intake", "Govern position and payment intake", "Challenge facts; protect critical needs"],
-        ["3 · Decision", "Decide within authority", "Block unsafe action; use emergency right"],
-        ["4 · Execution", "Shared or approved enterprise route", "Execute locally; retain status / audit"],
-        ["5 · Learn", "Govern KPI, controls, value", "Own corrective action; reconcile outcome"]
+      "headers": [
+        "Decision-chain layer",
+        "Enterprise responsibility",
+        "Regional / local right and proof"
       ],
-      "column_weights": [0.22, 0.36, 0.42],
-      "caption": "This is a decision-rights model—not a platform, bank, vendor, or final-architecture selection.",
+      "rows": [
+        [
+          "1 · Standards",
+          "Policy, definitions, KPI",
+          "Calendar, restriction, purpose"
+        ],
+        [
+          "2 · Intake",
+          "Govern position and intake",
+          "Challenge facts; protect needs"
+        ],
+        [
+          "3 · Decision",
+          "Decide within authority",
+          "Block unsafe act; emergency right"
+        ],
+        [
+          "4 · Execution",
+          "Shared or approved route",
+          "Execute locally; retain audit"
+        ],
+        [
+          "5 · Learn",
+          "Govern KPI, controls, value",
+          "Own fixes; reconcile outcome"
+        ]
+      ],
+      "column_weights": [
+        0.22,
+        0.36,
+        0.42
+      ],
+      "caption": "A decision-rights model—not a platform, vendor, or architecture choice.",
       "sources": [
         "W3 Future-State Operating Model",
         "W3 Future-State Process Map and RACI",
@@ -171,24 +227,62 @@
       "tables": [
         {
           "title": "Scope and safeguards",
-          "headers": ["Element", "Locked design", "Boundary"],
-          "rows": [
-            ["Census", "55 accounts / 9,955 account-days", "Full source, cutoff, owner, and reconciliation contract first"],
-            ["Cohort", "10 delayed accounts; 5 spreadsheet + 5 portal", "3 regions, 3 ERPs, 4 banks; purposive only"],
-            ["Protected", "AC0040: APAC, Payroll, restricted", "Read-only shadow; enhanced review or substitution"]
+          "headers": [
+            "Element",
+            "Locked design",
+            "Boundary"
           ],
-          "column_weights": [0.18, 0.34, 0.48]
+          "rows": [
+            [
+              "Census",
+              "55 accounts / 9,955 account-days",
+              "Full source, cutoff, owner, and reconciliation contract first"
+            ],
+            [
+              "Cohort",
+              "10 delayed accounts; 5 spreadsheet + 5 portal",
+              "3 regions, 3 ERPs, 4 banks; purposive only"
+            ],
+            [
+              "Protected",
+              "AC0040: APAC, Payroll, restricted",
+              "Read-only shadow; enhanced review or substitution"
+            ]
+          ],
+          "column_weights": [
+            0.18,
+            0.34,
+            0.48
+          ]
         },
         {
           "title": "Later operating-test gates",
-          "headers": ["Measure", "Condition"],
-          "rows": [
-            ["Comparable operation", "Minimum 4 consecutive weeks"],
-            ["Data", "≥95% on-time; 100% reconciled or formally explained"],
-            ["Service / control", "0 defined critical failures; 0 confirmed breaches"],
-            ["Recovery", "Rollback rehearsed at or below 4 hours"]
+          "headers": [
+            "Measure",
+            "Condition"
           ],
-          "column_weights": [0.38, 0.62]
+          "rows": [
+            [
+              "Comparable operation",
+              "Minimum 4 consecutive weeks"
+            ],
+            [
+              "Data",
+              "≥95% on-time; 100% reconciled or formally explained"
+            ],
+            [
+              "Service / control",
+              "0 defined critical failures; 0 confirmed breaches"
+            ],
+            [
+              "Recovery",
+              "Rollback rehearsed at or below 4 hours"
+            ]
+          ],
+          "column_weights": [
+            0.38,
+            0.62
+          ]
         }
       ],
       "interpretation": "No liquidity, borrowing, cash-release, fee, or capacity KPI is an acceptance measure.",
@@ -211,24 +305,62 @@
       "tables": [
         {
           "title": "Sample recipe per stratum",
-          "headers": ["Role", "Count", "Definition"],
-          "rows": [
-            ["Exception / status issue", "8", "Exception, Repaired, or Rejected"],
-            ["Late-only issue", "7", "Late flag without exception/status issue"],
-            ["Non-issue control", "15", "Flag-negative supplied status Completed"]
+          "headers": [
+            "Role",
+            "Count",
+            "Definition"
           ],
-          "column_weights": [0.36, 0.14, 0.50]
+          "rows": [
+            [
+              "Exception / status issue",
+              "8",
+              "Exception, Repaired, or Rejected"
+            ],
+            [
+              "Late-only issue",
+              "7",
+              "Late flag without exception/status issue"
+            ],
+            [
+              "Non-issue control",
+              "15",
+              "Flag-negative supplied status Completed"
+            ]
+          ],
+          "column_weights": [
+            0.36,
+            0.14,
+            0.5
+          ]
         },
         {
           "title": "Frame readout",
-          "headers": ["Readout", "Result"],
-          "rows": [
-            ["Four strata", "30 each / 120 total"],
-            ["Matching", "50 exact four-field pairs"],
-            ["Residual imbalance", "10 visible nearest-match deviations"],
-            ["Inference", "Purposive diagnosis; no prevalence or benefit"]
+          "headers": [
+            "Readout",
+            "Result"
           ],
-          "column_weights": [0.36, 0.64]
+          "rows": [
+            [
+              "Four strata",
+              "30 each / 120 total"
+            ],
+            [
+              "Matching",
+              "50 exact four-field pairs"
+            ],
+            [
+              "Residual imbalance",
+              "10 visible nearest-match deviations"
+            ],
+            [
+              "Inference",
+              "Purposive diagnosis; no prevalence or benefit"
+            ]
+          ],
+          "column_weights": [
+            0.36,
+            0.64
+          ]
         }
       ],
       "interpretation": "Choose an intervention only after evidence-based root-cause coding and a comparable baseline.",
@@ -248,15 +380,45 @@
       "role_layout_variant": "dense",
       "title": "Four value ledgers stay separate; recognized value remains zero",
       "subtitle": "Diagnostic quantities are not benefits and cannot be added",
-      "headers": ["Ledger", "Diagnostic quantity", "Recognized today", "Evidence gate"],
-      "rows": [
-        ["Cash release", "$21m / $35m / $46.2m screens", "$0", "VG01–VG05"],
-        ["Annual P&L", "$3,900 / $7,800 / $7,800", "$0", "VG06–VG07"],
-        ["Capacity", "50 / 150 / 150 hours/month", "$0", "VG08–VG10"],
-        ["Risk", "Exposure and value NOT QUANTIFIED", "$0 ledger entry only", "VG11–VG12"]
+      "headers": [
+        "Ledger",
+        "Diagnostic quantity",
+        "Recognized today",
+        "Evidence gate"
       ],
-      "column_weights": [0.20, 0.34, 0.20, 0.26],
-      "caption": "Actual cost, ROI, NPV, payback, and funding recommendation are unavailable.",
+      "rows": [
+        [
+          "Cash release",
+          "$21m / $35m / $46.2m screens",
+          "$0",
+          "VG01–VG05"
+        ],
+        [
+          "Annual P&L",
+          "$3,900 / $7,800 / $7,800",
+          "$0",
+          "VG06–VG07"
+        ],
+        [
+          "Capacity",
+          "50 / 150 / 150 hours/month",
+          "$0",
+          "VG08–VG10"
+        ],
+        [
+          "Risk",
+          "NOT QUANTIFIED",
+          "$0 ledger entry",
+          "VG11–VG12"
+        ]
+      ],
+      "column_weights": [
+        0.2,
+        0.34,
+        0.2,
+        0.26
+      ],
+      "caption": "Actual cost, ROI, NPV, payback, and funding are unavailable.",
       "sources": [
         "W3 Business Case",
         "W3 business-case outputs",
@@ -277,20 +439,20 @@
       "left": {
         "title": "Direction survives",
         "body": [
-          "$21m screen; 2 candidates; independent $3,900 sensitivity; 50 hours/month",
-          "Federated still supports common ownership, controls, local rights, and reversible learning",
-          "The same evidence packages remain necessary at lower diagnostic quantities"
+          "$21m screen; 2 candidates; $3,900; 50 hrs/mo",
+          "Still fits ownership, controls, local rights",
+          "Evidence packages still required"
         ]
       },
       "right": {
         "title": "Direction switches",
         "body": [
-          "Use local stabilization if ownership, minimum integration readiness, or affordability fails",
-          "Reconsider global only after legal/local, architecture, resilience, cost, mobility, and rollback close",
-          "Remove or redesign any option that fails a critical gate"
+          "Switch to local: ownership or affordability",
+          "Reconsider global only after gates close",
+          "Drop options failing a gate"
         ]
       },
-      "verdict": "The recommendation survives only as a conditional design direction; validated value remains $0 and cost remains unavailable.",
+      "verdict": "A conditional design direction only; validated value is $0 and cost is unavailable.",
       "sources": [
         "W3 Business Case — manager challenge",
         "W3 Strategic Options — switching conditions",
@@ -307,16 +469,51 @@
       "role_layout_variant": "dense",
       "title": "Five owner-led evidence packages now gate launch and funding",
       "subtitle": "Model controls can pass while client evidence remains open",
-      "headers": ["Open package", "Accountable owner(s)", "Required evidence", "Status"],
-      "rows": [
-        ["Data / metric", "Treasurer; CIO enables", "Population, source, cutoff, definition, lineage, owner", "OPEN"],
-        ["Local rights / mobility", "Treasury; Regional; Legal/Tax", "Restriction, purpose, buffers, transferability, service", "OPEN"],
-        ["Controls / cyber", "Control owner; CIO/Cyber", "Authorization, SoD, access, audit, duplicate, sanctions, test", "OPEN"],
-        ["Service / resilience", "BU/Regional; Shared Services; CIO", "Critical flows, blackout, monitoring, contingency, ≤4h rollback", "OPEN"],
-        ["Cost / recognition", "Finance; Procurement; functions", "CR01–CR10; VG01–VG12; timing, attribution, realization", "BLOCKED"]
+      "headers": [
+        "Open package",
+        "Accountable owner(s)",
+        "Required evidence",
+        "Status"
       ],
-      "column_weights": [0.20, 0.25, 0.43, 0.12],
-      "caption": "MODEL CONTROL PASS validates fail-closed model behavior—not evidence-gate closure.",
+      "rows": [
+        [
+          "Data / metric",
+          "Treasurer; CIO",
+          "Population, source, cutoff, lineage",
+          "OPEN"
+        ],
+        [
+          "Local rights",
+          "Treasury; Regional; Legal",
+          "Restriction, purpose, transferability",
+          "OPEN"
+        ],
+        [
+          "Controls / cyber",
+          "Control owner; Cyber",
+          "Authorization, SoD, access, audit",
+          "OPEN"
+        ],
+        [
+          "Service / resilience",
+          "BU; Shared Services; CIO",
+          "Critical flows, blackout, ≤4h rollback",
+          "OPEN"
+        ],
+        [
+          "Cost / recognition",
+          "Finance; Procurement",
+          "CR01–CR10; VG01–VG12; attribution",
+          "BLOCKED"
+        ]
+      ],
+      "column_weights": [
+        0.2,
+        0.25,
+        0.43,
+        0.12
+      ],
+      "caption": "A model-control pass validates fail-closed behavior—not gate closure.",
       "sources": [
         "W3 Control Inventory",
         "W3 Assumptions Register",
@@ -338,25 +535,25 @@
         {
           "label": "Decision day",
           "title": "Align and assign",
-          "body": "Confirm direction, accountable owners, local fallback, and the no-execution boundary."
+          "body": "Confirm direction, owners, fallback, and the no-execution boundary."
         },
         {
           "label": "Days 1–30",
           "title": "Reconcile and define",
-          "body": "Control the 55-account and 7,600-record populations; lock definitions, sources, calendars, and gaps."
+          "body": "Control the 55-account and 7,600-record populations; lock definitions and sources."
         },
         {
           "label": "Days 31–60",
           "title": "Certify and cost",
-          "body": "Complete local/control/architecture review, CR01–CR10 ranges, and safe-environment rollback rehearsal."
+          "body": "Complete local, control, and cost review; rehearse rollback safely."
         },
         {
           "label": "Days 61–90",
           "title": "Lock and decide",
-          "body": "Lock baselines and target rules; return with stop, extend-evidence, or later bounded-pilot recommendation."
+          "body": "Lock baselines; return with stop, extend, or a later bounded pilot."
         }
       ],
-      "summary_callout": "Decisions now: endorse direction · assign owners · approve the evidence timebox · reserve all launch, spend, value, and scale decisions.",
+      "summary_callout": "Decisions now: endorse direction · assign owners · approve the evidence timebox. All launch, spend, value, and scale decisions are reserved.",
       "sources": [
         "W3 Future-State Operating Model",
         "W3 pilot charters",
