@@ -1,0 +1,114 @@
+{
+  "topic": "Project Northstar Week 3 interim steering decision",
+  "source_policy": "Use only local Project Northstar source documents, reproduced processed outputs, and explicitly labelled analyst judgments. Keep screens, diagnostic samples, proposed targets, and client-approved facts visually distinct. Every slide carries compact sources; full file-level provenance and caveats remain in speaker notes and the Markdown source.",
+  "items": [
+    {
+      "id": "E01",
+      "claim": "Federated coordination should advance only as a conditional design direction; local stabilization remains the fallback and global coordination is held.",
+      "visual_use": "footer-source",
+      "source_note": "deliverables/working/week_3/W3_strategic_options.md; W3_future_state_operating_model.md; W3_business_case.md",
+      "used_on_slides": ["s01"],
+      "evidence_label": "ANALYST-JUDGMENT, with ACG-DATA for the FY2026 ceiling",
+      "boundary": "No execution, funding, cash movement, closure, labor action, benefit, or spend approval."
+    },
+    {
+      "id": "E02",
+      "claim": "Reporting and payment friction is concentrated in observable source and cohort patterns, while cash mobility, causes, and removability remain unproved.",
+      "visual_use": "table|kpi|footer-source",
+      "source_note": "deliverables/working/week_2/W2_findings_log.md F07–F10; W2_metric_contract.md; data/processed/W2_visibility_diagnostic.csv; W2_liquidity_scenarios.csv; W2_payment_diagnostic.csv",
+      "used_on_slides": ["s02"],
+      "evidence_label": "ACG-DATA / ANALYST-CALC",
+      "boundary": "$38.13m is a 30 June 14-day screen, not cash; the 7,600 records are a supplied extract, not a certified enterprise population."
+    },
+    {
+      "id": "E03",
+      "claim": "Federated scores 87 versus 72 local and 60 global, leads all five declared sensitivities, and remains subordinate to seven non-compensating gates.",
+      "visual_use": "chart|kpi|footer-source",
+      "source_note": "deliverables/working/week_3/W3_strategic_options.md; data/processed/W3_option_summary.csv; W3_option_weighted_scores.csv; W3_option_sensitivity.csv; src/week3_strategy.py",
+      "used_on_slides": ["s03"],
+      "evidence_label": "ANALYST-JUDGMENT / reproducible model",
+      "boundary": "The weighted score is not confidence, value, execution readiness, or client approval."
+    },
+    {
+      "id": "E04",
+      "claim": "The proposed federated operating model couples one global data/control spine with explicit regional and local validation, emergency, and execution rights.",
+      "visual_use": "table|footer-source",
+      "source_note": "deliverables/working/week_3/W3_future_state_operating_model.md; W3_future_state_process_map_and_RACI.md; W3_control_inventory.csv",
+      "used_on_slides": ["s04"],
+      "evidence_label": "ANALYST-JUDGMENT",
+      "boundary": "The model does not select a platform, bank, vendor, architecture, or production process."
+    },
+    {
+      "id": "E05",
+      "claim": "A controlled 55-account census must precede any later 10-account read-only visibility test, with AC0040 protected through enhanced review.",
+      "visual_use": "table|kpi|footer-source",
+      "source_note": "deliverables/working/week_3/W3_visibility_pilot_charter.md; data/processed/W3_visibility_pilot_candidates.csv; src/week3_pilot_design.py",
+      "used_on_slides": ["s05"],
+      "evidence_label": "ACG-DATA / ANALYST-CALC / ANALYST-JUDGMENT",
+      "boundary": "The cohort is purposive and not launch-ready; the pilot has no mobility or value KPI."
+    },
+    {
+      "id": "E06",
+      "claim": "The payment v3 design selects 120 records across four strata using 8 exception/status issues, 7 late-only issues, and 15 controls per stratum, producing 50 exact pairs and 10 visible deviations.",
+      "visual_use": "table|kpi|footer-source",
+      "source_note": "deliverables/working/week_3/W3_payment_pilot_charter.md; data/processed/W3_payment_sample_frame.csv; W3_pilot_model_controls.csv; src/week3_pilot_design.py",
+      "used_on_slides": ["s06"],
+      "evidence_label": "ANALYST-CALC / ANALYST-JUDGMENT",
+      "boundary": "Purposive case-control diagnosis only; not prevalence, causation, benefit, capacity, or enterprise extrapolation."
+    },
+    {
+      "id": "E07",
+      "claim": "Cash release, annual P&L, productive capacity, and risk are separate non-additive ledgers; all recognized value is $0 and risk exposure/value is not quantified.",
+      "visual_use": "table|footer-source",
+      "source_note": "deliverables/working/week_3/W3_business_case.md; W3_assumptions_register.csv; data/processed/W3_business_case_scenarios.csv; W3_business_case_value_ledger.csv; W3_cost_evidence_requirements.csv",
+      "used_on_slides": ["s07"],
+      "evidence_label": "ACG-DATA / ANALYST-CALC / fail-closed model",
+      "boundary": "Do not total the ledgers; actual cost, ROI, NPV, payback, and funding recommendation are unavailable."
+    },
+    {
+      "id": "E08",
+      "claim": "The manager downside preserves the conditional federated design direction, but failures in ownership, integration readiness, affordability, or a critical gate force a switch or redesign.",
+      "visual_use": "table|footer-source",
+      "source_note": "deliverables/working/week_3/W3_business_case.md; W3_strategic_options.md; data/processed/W3_business_case_scenarios.csv; W3_option_sensitivity.csv",
+      "used_on_slides": ["s08"],
+      "evidence_label": "ANALYST-JUDGMENT / scenario sensitivity",
+      "boundary": "The downside does not make the option investable; validated value remains $0 and cost remains unavailable."
+    },
+    {
+      "id": "E09",
+      "claim": "Five named evidence packages remain open or blocked and gate any later launch, value, funding, or scale decision.",
+      "visual_use": "table|footer-source",
+      "source_note": "deliverables/working/week_3/W3_control_inventory.csv; W3_assumptions_register.csv; W3_future_state_operating_model.md; data/processed/W3_cost_evidence_requirements.csv; W3_business_case_controls.csv",
+      "used_on_slides": ["s09"],
+      "evidence_label": "ANALYST-JUDGMENT / model-control evidence",
+      "boundary": "MODEL CONTROL PASS validates fail-closed behavior; it does not close client evidence gates."
+    },
+    {
+      "id": "E10",
+      "claim": "A 90-day evidence-mobilization timebox can prepare a separate stop, extend, or later bounded-pilot decision without authorizing execution.",
+      "visual_use": "footer-source",
+      "source_note": "deliverables/working/week_3/W3_future_state_operating_model.md; W3_visibility_pilot_charter.md; W3_payment_pilot_charter.md; W3_business_case.md; W3_strategic_options.md",
+      "used_on_slides": ["s10"],
+      "evidence_label": "ANALYST-JUDGMENT grounded in existing stage gates",
+      "boundary": "The timebox is not a pilot duration or promise of closure; open evidence forces extension, redesign, or fallback."
+    }
+  ],
+  "chart_candidates": [
+    {
+      "id": "C01",
+      "target_slide": "s03",
+      "title": "Weighted strategic-option score / 100",
+      "chart_type": "horizontal bar",
+      "source_ids": ["E03"],
+      "categories": ["Local stabilization", "Federated coordination", "Globally coordinated"],
+      "values": [72, 87, 60],
+      "annotation": "Show seven gates separately; do not encode the scores as confidence or readiness."
+    }
+  ],
+  "open_questions": [
+    "Will the Steering Committee confirm the federated direction and local fallback?",
+    "Who accepts accountability for each evidence package?",
+    "Can minimum integration readiness and a bottom-up initial-stage cost fit within the $1.0–$1.5m ceiling?",
+    "Which open evidence will require extension beyond the proposed 90-day mobilization timebox?"
+  ]
+}

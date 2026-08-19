@@ -1,0 +1,253 @@
+{
+  "topic": "Project Northstar Week 3 interim steering decision",
+  "content_maturity": "serious/work",
+  "audience_posture": "CFO and Steering Committee; skeptical, time-constrained, control-sensitive",
+  "emotional_register": "measured, evidence-led, and explicit about uncertainty",
+  "format_promise": "A concise, editable 16:9 board-risk deck with exactly ten claim-led slides, a visible evidence boundary on every page, and detailed notes that preserve the audit trail.",
+  "user_intake": {
+    "answered_by": "inferred",
+    "audience": "CFO, Group Treasurer, Steering Committee",
+    "density": "concise on-slide; detailed notes",
+    "visual_preference": "board-risk and lab-results evidence grammar",
+    "asset_preference": "no external imagery",
+    "unanswered": [
+      "Final client template and brand font were not supplied."
+    ]
+  },
+  "anti_format": [
+    "repeated equal-card grids",
+    "decorative maps or icons without an evidence role",
+    "a total-benefit hero number",
+    "a readiness percentage that averages non-compensating gates",
+    "an ending arrow that implies automatic execution",
+    "footers so dense that source text becomes unreadable"
+  ],
+  "canvas_and_grid": {
+    "aspect": "16:9",
+    "margin_x_in": 0.65,
+    "footer_reserve_in": 0.34,
+    "header_policy": "Measured title and subtitle stack; body begins below the resolved header.",
+    "column_policy": "Use a board-ledger grid with stable table columns and a single dominant evidence object."
+  },
+  "visual_system": {
+    "style_preset": "data-heavy-boardroom",
+    "page_system": "board-ledger",
+    "dominant_color": "#0F172A",
+    "background_color": "#F8FAFC",
+    "surface_color": "#FFFFFF",
+    "accent_primary": "#1D4ED8",
+    "accent_secondary": "#0891B2",
+    "warning_accent": "#B45309",
+    "palette_role_map": {
+      "navy": "authority, headers, and decision framing",
+      "blue": "preferred direction and governed enterprise standard",
+      "teal": "regional/local rights and validated evidence",
+      "amber": "open evidence or caution; never booked value",
+      "gray": "diagnostic quantities and non-authoritative context"
+    }
+  },
+  "style_system": {
+    "style_preset": "data-heavy-boardroom",
+    "style_seed": "northstar-week3-steering-v1",
+    "page_system": "board-ledger",
+    "header_system": {
+      "mode": "bar",
+      "source": "outline.deck_style"
+    },
+    "footer_system": {
+      "mode": "source-line",
+      "page_numbers": true
+    },
+    "title_slide_system": {
+      "layout": "command-center",
+      "motif": "none"
+    },
+    "figure_table_system": {
+      "bias": "table-first",
+      "table_treatment": "compact-ledger"
+    },
+    "chart_system": {
+      "treatment": "facts-right",
+      "native_editable": true
+    },
+    "style_mix_matrix": {
+      "header_variant_pool": [
+        "split-rule",
+        "left-accent",
+        "top-bottom-rule",
+        "plain"
+      ],
+      "title_layout_pool": [
+        "command-center",
+        "light-atlas"
+      ],
+      "footer_pool": [
+        "source-line",
+        "standard"
+      ],
+      "chart_treatment_pool": [
+        "facts-right",
+        "threshold-band"
+      ],
+      "table_treatment_pool": [
+        "compact-ledger",
+        "readout-sidecar",
+        "decision-matrix"
+      ],
+      "figure_table_treatment_pool": [
+        "table-first",
+        "stats-strip"
+      ],
+      "comparison_mode_pool": [
+        "open-columns",
+        "scorecard"
+      ],
+      "timeline_mode_pool": [
+        "bands",
+        "chapter-spread"
+      ],
+      "do_not_mix": [
+        "Do not use image-sidebar treatments because external imagery is excluded.",
+        "Do not rotate to card grids for evidence that belongs in a ledger."
+      ],
+      "mix_rule": "Rotate only within the role-appropriate pool using northstar-week3-steering-v1; keep board-ledger framing, source lines, and semantic colors fixed."
+    }
+  },
+  "title_page_concept": {
+    "chosen_archetype": "command-center",
+    "dominant_element": "One conditional decision statement",
+    "supporting_element": "Advance / retain / hold direction strip and a no-authorization boundary",
+    "why_this_could_only_be_this_deck": "The opener separates a treasury design-direction decision from cash, execution, value, and spend authorization."
+  },
+  "structure_strategy": {
+    "primary_scaffold": "Board-ledger decision memo with lab-results evidence inserts",
+    "container_policy": "Use open tables and ledgers for parallel fields; use cards only if content is truly modular. No slide may rely on decorative containers.",
+    "reading_path": "Decision → evidence → option → operating system → two tests → value discipline → falsification → owners → next decision",
+    "repeated_elements": [
+      "compact source-line footer",
+      "categorical evidence labels",
+      "blue enterprise standard and teal local-right encoding",
+      "amber open-gate status"
+    ],
+    "allowed_variations": [
+      "command-center title",
+      "lab-run-results",
+      "editable chart",
+      "compact-ledger table",
+      "open-columns comparison",
+      "banded timeline"
+    ],
+    "rhythm_break_plan": "Use the option-score chart on slide 3 and the open falsification comparison on slide 8 as the two principal rhythm breaks."
+  },
+  "design_modulation": {
+    "change_intensity": "moderate",
+    "accent_strategy": "Reserve blue for the preferred direction, teal for governed local rights, and amber for open gates.",
+    "container_strategy": "Favor open ledgers and one evidence object over card stacks."
+  },
+  "evidence_continuity": {
+    "threads": [
+      "direction-versus-authorization",
+      "screen-versus-validated-value",
+      "global-standard-versus-local-right",
+      "model-control-versus-evidence-gate"
+    ],
+    "carry_forward_rule": "Every slide must preserve at least one boundary thread through title, table label, caption, or source line.",
+    "slide_applications": [
+      {
+        "slide_id": "s01",
+        "thread": "direction-versus-authorization",
+        "treatment": "no-authorization boundary strip"
+      },
+      {
+        "slide_id": "s02",
+        "thread": "screen-versus-validated-value",
+        "treatment": "supports / does-not-support columns"
+      },
+      {
+        "slide_id": "s04",
+        "thread": "global-standard-versus-local-right",
+        "treatment": "separate enterprise and local columns"
+      },
+      {
+        "slide_id": "s07",
+        "thread": "screen-versus-validated-value",
+        "treatment": "diagnostic versus recognized columns"
+      },
+      {
+        "slide_id": "s09",
+        "thread": "model-control-versus-evidence-gate",
+        "treatment": "categorical open / blocked status and caption"
+      },
+      {
+        "slide_id": "s10",
+        "thread": "direction-versus-authorization",
+        "treatment": "evidence-only timeline ending at go/no-go"
+      }
+    ]
+  },
+  "readability_contract": {
+    "min_title_pt": 30,
+    "min_body_pt": 15,
+    "min_caption_pt": 10,
+    "max_title_lines": 2,
+    "max_slide_text_lines": 14,
+    "max_slide_words": 120,
+    "max_slide_chars": 820,
+    "footer_reserved_inches": 0.34,
+    "chart_label_min_pt": 9,
+    "table_density_rule": "Keep editable tables at five body rows or fewer and four columns or fewer; shorten cells before reducing type.",
+    "whitespace_rule": "One dominant evidence object should use the body region without stranded narrow content bands.",
+    "figure_crop_rule": "No figures are planned; any future figure must be tightly cropped for its target slide."
+  },
+  "speed_contract": {
+    "renderer": "pptxgenjs by default; Python tooling only where the supported workflow requires it",
+    "first_pass": "Run workspace JSON/source validation and presentation-skill planning/preflight before rendering.",
+    "render_policy": "Render only after the source stabilizes and required local dependencies are available; do not install dependencies during this task.",
+    "asset_policy": "Use native editable tables and one native chart; no external or generated imagery.",
+    "conversion_hint": "Use the presentation-skill workspace build and its supported local Office/LibreOffice path when available."
+  },
+  "qa_contract": {
+    "required_checks": [
+      "scripts/validate_planning.py",
+      "scripts/build_workspace.py with strict QA",
+      "scripts/report_delivery_readiness.py",
+      "decks/week3-interim/validate_sources.py"
+    ],
+    "fail_on": [
+      "planning errors or unresolved planning warnings",
+      "text overflow or geometry overlap",
+      "awkward whitespace or unreadable footer",
+      "missing sources, notes, or boundary language",
+      "fewer or more than ten slides"
+    ],
+    "placeholder_checks": true
+  },
+  "acceptance_evidence": [
+    "All workspace JSON parses and the custom source checks pass.",
+    "Exactly ten unique slide IDs and ten Markdown slide sections exist.",
+    "Every slide includes compact sources and detailed notes.",
+    "No external asset or remote URL appears in the asset plan.",
+    "A final PPTX is not accepted until it is built, rendered, and visually reviewed."
+  ],
+  "agent_execution_plan": {
+    "profile": "quality-first source pass",
+    "phases": [
+      {
+        "id": "source",
+        "purpose": "Author the ten-slide narrative and durable planning files."
+      },
+      {
+        "id": "preflight",
+        "purpose": "Run JSON, source, planning, and outline checks when dependencies permit."
+      },
+      {
+        "id": "render",
+        "purpose": "Build and render through the supported workspace workflow after dependencies are available."
+      },
+      {
+        "id": "visual-review",
+        "purpose": "Inspect the contact sheet and individual slides, repair source, and rerun final readiness."
+      }
+    ]
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "topic": "Project Northstar Week 3 interim steering decision",
+  "audience": "CFO, Group Treasurer, and Steering Committee members who need a concise decision, its evidence limits, and named next actions",
+  "objective": "Secure alignment on a conditional federated design direction and a 90-day evidence-mobilization plan without implying execution, funding, or value approval",
+  "thesis": "Federated coordination is the best-supported direction for controlled learning because it combines a common data/control spine with explicit local rights, but seven open gates, zero validated value, and unavailable cost keep every production and funding decision closed.",
+  "narrative_arc": [
+    {
+      "act": "answer first",
+      "purpose": "State the decision and authorization boundary.",
+      "slides": ["s01"]
+    },
+    {
+      "act": "evidence and choice",
+      "purpose": "Show what is known, what it does not prove, and why federated is the conditional leader.",
+      "slides": ["s02", "s03"]
+    },
+    {
+      "act": "system and tests",
+      "purpose": "Map the future-state decision chain and the two bounded evidence designs.",
+      "slides": ["s04", "s05", "s06"]
+    },
+    {
+      "act": "value discipline and falsification",
+      "purpose": "Keep value types separate and state what would change the direction.",
+      "slides": ["s07", "s08"]
+    },
+    {
+      "act": "owners and close",
+      "purpose": "Convert open risks into accountable evidence work and return to the opening decision.",
+      "slides": ["s09", "s10"]
+    }
+  ],
+  "slide_plan": [
+    {
+      "slide_id": "s01",
+      "role": "title",
+      "message": "Advance federated coordination only for evidence mobilization; retain and hold the two alternatives.",
+      "variant": "title",
+      "visual_strategy": "Dark command-center opener with advance / retain / hold posture and a visible no-authorization strip.",
+      "evidence_needs": ["E01"],
+      "asset_needs": [],
+      "source_status": "local source plus analyst judgment",
+      "outline_title": "Advance federated design—not execution"
+    },
+    {
+      "slide_id": "s02",
+      "role": "evidence",
+      "message": "The evidence is concentrated and decision-useful, but it proves neither cash mobility nor removable effort.",
+      "variant": "lab-run-results",
+      "visual_strategy": "Lab-results ledger pairing four diagnostic facts with permitted and prohibited inference.",
+      "evidence_needs": ["E02"],
+      "asset_needs": [],
+      "source_status": "reproduced Week 2 evidence",
+      "outline_title": "The evidence points to concentrated friction, not a proven benefit"
+    },
+    {
+      "slide_id": "s03",
+      "role": "comparison",
+      "message": "Federated is the robust directional leader, but open non-compensating gates control the decision.",
+      "variant": "chart",
+      "visual_strategy": "Editable score chart with a gate ledger and no confidence or value encoding.",
+      "evidence_needs": ["E03"],
+      "asset_needs": ["native editable option-score chart"],
+      "source_status": "reproducible analyst model",
+      "outline_title": "Federated leads at 87—subject to seven open gates"
+    },
+    {
+      "slide_id": "s04",
+      "role": "process",
+      "message": "A common global spine can standardize evidence and decisions while preserving governed local rights.",
+      "variant": "table",
+      "visual_strategy": "Five-layer operating ledger functioning as the system map; enterprise standard and local right remain distinct.",
+      "evidence_needs": ["E04"],
+      "asset_needs": [],
+      "source_status": "analyst design",
+      "outline_title": "One global spine can preserve local rights while tightening the decision chain"
+    },
+    {
+      "slide_id": "s05",
+      "role": "evidence",
+      "message": "Visibility testing must start with a controlled 55-account census and remain read-only for the 10-account cohort.",
+      "variant": "lab-run-results",
+      "visual_strategy": "Table-first readiness dashboard with cohort, protected case, KPI, and rollback evidence.",
+      "evidence_needs": ["E05"],
+      "asset_needs": [],
+      "source_status": "reproducible analyst design",
+      "outline_title": "Visibility readiness starts with 55-account control, then a 10-account read-only test"
+    },
+    {
+      "slide_id": "s06",
+      "role": "evidence",
+      "message": "The payment frame is built to diagnose evidence-backed causes, not estimate enterprise prevalence or savings.",
+      "variant": "lab-run-results",
+      "visual_strategy": "Compact sample equation and matching-quality readout using editable tables.",
+      "evidence_needs": ["E06"],
+      "asset_needs": [],
+      "source_status": "reproducible analyst design",
+      "outline_title": "Payment v3 uses 120 paired reviews to diagnose causes"
+    },
+    {
+      "slide_id": "s07",
+      "role": "evidence",
+      "message": "Cash, P&L, capacity, and risk remain separate ledgers with zero recognized value today.",
+      "variant": "table",
+      "visual_strategy": "Compact four-row value ledger without a total or benefit hero.",
+      "evidence_needs": ["E07"],
+      "asset_needs": [],
+      "source_status": "reproducible fail-closed analyst model",
+      "outline_title": "Four value ledgers stay separate; recognized value remains zero"
+    },
+    {
+      "slide_id": "s08",
+      "role": "decision",
+      "message": "The manager downside preserves only the design direction; explicit ownership and affordability failures force a switch.",
+      "variant": "comparison-2col",
+      "visual_strategy": "Open two-column falsification test linked by a non-compensating gate hinge.",
+      "evidence_needs": ["E08"],
+      "asset_needs": [],
+      "source_status": "reproducible scenario plus analyst judgment",
+      "outline_title": "The downside preserves the direction, while ownership and affordability can force a switch"
+    },
+    {
+      "slide_id": "s09",
+      "role": "evidence",
+      "message": "Five accountable evidence packages, all open or blocked, now control any launch or investment decision.",
+      "variant": "table",
+      "visual_strategy": "Board risk ledger with package, owner, evidence, and categorical status; no averaged readiness score.",
+      "evidence_needs": ["E09"],
+      "asset_needs": [],
+      "source_status": "analyst control and evidence design",
+      "outline_title": "Five owner-led evidence packages now gate launch and funding"
+    },
+    {
+      "slide_id": "s10",
+      "role": "decision",
+      "message": "A 90-day evidence timebox should end in another decision, not an automatic launch.",
+      "variant": "timeline",
+      "visual_strategy": "Four report bands with an EVIDENCE ONLY rail and a final stop / extend / later-pilot gate.",
+      "evidence_needs": ["E10"],
+      "asset_needs": [],
+      "source_status": "analyst mobilization proposal grounded in existing stage gates",
+      "outline_title": "Use 90 days to make the next decision evidence-ready, then return for go/no-go"
+    }
+  ],
+  "design_notes": {
+    "primary_grammar": "Board risk memo using board-ledger page system",
+    "secondary_grammar": "Lab-results evidence tables for diagnostic, pilot, and value slides",
+    "conclusion_loop": "Slide 10 repeats slide 1's direction, owner assignment, and reserved approvals after showing the evidence.",
+    "system_map": "Slide 4 is the early decision-chain map; later pilot and evidence slides zoom into its nodes.",
+    "falsification": "Slide 8 states the downside and observable switching conditions before the close.",
+    "rhythm": "title → results ledger → score chart → system ledger → two lab readouts → value ledger → open comparison → risk ledger → banded timeline",
+    "prohibited_moves": [
+      "no total-benefit number",
+      "no readiness percentage",
+      "no map or decorative imagery without evidence",
+      "no execution arrow at the end",
+      "no value or confidence interpretation of the option scores"
+    ]
+  }
+}
