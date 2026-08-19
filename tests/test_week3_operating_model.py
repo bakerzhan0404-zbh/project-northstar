@@ -2,17 +2,37 @@
 
 import csv
 import re
+from collections import Counter
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 W3 = ROOT / "deliverables" / "working" / "week_3"
+PROCESSED = ROOT / "data" / "processed"
 
 OPERATING_MODEL = W3 / "W3_future_state_operating_model.md"
 PROCESS_RACI = W3 / "W3_future_state_process_map_and_RACI.md"
 CONTROL_INVENTORY = W3 / "W3_control_inventory.csv"
 VISIBILITY_CHARTER = W3 / "W3_visibility_pilot_charter.md"
 PAYMENT_CHARTER = W3 / "W3_payment_pilot_charter.md"
+VISIBILITY_FRAME = PROCESSED / "W3_visibility_pilot_candidates.csv"
+PAYMENT_FRAME = PROCESSED / "W3_payment_sample_frame.csv"
+PILOT_MODEL_CONTROLS = PROCESSED / "W3_pilot_model_controls.csv"
+
+VISIBILITY_RULE_VERSION = "W3-VIS-PILOT-v2 · 2026-08-18"
+PAYMENT_RULE_VERSION = "W3-PAY-PILOT-v3 · 2026-08-18"
+
+PAYMENT_COHORTS = (
+    "Manual touch only",
+    "Manual touch + cross-border wire",
+    "Cross-border wire only",
+    "Neither priority cohort",
+)
+
+ISSUE_MODE_TARGETS = {
+    "Exception/status": 8,
+    "Late-only": 7,
+}
 
 EXPECTED_CONTROL_COLUMNS = [
     "control_id",
@@ -57,6 +77,12 @@ def load_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def load_csv(path: Path):
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        return list(reader), list(reader.fieldnames or [])
+
+
 def main() -> None:
     required_paths = [
         OPERATING_MODEL,
@@ -65,6 +91,7 @@ def main() -> None:
         VISIBILITY_CHARTER,
         PAYMENT_CHARTER,
     ]
+    model_paths = [VISIBILITY_FRAME, PAYMENT_FRAME, PILOT_MODEL_CONTROLS]
     texts = {path.name: load_text(path) for path in required_paths if path.exists()}
 
     with CONTROL_INVENTORY.open(newline="", encoding="utf-8") as handle:
@@ -85,8 +112,38 @@ def main() -> None:
     operating_text = texts.get(OPERATING_MODEL.name, "")
     visibility_accounts = set(re.findall(r"\bAC\d{4}\b", visibility_text))
 
+    visibility_rows, visibility_columns = load_csv(VISIBILITY_FRAME)
+    payment_rows, payment_columns = load_csv(PAYMENT_FRAME)
+    pilot_control_rows, _ = load_csv(PILOT_MODEL_CONTROLS)
+
+    payment_ids = [row["source_payment_id"] for row in payment_rows]
+    issue_rows = [row for row in payment_rows if row["sample_role"] == "Issue case"]
+    nonissue_rows = [
+        row for row in payment_rows if row["sample_role"] == "Non-issue control"
+    ]
+    cohort_role_counts = Counter(
+        (row["priority_payment_cohort"], row["sample_role"])
+        for row in payment_rows
+    )
+    issue_mode_counts = Counter(
+        (row["priority_payment_cohort"], row["issue_mode"])
+        for row in issue_rows
+    )
+    pair_counts = Counter(row["case_control_pair_id"] for row in payment_rows)
+    exact_pairs = sum(
+        int(row["match_deviation_count"]) == 0 for row in issue_rows
+    )
+    deviation_rows = [
+        row for row in issue_rows if int(row["match_deviation_count"]) > 0
+    ]
+    ac0040_rows = [row for row in visibility_rows if row["account_id"] == "AC0040"]
+    ac0040 = ac0040_rows[0] if len(ac0040_rows) == 1 else {}
+
     checks = {
         "all five Week 3 design artifacts exist": len(texts) == 5,
+        "all three governed pilot-model outputs exist": all(
+            path.exists() for path in model_paths
+        ),
         "control inventory uses the governed 15-column schema": columns
         == EXPECTED_CONTROL_COLUMNS,
         "control inventory contains 19 unique controls": len(controls) == 19
@@ -138,15 +195,201 @@ def main() -> None:
             "This pilot does not test, authorize, or value cash mobility."
             in visibility_text
         ),
+        "visibility charter states base and enhanced review semantics": (
+            "All ten accounts require the same base readiness/control review"
+            in visibility_text
+            and "enhanced control review" in visibility_text
+            and "`control_review_required = true` for 10/10 accounts"
+            in visibility_text
+            and "`enhanced_control_review_required = true` only for `AC0040`"
+            in visibility_text
+        ),
+        "visibility charter uses generic approved peak-period language": (
+            "outside approved blackout/peak periods" in visibility_text
+            and "launch window remain TBD" in visibility_text
+            and "fourth-quarter" not in visibility_text.lower()
+            and "q4" not in visibility_text.lower()
+        ),
+        "visibility frame uses the v2 review fields": (
+            {
+                "control_review_required",
+                "enhanced_control_review_required",
+                "shadow_only_flag",
+            }
+            <= set(visibility_columns)
+            and len(visibility_rows) == 10
+            and {row["account_id"] for row in visibility_rows}
+            == EXPECTED_VISIBILITY_ACCOUNTS
+            and all(
+                row["control_review_required"] == "True"
+                for row in visibility_rows
+            )
+            and {
+                row["account_id"]
+                for row in visibility_rows
+                if row["enhanced_control_review_required"] == "True"
+            }
+            == {"AC0040"}
+            and {
+                row["account_id"]
+                for row in visibility_rows
+                if row["shadow_only_flag"] == "True"
+            }
+            == {"AC0040"}
+            and all(
+                row["selection_rule_version"] == VISIBILITY_RULE_VERSION
+                for row in visibility_rows
+            )
+        ),
+        "AC0040 retains the enhanced-review source semantics": (
+            len(ac0040_rows) == 1
+            and ac0040.get("region") == "APAC"
+            and ac0040.get("purpose") == "Payroll"
+            and ac0040.get("restricted_flag") == "True"
+            and ac0040.get("control_review_required") == "True"
+            and ac0040.get("enhanced_control_review_required") == "True"
+            and ac0040.get("shadow_only_flag") == "True"
+        ),
         "payment charter fixes a 120-record four-stratum diagnostic": (
             "Review **120 supplied records**, 30 from each mutually exclusive stratum"
             in payment_text
-            and "**15 issue cases**" in payment_text
+            and "**8 exception/status issue cases**" in payment_text
+            and "**7 late-only issue cases**" in payment_text
             and "**15 non-issue controls**" in payment_text
         ),
-        "payment issue definition is explicit and reproducible": (
-            "exception, late release, `Repaired`, or `Rejected`" in payment_text
-            and "rank by repair minutes and then USD amount" in payment_text
+        "payment issue modes and ranking are explicit and reproducible": (
+            "`exception_flag = true` or status is `Repaired`/`Rejected`"
+            in payment_text
+            and "`late_release_flag = true`" in payment_text
+            and "Rank each issue-mode subgroup separately" in payment_text
+            and "repair minutes descending, USD amount descending"
+            in payment_text
+            and "source payment ID ascending" in payment_text
+        ),
+        "payment 8/7 split is coverage judgment rather than prevalence weighting": (
+            "balances diagnostic coverage" in payment_text
+            and "larger source pool in every cohort" in payment_text
+            and "not prevalence weighting" in payment_text
+        ),
+        "payment charter fixes combined issue-mode matching order": (
+            "exception/status ranks 1–8 first" in payment_text
+            and "late-only ranks 1–7 second" in payment_text
+            and "overall ranks 9–15" in payment_text
+        ),
+        "payment charter reports the current v3 matching result": (
+            "50 exact four-field pairs" in payment_text
+            and "ten documented nearest-match deviations" in payment_text
+            and "row-level `issue_mode`" in payment_text
+            and "pair-level `paired_issue_mode`" in payment_text
+        ),
+        "payment charter excludes Pending from the control pool": (
+            "supplied status `Completed`" in payment_text
+            and "`Pending` records remain inside the supplied source population"
+            in payment_text
+            and "excluded from the non-issue control pool" in payment_text
+            and "not certify a `Completed` record as settled" in payment_text
+        ),
+        "payment charter rejects stale issue and match wording": (
+            "**15 issue cases**" not in payment_text
+            and "55 exact four-field pairs" not in payment_text
+            and "five documented nearest-match deviations" not in payment_text
+            and "51 exact four-field pairs" not in payment_text
+            and "nine documented nearest-match deviations" not in payment_text
+        ),
+        "payment frame uses v3 issue-mode lineage fields": (
+            {
+                "issue_mode",
+                "paired_issue_mode",
+                "issue_selection_rank",
+                "issue_mode_selection_rank",
+            }
+            <= set(payment_columns)
+            and len(payment_rows) == 120
+            and len(payment_ids) == len(set(payment_ids)) == 120
+            and all(
+                row["selection_rule_version"] == PAYMENT_RULE_VERSION
+                for row in payment_rows
+            )
+        ),
+        "payment frame allocates 15 issues and controls in every cohort": all(
+            cohort_role_counts[(cohort, "Issue case")] == 15
+            and cohort_role_counts[(cohort, "Non-issue control")] == 15
+            for cohort in PAYMENT_COHORTS
+        ),
+        "payment frame allocates 8 exception/status and 7 late-only cases": all(
+            issue_mode_counts[(cohort, issue_mode)] == target
+            for cohort in PAYMENT_COHORTS
+            for issue_mode, target in ISSUE_MODE_TARGETS.items()
+        ),
+        "payment frame keeps issue ranks deterministic and controls non-issue": (
+            all(
+                sorted(
+                    int(row["issue_mode_selection_rank"])
+                    for row in issue_rows
+                    if row["priority_payment_cohort"] == cohort
+                    and row["issue_mode"] == issue_mode
+                )
+                == list(range(1, target + 1))
+                for cohort in PAYMENT_COHORTS
+                for issue_mode, target in ISSUE_MODE_TARGETS.items()
+            )
+            and all(
+                sorted(
+                    int(row["issue_selection_rank"])
+                    for row in issue_rows
+                    if row["priority_payment_cohort"] == cohort
+                )
+                == list(range(1, 16))
+                for cohort in PAYMENT_COHORTS
+            )
+            and all(
+                row["issue_mode"] == "Non-issue control"
+                and row["paired_issue_mode"] in ISSUE_MODE_TARGETS
+                and int(row["issue_selection_rank"]) == 0
+                and int(row["issue_mode_selection_rank"]) == 0
+                and row["status"] == "Completed"
+                for row in nonissue_rows
+            )
+        ),
+        "payment frame excludes Pending and other unresolved control statuses": (
+            len(nonissue_rows) == 60
+            and all(row["status"] == "Completed" for row in nonissue_rows)
+            and all(row["source_payment_id"] != "P004510" for row in nonissue_rows)
+        ),
+        "payment frame preserves combined matching order": all(
+            [
+                row["issue_mode"]
+                for row in issue_rows
+                if row["priority_payment_cohort"] == cohort
+            ]
+            == ["Exception/status"] * 8 + ["Late-only"] * 7
+            and [
+                int(row["issue_selection_rank"])
+                for row in issue_rows
+                if row["priority_payment_cohort"] == cohort
+            ]
+            == list(range(1, 16))
+            for cohort in PAYMENT_COHORTS
+        ),
+        "payment frame contains 60 complete pairs and current 50/10 result": (
+            len(pair_counts) == 60
+            and all(count == 2 for count in pair_counts.values())
+            and exact_pairs == 50
+            and len(deviation_rows) == 10
+            and all(
+                row["match_deviation_detail"].strip()
+                and row["match_deviation_detail"] != "none"
+                for row in deviation_rows
+            )
+        ),
+        "pilot control output records v3 and fourteen passing controls": (
+            len(pilot_control_rows) == 14
+            and all(row["test_result"] == "PASS" for row in pilot_control_rows)
+            and all(
+                row["visibility_rule_version"] == VISIBILITY_RULE_VERSION
+                and row["payment_rule_version"] == PAYMENT_RULE_VERSION
+                for row in pilot_control_rows
+            )
         ),
         "payment review is not a prevalence or benefit sample": (
             "purposive case-control diagnosis" in payment_text
