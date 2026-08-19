@@ -12,7 +12,7 @@
 2. [Five hardest CFO questions](W3_CFO_QA.md) — direction, liquidity screen, affordability, pilot safety/usefulness, and downside switching conditions
 3. [Strategic options](W3_strategic_options.md) — gate-then-score comparison, `87 / 72 / 60` result, five plausible sensitivities, and switching conditions
 4. [Validation case](W3_business_case.md) — non-additive value ledgers, zero recognized value, open costs, and manager challenge
-5. [Interim steering deck](W3_interim_steering_deck.md) — ten-slide narrative and speaker notes; rendered to `decks/week3-interim/build/project-northstar-week3-interim-steering.pptx`
+5. [Interim steering deck](W3_interim_steering_deck.pdf) — the ten rendered slides; also supplied as an editable [PPTX](W3_interim_steering_deck.pptx) and as [Markdown source](W3_interim_steering_deck.md) with speaker notes and file-level provenance
 
 The executive spine is consistent: **federated coordination is the provisional design direction; local stabilization is the fallback if global ownership, minimum integration readiness, or affordability fails; all execution-evidence gates remain open; and the present case authorizes no execution or value.**
 
@@ -55,8 +55,10 @@ The executive spine is consistent: **federated coordination is the provisional d
 | [Workplan](W3_workplan.md) | Week 3 modules, dependencies, owners, and status | Current; client mandate/ownership remains proposed |
 | [Findings log](W3_findings_log.md) | F12–F17 fact–implication–action chain and Week 2 disposition | Promoted for CFO review; not approved |
 | [Decision log](W3_decision_log.md) | Analyst decisions, open CFO decisions, conditions, and status convention | Current; no client decision recorded |
-| [Recommendation risk register](W3_risk_register.md) | Likelihood, impact, trigger, mitigation, contingency, owner, and evidence label | Open/monitoring; risk exposure not monetized |
-| [Source and evidence log](W3_source_log.md) | Internal provenance, evidence labels, public-context limits, and approval boundary | Current for working pack |
+| [Recommendation risk register](W3_risk_register.csv) | R017–R030 likelihood, impact, score, trigger, mitigation, contingency, owner, and evidence label | Open/monitoring; risk exposure not monetized |
+| [Risk register narrative](W3_risk_register.md) | Same register with priority control actions and Week 2 relationship | Companion to the CSV; the CSV governs |
+| [Source and evidence log](W3_source_log.csv) | 11 internal and 7 public-context sources with label, method, limitation, and status | Current for working pack |
+| [Source log narrative](W3_source_log.md) | Same sources with the evidence-label convention and approval boundary | Companion to the CSV; the CSV governs |
 
 ## Reproducible model and assurance paths
 
