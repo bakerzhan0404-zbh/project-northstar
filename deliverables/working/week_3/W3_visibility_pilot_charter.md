@@ -14,7 +14,7 @@
 
 This charter asks the CFO, Group Treasurer, CIO, Regional Finance, BU Finance, and management control owner to review a **bounded, read-only validation design**. Week 3 may approve the design for further readiness work; it does not authorize the pilot to launch.
 
-A separate go/no-go approval is required after the authoritative-source census, controlled baseline, named ownership, service and control design, specialist reviews, cost range, peak-season approval, and rollback rehearsal are complete. Pilot completion would not itself authorize cash transfers, account closure, platform procurement, funded benefits, or enterprise scale.
+A separate go/no-go approval is required after the authoritative-source census, controlled baseline, named ownership, service and control design, specialist reviews, cost range, approved blackout/peak-period conditions, and rollback rehearsal are complete. Pilot completion would not itself authorize cash transfers, account closure, platform procurement, funded benefits, or enterprise scale.
 
 ## Objective and testable hypothesis
 
@@ -55,10 +55,10 @@ Subject to readiness and control review, the design carries forward ten delayed 
 
 | Source method | Provisional account IDs | Selection rule |
 |---|---|---|
-| Spreadsheet | `AC0021`, `AC0010`, `AC0017`, `AC0001`, `AC0040` | Top four eligible accounts by January–June average positive estimated-available USD plus the highest eligible APAC account |
-| Portal | `AC0022`, `AC0031`, `AC0018`, `AC0002`, `AC0050` | Top four eligible accounts by January–June average positive estimated-available USD plus the highest eligible APAC account |
+| Spreadsheet | `AC0021`, `AC0010`, `AC0017`, `AC0001`, `AC0040` | Top four delayed-source accounts with complete supplied selection fields by January–June average positive estimated-available USD, plus the highest APAC account under the same screen; account ID ascending breaks ties |
+| Portal | `AC0022`, `AC0031`, `AC0018`, `AC0002`, `AC0050` | Top four delayed-source accounts with complete supplied selection fields by January–June average positive estimated-available USD, plus the highest APAC account under the same screen; account ID ascending breaks ties |
 
-The set spans three regions, three ERP environments, and four banks under the Week 2 design. It is coverage-constrained and purposive, not statistically representative. Account readiness must be rechecked against the reproduced selection output before approval.
+The set spans three regions, three ERP environments, and four banks under the Week 2 design. Here, selection eligibility means only that the supplied delayed-source fields needed to reproduce the screen are complete; it does **not** mean launch readiness. All ten accounts require the same base readiness/control review before any later use. `AC0040` remains APAC, Payroll, and restricted; it alone is marked for enhanced control review and retained only as a read-only shadow-observation candidate subject to documented substitution. In `data/processed/W3_visibility_pilot_candidates.csv`, this distinction is explicit: `control_review_required = true` for 10/10 accounts, while `enhanced_control_review_required = true` only for `AC0040`. The set is coverage-constrained and purposive, not statistically representative. Account readiness must be rechecked against the reproduced output before approval.
 
 ### Cohort substitution rule
 
@@ -89,10 +89,10 @@ This charter excludes:
 | 0. Owner and data readiness | Complete the 55-account census; confirm source, cutoff, calendar, balance, owner, reconciliation, local context, and exception rules | Controlled denominator and readiness status are owner-approved | Duration TBD; no launch clock begins until complete |
 | 1. Baseline | Observe the approved cohort using the current approved process; capture all KPI fields and failures without changing production | Baseline period and comparability are approved by Group Treasury and data/control owners | Length TBD from reporting calendar and data stability; must be approved before launch |
 | 2. Technical/control rehearsal | Test the proposed read-only source path, monitoring, access, failure modes, contingency, evidence capture, and rollback in a non-production or approved safe environment | Cyber/architecture/control/service sign-off; restoration rehearsal at or below four hours | Duration TBD from architecture and test plan |
-| 3. Later bounded operation | If separately approved, observe the ten-account process outside the fourth-quarter peak under the signed charter | Minimum four consecutive compliant operating weeks | Proposed minimum four consecutive weeks; extend after material population, control, or service change |
+| 3. Later bounded operation | If separately approved, observe the ten-account process outside approved blackout/peak periods under the signed charter | Minimum four consecutive compliant operating weeks | Proposed minimum four consecutive weeks; extend after material population, control, or service change |
 | 4. Evaluation | Compare like-for-like baseline and pilot periods; assess data, service, control, cost, adoption, and learning | Written scale/extend/stop recommendation and separate CFO/SteerCo decision | Evaluation window TBD |
 
-The total calendar duration and launch window remain TBD. Q4 peak operation is excluded unless BU Finance and the Steering Committee explicitly approve a different service-risk decision.
+The total calendar duration and launch window remain TBD. Any blackout or peak-period exclusion must be defined and approved by affected BU/Regional Finance and the Steering Committee before launch.
 
 ## Controlled baseline and denominator plan
 
@@ -144,7 +144,7 @@ No later launch may occur without:
 1. named business, data, technology, control, service, and exception owners;
 2. an approved account population, source, calendar, cutoff, balance type, denominator, baseline, tolerance, and KPI version;
 3. architecture, cybersecurity, access, source authentication, lineage, and source-to-target reconciliation approval;
-4. peak blackout and critical-service definitions approved by affected BU/Regional Finance leaders;
+4. blackout/peak-period and critical-service definitions approved by affected BU/Regional Finance leaders;
 5. tested contingency and a rollback rehearsal at or below four hours;
 6. a complete issue, incident, evidence-retention, and escalation plan;
 7. one-time and recurring cost ranges with source and Finance review; and
@@ -164,7 +164,7 @@ This charter approves no benefit. Visibility improvement may create decision evi
 
 | Trigger | Required response | Proposed decision owner |
 |---|---|---|
-| Missing owner, source, controlled baseline, cutoff, service definition, control sign-off, cost range, peak approval, or rollback rehearsal | No-go; return design for remediation | Group Treasurer / CIO / BU Finance |
+| Missing owner, source, controlled baseline, cutoff, service definition, control sign-off, cost range, approved blackout/peak-period decision, or rollback rehearsal | No-go; return design for remediation | Group Treasurer / CIO / BU Finance |
 | Account/source population materially changes or cannot reconcile | Pause comparison; segment or rebuild baseline; do not claim improvement | Group Treasurer / data owner |
 | Defined material unexplained position break | Pause the affected process; preserve evidence and escalate | Group Treasurer |
 | Critical-service failure or confirmed control/cyber/access breach attributable to the pilot | Stop; preserve evidence; invoke the approved prior process and incident response | Pilot accountable owner / control owner / CIO |

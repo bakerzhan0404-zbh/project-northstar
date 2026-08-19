@@ -61,10 +61,19 @@ Review **120 supplied records**, 30 from each mutually exclusive stratum:
 
 Within each stratum, select:
 
-- **15 issue cases**, where issue means exception, late release, `Repaired`, or `Rejected`; rank by repair minutes and then USD amount; and
-- **15 non-issue controls**, matched on payment type, region, month, and USD amount band where feasible.
+- **8 exception/status issue cases**, where the mode means `exception_flag = true` or status is `Repaired`/`Rejected`; cases that are also late remain in this mode;
+- **7 late-only issue cases**, where `late_release_flag = true` and the record does not meet the exception/status definition; and
+- **15 non-issue controls**, each negative on the locked issue definition **and** carrying supplied status `Completed`, matched without replacement on payment type, region, month, and USD amount band where feasible.
 
-Record every nearest-match deviation and any unavailable match. The review is purposive case-control diagnosis, not a powered prevalence estimate and not an enterprise benefit sample.
+The 8/7 split balances diagnostic coverage across the two mutually exclusive issue modes as evenly as a 15-case allocation permits. The odd case is assigned to exception/status because it is the larger source pool in every cohort. This is a coverage-balanced analyst judgment, not prevalence weighting or a claim about population incidence.
+
+Rank each issue-mode subgroup separately by repair minutes descending, USD amount descending, then source payment ID ascending. The combined without-replacement matching order is exception/status ranks 1–8 first, which are overall ranks 1–8, followed by late-only ranks 1–7 second, which are overall ranks 9–15. This order is locked because changing it can change which controls remain available and therefore the reproduced 50/10 matching result. The governed USD amount bands are `≤$10k`, `>$10k–$25k`, `>$25k–$50k`, `>$50k–$100k`, and `>$100k`. In that combined issue-rank order, select the unused eligible control that minimizes, in order: the count of mismatches across payment type/region/month/amount band; amount-band distance; month distance; absolute USD amount gap; and source payment ID ascending. If a stratum has fewer than eight exception/status cases, seven late-only cases, or 15 flag-negative `Completed` controls, fail the frame rather than silently change the sample.
+
+`Pending` records remain inside the supplied source population but are excluded from the non-issue control pool. A Pending status is unresolved at the supplied status-as-of point and therefore is not a sufficiently clean comparator: later friction, rejection, repair, or completion cannot be ruled out. This restriction does not certify a `Completed` record as settled or problem-free; it only avoids knowingly using an unresolved status as a control.
+
+The output records row-level `issue_mode`, pair-level `paired_issue_mode`, overall `issue_selection_rank`, and within-mode `issue_mode_selection_rank`. A control is labeled `Non-issue control`, carries zero in both issue-rank fields, and links to its case through the pair ID and `paired_issue_mode`; it is not relabeled as an issue. The reproduced result contains 50 exact four-field pairs and ten documented nearest-match deviations in `data/processed/W3_payment_sample_frame.csv`. Every deviation remains visible; no unavailable match was silently dropped.
+
+The review is purposive case-control diagnosis, not a powered prevalence estimate and not an enterprise benefit sample. The deterministic rules and reconciliation controls are implemented in `src/week3_pilot_design.py` and tested by `tests/test_week3_pilot_design.py`.
 
 ### Candidate later process-test population
 
