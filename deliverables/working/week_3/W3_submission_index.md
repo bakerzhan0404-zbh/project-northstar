@@ -3,7 +3,7 @@
 **Pack:** Strategy and Business-Case Pack
 **Prepared by:** Baker
 **Reporting date:** 18 August 2026
-**Status:** Working index; interim steering-deck render and integrated final QA remain pending
+**Status:** Working index; steering deck rendered and visually reviewed, strict polish gate still open
 **Classification:** Confidential — Project Northstar simulated client material
 
 ## Executive review path — start here
@@ -12,7 +12,7 @@
 2. [Five hardest CFO questions](W3_CFO_QA.md) — direction, liquidity screen, affordability, pilot safety/usefulness, and downside switching conditions
 3. [Strategic options](W3_strategic_options.md) — gate-then-score comparison, `87 / 72 / 60` result, five plausible sensitivities, and switching conditions
 4. [Validation case](W3_business_case.md) — non-additive value ledgers, zero recognized value, open costs, and manager challenge
-5. `W3_interim_steering_deck` — maximum-ten-slide source and rendered artifact to be added after render-and-visual QA
+5. [Interim steering deck](W3_interim_steering_deck.md) — ten-slide narrative and speaker notes; rendered to `decks/week3-interim/build/project-northstar-week3-interim-steering.pptx`
 
 The executive spine is consistent: **federated coordination is the provisional design direction; local stabilization is the fallback if global ownership, minimum integration readiness, or affordability fails; all execution-evidence gates remain open; and the present case authorizes no execution or value.**
 

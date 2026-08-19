@@ -65,8 +65,10 @@ python3 /Users/bakerzhan/.codex/skills/presentation-skill/scripts/report_deliver
   --workspace decks/week3-interim
 ```
 
-The deck is not visually complete until the PPTX is rendered, the contact sheet and individual slides are inspected, source is repaired, and final delivery readiness passes.
+Export `soffice` onto `PATH` first: `export PATH="$PATH:/Applications/LibreOffice.app/Contents/MacOS"`.
 
 ## Current renderer dependency status
 
-The local presentation-workspace initializer currently stops at import with `ModuleNotFoundError: No module named 'pptx'`. No dependency was installed because the workflow forbids installing dependencies during a deck task. See `renderer_dependency_status.md`. The current deliverable is therefore a validated source workspace, not a rendered PPTX.
+The toolchain is installed and the deck renders: 10 slides to PPTX and 10/10 rasterized into `build/qa/visual_review/contact_sheet.jpg`. Geometry, overlap, whitespace, placeholder, preflight, planning, and narration checks pass.
+
+The strict polish gate remains open. One text box on slide 3 overflows a 0.22"-tall rail, and 49 font-floor warnings come from a mismatch between the `data-heavy-boardroom` preset's declared typography and its own renderer's output — not from deck density. See `renderer_dependency_status.md` for the per-category evidence.
