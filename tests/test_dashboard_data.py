@@ -350,7 +350,7 @@ class DashboardDataTest(unittest.TestCase):
             self.assertTrue(definition["search_aliases"])
 
     def test_build_is_deterministic_and_does_not_write(self) -> None:
-        output = ROOT / "dashboard" / "dashboard_data.json"
+        output = ROOT / "docs" / "dashboard" / "dashboard_data.json"
         existed_before = output.exists()
         first = build_dashboard_data(self.frames)
         second = build_dashboard_data(self.frames)

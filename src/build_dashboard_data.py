@@ -23,7 +23,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED = ROOT / "data" / "processed"
-OUTPUT = ROOT / "dashboard" / "dashboard_data.json"
+OUTPUT = ROOT / "docs" / "dashboard" / "dashboard_data.json"
 
 INPUT_FILES = {
     "w1_checks": "W1_data_quality_checks.csv",

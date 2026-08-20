@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from build_dashboard_data import build_dashboard_data, load_dashboard_inputs  # noqa: E402
 
 
-DASHBOARD = ROOT / "dashboard"
+DASHBOARD = ROOT / "docs" / "dashboard"
 
 
 class StructureParser(HTMLParser):
@@ -376,6 +376,82 @@ class DashboardUiTest(unittest.TestCase):
         footer = self.index.split('id="evidence-footer"', 1)[1].split("</footer>", 1)[0]
         self.assertNotIn("<button", footer)
 
+    def test_menu_page_pairs_governed_findings_with_the_menu_and_fails_closed(self) -> None:
+        tags_by_id = {attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs}
+        required_ids = {
+            "menu-page",
+            "menu-decision-headline",
+            "menu-decision-next",
+            "menu-signal-visibility",
+            "menu-signal-liquidity",
+            "menu-signal-payments",
+            "menu-findings",
+            "menu-findings-scope",
+            "menu-stat-visibility",
+            "menu-stat-liquidity",
+            "menu-stat-payments",
+            "menu-stat-quality",
+            "menu-finding-payments-bars",
+            "menu-finding-liquidity-bars",
+            "menu-finding-visibility-bars",
+            "menu-finding-value-gates",
+        }
+        self.assertTrue(required_ids.issubset(tags_by_id))
+
+        # The menu stays the routing spine and is still the only view selector.
+        self.assertNotIn("hidden", tags_by_id["dashboard-menu-hub"])
+        self.assertNotIn("hidden", tags_by_id["menu-page"])
+        self.assertEqual(
+            sum("data-select-dashboard-view" in attrs for _, attrs in self.parser.tags), 6
+        )
+
+        # Findings are declared portfolio-wide and never imply a composite score.
+        self.assertIn("portfolio-wide · filters do not apply", self.script)
+        self.assertIn(
+            "Three separate signals—not a composite score. Portfolio-wide · filters do not apply.",
+            self.index,
+        )
+
+        # Evidence on the menu page is hidden until the governed contract validates.
+        evidence_sections = [
+            attrs for _, attrs in self.parser.tags if "data-menu-evidence" in attrs
+        ]
+        self.assertEqual(len(evidence_sections), 2)
+        sync = self.script.split("function syncDashboardViewVisibility", 1)[1].split(
+            "function selectDashboardView", 1
+        )[0]
+        self.assertIn("if (menuPage) menuPage.hidden = Boolean(activeConfig);", sync)
+        self.assertIn("node.hidden = !dashboardData;", sync)
+
+        # Every headline number is read from the governed contract, never hard-coded.
+        findings = self.script.split("function renderMenuFindings", 1)[1].split(
+            "function renderHeader", 1
+        )[0]
+        for source in (
+            "dashboardData.visibility",
+            "dashboardData.payments",
+            "dashboardData.decision",
+            "liquidity.evidence_ladder",
+            "liquidity.scenarios",
+            "dashboardData.guardrails",
+            "quality.w1_checks",
+            "quality.w2_controls",
+        ):
+            self.assertIn(source, findings)
+        self.assertIn("replaceChildren", findings)
+
+        for token in (
+            ".menu-page",
+            ".menu-decision-band",
+            ".menu-stat-strip",
+            ".menu-finding-grid",
+            ".menu-bar-fill",
+            ".menu-gate-list",
+            "grid-template-columns: minmax(300px, 372px) minmax(0, 1fr);",
+            "@media (max-width: 1180px)",
+        ):
+            self.assertIn(token, self.styles)
+
     def test_menu_hub_is_dark_row_based_and_mobile_safe(self) -> None:
         required_css = (
             ".dashboard-menu-hub",
@@ -699,8 +775,8 @@ class DashboardUiTest(unittest.TestCase):
     def test_quality_contract_validation_fails_closed_on_incomplete_evidence(self) -> None:
         node_script = """
 const fs = require('node:fs');
-const { assertDashboardData } = require('./dashboard/app.js');
-const base = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const { assertDashboardData } = require('./docs/dashboard/app.js');
+const base = JSON.parse(fs.readFileSync('./docs/dashboard/dashboard_data.json', 'utf8'));
 assertDashboardData(base);
 const clone = () => JSON.parse(JSON.stringify(base));
 const mutations = [
@@ -748,9 +824,9 @@ process.stdout.write(JSON.stringify({ rejected, total: mutations.length }));
     def test_exact_menu_labels_route_to_their_owning_views(self) -> None:
         node_script = """
 const fs = require('node:fs');
-const model = require('./dashboard/filter_model.js');
-const app = require('./dashboard/app.js');
-const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const model = require('./docs/dashboard/filter_model.js');
+const app = require('./docs/dashboard/app.js');
+const data = JSON.parse(fs.readFileSync('./docs/dashboard/dashboard_data.json', 'utf8'));
 const index = model.buildSearchIndex(data, app.metricSearchDefinitions(data));
 const expected = {
   'Executive Overview': 'view:executive',
@@ -779,9 +855,9 @@ process.stdout.write(JSON.stringify({ routes, expected }));
     def test_quality_dimension_and_issue_search_routes_are_indexed(self) -> None:
         node_script = """
 const fs = require('node:fs');
-const model = require('./dashboard/filter_model.js');
-const app = require('./dashboard/app.js');
-const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const model = require('./docs/dashboard/filter_model.js');
+const app = require('./docs/dashboard/app.js');
+const data = JSON.parse(fs.readFileSync('./docs/dashboard/dashboard_data.json', 'utf8'));
 const index = model.buildSearchIndex(data, app.metricSearchDefinitions(data));
 const firstId = query => model.querySearchIndex(index, query, { limit: 8 })[0]?.id ?? null;
 process.stdout.write(JSON.stringify({
@@ -877,7 +953,7 @@ process.stdout.write(JSON.stringify({
 
     def test_adaptive_usd_formatter_never_renders_nonzero_as_zero_millions(self) -> None:
         node_script = """
-const { formatUsdCompact } = require('./dashboard/app.js');
+const { formatUsdCompact } = require('./docs/dashboard/app.js');
 const values = [1568.19, 943.98, -943.98, 0.5, -0.5, 0, 38127490.73];
 process.stdout.write(JSON.stringify(values.map(formatUsdCompact)));
 """
@@ -895,9 +971,9 @@ process.stdout.write(JSON.stringify(values.map(formatUsdCompact)));
     def test_visual_runtime_helpers_use_filtered_summaries_and_preserve_nulls(self) -> None:
         node_script = """
 const fs = require('node:fs');
-const model = require('./dashboard/filter_model.js');
-const visual = require('./dashboard/app.js');
-const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const model = require('./docs/dashboard/filter_model.js');
+const visual = require('./docs/dashboard/app.js');
+const data = JSON.parse(fs.readFileSync('./docs/dashboard/dashboard_data.json', 'utf8'));
 const defaults = model.createDefaultState(data);
 const base = model.summarize(data, defaults);
 const filtered = model.summarize(data, {
@@ -1019,7 +1095,7 @@ const {
   orderSearchResultsForDisplay,
   dashboardViewForTopic,
   dashboardTopicsForView,
-} = require('./dashboard/app.js');
+} = require('./docs/dashboard/app.js');
 const results = [
   { id: 'inline:regions', kind: 'metric', label: 'Regional footprint' },
   { id: 'region:EMEA', kind: 'dimension', label: 'EMEA' },
@@ -1154,8 +1230,8 @@ process.stdout.write(JSON.stringify({
 
         node_script = """
 const fs = require('node:fs');
-const model = require('./dashboard/filter_model.js');
-const data = JSON.parse(fs.readFileSync('./dashboard/dashboard_data.json', 'utf8'));
+const model = require('./docs/dashboard/filter_model.js');
+const data = JSON.parse(fs.readFileSync('./docs/dashboard/dashboard_data.json', 'utf8'));
 const defaults = model.createDefaultState(data);
 const fullPeriod = model.summarize(data, defaults);
 const sameEndSingleDay = model.summarize(data, { ...defaults, dateFrom: defaults.dateTo });
@@ -1235,7 +1311,7 @@ process.stdout.write(JSON.stringify({
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:
-            base = f"http://127.0.0.1:{server.server_port}/dashboard"
+            base = f"http://127.0.0.1:{server.server_port}/docs/dashboard"
             for relative in (
                 "/",
                 "/styles.css",

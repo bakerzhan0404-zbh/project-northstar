@@ -317,6 +317,7 @@ function syncDashboardViewVisibility() {
   const activeView = state.activeDashboardView;
   const activeConfig = activeView ? DASHBOARD_VIEWS[activeView] : null;
   const menuHub = get("#dashboard-menu-hub");
+  const menuPage = get("#menu-page");
   const selectedHeader = get("#selected-view-header");
   const signals = get("#signals");
   const qualityView = get("#quality-view");
@@ -324,6 +325,10 @@ function syncDashboardViewVisibility() {
   const footer = get("#evidence-footer");
 
   if (menuHub) menuHub.hidden = Boolean(activeConfig);
+  if (menuPage) menuPage.hidden = Boolean(activeConfig);
+  getAll("[data-menu-evidence]").forEach((node) => {
+    node.hidden = !dashboardData;
+  });
   if (selectedHeader) selectedHeader.hidden = !activeConfig;
   if (signals) signals.hidden = !activeConfig || activeView === "evidence";
   if (qualityView) qualityView.hidden = activeView !== "evidence";
@@ -770,6 +775,166 @@ function visibilityActionText(visibility, hasData) {
   }
   const methods = new Intl.ListFormat("en-US", { style: "long", type: "conjunction" }).format(delayedMethods);
   return `Prioritize ${methods} reporting exposure in the selected scope; validate timestamps, cutoffs, and ownership.`;
+}
+
+function menuBarRow(label, share, valueText, color) {
+  const row = make("li");
+  row.append(make("span", "menu-bar-label", label));
+  const track = make("span", "menu-bar-track");
+  track.setAttribute("aria-hidden", "true");
+  const fill = make("span", "menu-bar-fill");
+  fill.style.width = `${clampedPercentage(share) ?? 0}%`;
+  fill.style.background = color;
+  track.append(fill);
+  row.append(track, make("span", "menu-bar-value", valueText));
+  return row;
+}
+
+function menuGateRow(label, status) {
+  const row = make("li");
+  row.append(make("span", "menu-gate-label", label), make("span", "menu-gate-status", status));
+  return row;
+}
+
+function setMenuMeter(selector, share) {
+  const meter = get(selector);
+  if (meter) meter.style.width = `${clampedPercentage(share) ?? 0}%`;
+}
+
+function renderMenuFindings() {
+  const visibility = dashboardData.visibility;
+  const payments = dashboardData.payments;
+  const liquidity = dashboardData.liquidity;
+  const quality = dashboardData.quality;
+  const capacity = dashboardData.guardrails.capacity;
+  const closures = dashboardData.guardrails.closures;
+
+  setText("#menu-decision-headline", dashboardData.decision.headline);
+  setText("#menu-decision-next", dashboardData.decision.next_step);
+  setText("#menu-decision-status", "Validation required");
+  setText(
+    "#menu-signal-visibility",
+    `${formatNumber(visibility.delayed_accounts)} / ${formatNumber(visibility.accounts_total)} accounts delayed`,
+  );
+  setText(
+    "#menu-signal-liquidity",
+    `${liquidity.funded_case.display} funded case · mobility not established`,
+  );
+  setText(
+    "#menu-signal-payments",
+    `${formatPercent(payments.priority_union.exception_contribution_pct)} of exceptions in the priority union`,
+  );
+  setText(
+    "#menu-findings-scope",
+    `${formatDateRange(dashboardData.meta.period_start, dashboardData.meta.period_end)} · portfolio-wide · filters do not apply`,
+  );
+
+  const delayedShare = safePercentage(visibility.delayed_accounts, visibility.accounts_total);
+  setText("#menu-stat-visibility", formatNumber(visibility.delayed_accounts));
+  setText("#menu-stat-visibility-unit", `of ${formatNumber(visibility.accounts_total)} accounts · ${formatPercent(delayedShare)}`);
+  setMenuMeter("#menu-stat-visibility-meter", delayedShare);
+
+  const grossAvailability = liquidity.evidence_ladder[0];
+  const apparentNet = liquidity.evidence_ladder.find((step) => step.role === "resulting_total")
+    || liquidity.evidence_ladder[liquidity.evidence_ladder.length - 1];
+  const netShare = safePercentage(apparentNet.value_usd, grossAvailability.value_usd);
+  setText("#menu-stat-liquidity", formatUsdCompact(grossAvailability.value_usd));
+  setMenuMeter("#menu-stat-liquidity-meter", netShare);
+  setText(
+    "#menu-stat-liquidity-note",
+    `${formatUsdCompact(apparentNet.value_usd)} apparent net after restrictions. Validated mobility: not established by supplied data.`,
+  );
+
+  setText("#menu-stat-payments", formatPercent(payments.overall.exception_rate_pct));
+  setText(
+    "#menu-stat-payments-unit",
+    `${formatNumber(payments.overall.exceptions)} of ${formatNumber(payments.overall.records)} records`,
+  );
+  setMenuMeter("#menu-stat-payments-meter", payments.overall.exception_rate_pct);
+
+  setText("#menu-stat-quality", `${formatNumber(quality.w1_checks.passed)} / ${formatNumber(quality.w1_checks.total)}`);
+  setText("#menu-stat-quality-unit", "Week 1 structural checks");
+  setText(
+    "#menu-stat-quality-note",
+    `${formatNumber(quality.w2_controls.reconciled)} / ${formatNumber(quality.w2_controls.total)} Week 2 reconciliation controls reconciled; source certification open.`,
+  );
+  setMenuMeter("#menu-stat-quality-meter", safePercentage(quality.w1_checks.passed, quality.w1_checks.total));
+
+  const union = payments.priority_union;
+  setText(
+    "#menu-finding-payments-lede",
+    `${formatNumber(union.records)} deduplicated records — ${formatPercent(union.record_contribution_pct)} of the supplied population — carry ${formatPercent(union.exception_contribution_pct)} of exceptions and ${formatPercent(union.repair_contribution_pct)} of repair minutes.`,
+  );
+  const paymentBars = get("#menu-finding-payments-bars");
+  if (paymentBars) {
+    paymentBars.replaceChildren(
+      menuBarRow("Share of records", union.record_contribution_pct, formatPercent(union.record_contribution_pct), "var(--sky)"),
+      menuBarRow("Share of exceptions", union.exception_contribution_pct, formatPercent(union.exception_contribution_pct), "var(--orange)"),
+      menuBarRow("Share of repair minutes", union.repair_contribution_pct, formatPercent(union.repair_contribution_pct), "var(--purple)"),
+    );
+  }
+
+  const sevenDayBase = liquidity.scenarios["7"].thresholds.base;
+  const fourteenDayBase = liquidity.scenarios["14"].thresholds.base;
+  const fourteenDayStress = liquidity.scenarios["14"].thresholds.stress;
+  const fourteenDayUpside = liquidity.scenarios["14"].thresholds.upside;
+  setText(
+    "#menu-finding-liquidity-lede",
+    `Every seven-day window clears the ${formatUsdCompact(sevenDayBase.threshold_usd)} base threshold. At fourteen days only ${formatNumber(fourteenDayBase.windows_met)} of ${formatNumber(fourteenDayBase.complete_windows)} do, though all of them clear the ${formatUsdCompact(fourteenDayStress.threshold_usd)} stress threshold and none clears ${formatUsdCompact(fourteenDayUpside.threshold_usd)}.`,
+  );
+  const liquidityBars = get("#menu-finding-liquidity-bars");
+  if (liquidityBars) {
+    liquidityBars.replaceChildren(
+      menuBarRow(`7-day · ${formatUsdCompact(sevenDayBase.threshold_usd)} base`, sevenDayBase.met_rate_pct, formatPercent(sevenDayBase.met_rate_pct), "var(--teal)"),
+      menuBarRow(`14-day · ${formatUsdCompact(fourteenDayBase.threshold_usd)} base`, fourteenDayBase.met_rate_pct, formatPercent(fourteenDayBase.met_rate_pct), "var(--coral)"),
+      menuBarRow(`14-day · ${formatUsdCompact(fourteenDayStress.threshold_usd)} stress`, fourteenDayStress.met_rate_pct, formatPercent(fourteenDayStress.met_rate_pct), "var(--sky)"),
+    );
+  }
+
+  const beyondOneDayShare = isFiniteNumber(visibility.within_one_day_rate_pct)
+    ? Math.round((100 - visibility.within_one_day_rate_pct) * 100) / 100
+    : null;
+  const beyondOneDayAccounts = isFiniteNumber(beyondOneDayShare)
+    ? Math.round((beyondOneDayShare / 100) * visibility.accounts_total)
+    : null;
+  setText(
+    "#menu-finding-visibility-lede",
+    `${formatNumber(visibility.delayed_accounts)} of ${formatNumber(visibility.accounts_total)} accounts miss same-day reporting, yet ${formatPercent(visibility.within_one_day_rate_pct)} report within one day — roughly ${formatNumber(beyondOneDayAccounts)} accounts lag beyond it.`,
+  );
+  const visibilityBars = get("#menu-finding-visibility-bars");
+  if (visibilityBars) {
+    visibilityBars.replaceChildren(
+      menuBarRow("Same-day reporting", visibility.same_day_rate_pct, formatPercent(visibility.same_day_rate_pct), "var(--aqua)"),
+      menuBarRow("Within one day", visibility.within_one_day_rate_pct, formatPercent(visibility.within_one_day_rate_pct), "var(--sky)"),
+      menuBarRow("Beyond one day", beyondOneDayShare, formatPercent(beyondOneDayShare), "var(--purple)"),
+    );
+  }
+
+  setText(
+    "#menu-finding-value-lede",
+    `Four benefit candidates are measurable in the supplied data. None has cleared the validation gate that would let it be booked as value.`,
+  );
+  const valueGates = get("#menu-finding-value-gates");
+  if (valueGates) {
+    valueGates.replaceChildren(
+      menuGateRow(
+        `Liquidity — ${formatUsdCompact(grossAvailability.value_usd)} gross positive availability`,
+        "Mobility not established",
+      ),
+      menuGateRow(
+        `Workload — ${formatNumber(capacity.total_estimated_manual_hours_monthly, 1)} est. manual hours monthly`,
+        "Capacity value not fundable",
+      ),
+      menuGateRow(
+        `Closures — ${plural(closures.validation_candidates, "candidate")} · ${formatUsdCompact(closures.estimated_annual_fees_usd)} annual fees`,
+        `Closure value not fundable · ${formatNumber(closures.approved_closures)} approved`,
+      ),
+      menuGateRow(
+        `Evidence — ${plural(quality.source_artifacts, "source artifact")} · ${plural(quality.issue_queue.length, "open item")}`,
+        "Source certification open",
+      ),
+    );
+  }
 }
 
 function renderHeader() {
@@ -2582,6 +2747,7 @@ function bindEvents() {
 
 function renderAll() {
   renderHeader();
+  renderMenuFindings();
   renderQualityLanding();
   renderFilterChrome();
   renderVisibility();

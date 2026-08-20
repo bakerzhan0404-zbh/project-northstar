@@ -5,7 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FilterModel = require(path.join(__dirname, "..", "dashboard", "filter_model.js"));
+const FilterModel = require(path.join(__dirname, "..", "docs", "dashboard", "filter_model.js"));
 
 const ACCOUNT_DAY_COLUMNS = [
   "date",
@@ -392,7 +392,7 @@ test("default state reproduces the governed full-period controls", () => {
 
 test("regional facets reconcile the governed full-period dashboard data", () => {
   const actualPayload = JSON.parse(fs.readFileSync(
-    path.join(__dirname, "..", "dashboard", "dashboard_data.json"),
+    path.join(__dirname, "..", "docs", "dashboard", "dashboard_data.json"),
     "utf8",
   ));
   const summary = FilterModel.summarize(actualPayload);

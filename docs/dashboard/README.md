@@ -11,15 +11,34 @@ python3 src/build_dashboard_data.py
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open `http://127.0.0.1:8000/dashboard/`.
+Open `http://127.0.0.1:8000/docs/dashboard/`.
 
 The dashboard is intentionally local and has not been deployed or pushed.
 
 ## What is interactive—and why
 
-### Menu-first navigation
+### The landing page: baseline findings beside the menu
 
-The dashboard opens on a menu-only page. Search, filters, the applied-scope summary, and the Metric guide remain available, but no KPI, chart, warning, or evidence table appears until a user chooses one of six views.
+The dashboard opens on a landing page with two parts: a **baseline-evidence brief** and the **six-view menu** that remains the routing spine for everything else.
+
+The brief is a fixed, portfolio-wide read of the Week 1–2 snapshot. It does not respond to filters, and it says so on every band. It carries:
+
+| Element | Shows | Boundary kept visible |
+|---|---|---|
+| Portfolio decision band | The governed decision headline, its next step, and the three portfolio signals held apart | `Three separate signals—not a composite score. Portfolio-wide · filters do not apply.` |
+| Four headline measures | Accounts reporting late, gross positive availability, payment exception rate, and Week 1 structural checks | Each tile carries its own proxy, mobility, causation, or certification limit |
+| Finding 01 · Payment friction | Record, exception, and repair-minute shares of the deduplicated priority union | Overlap records are counted once; association, not causation |
+| Finding 02 · Liquidity screening | Share of complete windows meeting the base and stress thresholds at 7 and 14 days | A screening sensitivity—not surplus cash or transfer authorization |
+| Finding 03 · Reporting visibility | Same-day, within-one-day, and beyond-one-day shares of the account population | Reporting-date proxy—not start-of-day or elapsed-24-hour performance |
+| Finding 04 · Value not yet bookable | The four benefit candidates and the validation gate each still fails | Capacity and closure value not fundable; no approved closures; source certification open |
+
+Every number is read from the governed JSON contract at render time; none is hard-coded in the page. If the contract fails validation, both the decision band and the findings section are removed and only the disabled menu and the failure banner remain — the page never shows a conclusion it cannot source.
+
+Why the change: the earlier build opened on a menu with no evidence at all, which asked users to choose an investigation before knowing what the snapshot contained. The brief answers *what did we find* in one viewport; the menu still answers *what do you want to investigate*, and remains the only way to open a view.
+
+### Menu navigation
+
+Search, filters, the applied-scope summary, and the Metric guide remain available on the landing page. No analytical view, KPI panel, or evidence table opens until a user chooses one of six views.
 
 | Menu view | Purpose | Content shown | Filter applicability |
 |---|---|---|---|
@@ -32,7 +51,7 @@ The dashboard opens on a menu-only page. Search, filters, the applied-scope summ
 
 A normal menu selection reveals only the mapped content and leaves every analytical section collapsed. Metric search may route directly to a view and open one matching section. Switching views collapses the previous section, while filters and the liquidity/payment control choices remain applied.
 
-Why: the first viewport asks what the user wants to investigate instead of presenting seven conclusions like a slide.
+Why: selecting a view keeps one investigation on screen at a time, instead of presenting seven conclusions like a slide. The landing brief is deliberately separate from this — it reports the fixed portfolio baseline and cannot be filtered, so it never competes with the filtered evidence inside a view.
 
 ### Expanded analytical views
 
@@ -153,7 +172,7 @@ The six view choices are ordinary buttons inside a labelled navigation list. Sel
 - Capacity bars remain independent, share a scale, and are never additive. Filters do not apply to this enterprise-global comparison.
 - Closure rows remain `Candidate only · not approved`; local purpose, dependencies, continuity, closure cost, and fee removal remain unvalidated.
 - Regional rows reconcile to the same governed facet scope. The map uses neutral category colors, never a regional score, rank, risk heatmap, live-cash marker, or transfer path.
-- The local map image is decorative, hidden from assistive technology, and hash-pinned; its CC0 provenance is recorded in `dashboard/assets/README.md`.
+- The local map image is decorative, hidden from assistive technology, and hash-pinned; its CC0 provenance is recorded in `docs/dashboard/assets/README.md`.
 - Visual meaning is available without color or hover through direct labels, persistent legends, accessible chart descriptions, and semantic tables.
 
 ## Refresh and verify
@@ -163,8 +182,8 @@ python3 tests/test_data_quality.py
 python3 tests/test_week2_diagnostic.py
 python3 tests/test_dashboard_data.py
 python3 src/build_dashboard_data.py
-node --check dashboard/filter_model.js
-node --check dashboard/app.js
+node --check docs/dashboard/filter_model.js
+node --check docs/dashboard/app.js
 node --test tests/test_dashboard_filter_model.js
 python3 tests/test_dashboard_ui.py
 ```
@@ -176,13 +195,13 @@ The final UI test opens a temporary loopback server when the environment permits
 - `src/build_dashboard_data.py` — validation and dashboard-data adapter
 - `data/processed/W2_dashboard_account_day_facts.csv` — governed visibility and liquidity filter facts
 - `data/processed/W2_dashboard_payment_facts.csv` — governed payment filter facts
-- `dashboard/dashboard_data.json` — generated governed data, filter, definition, quality-dimension, monitoring, and action-queue contract
-- `dashboard/index.html` — menu-first semantic dashboard structure
-- `dashboard/styles.css` — Figma-aligned responsive design
-- `dashboard/assets/world-map.png` — locally vendored decorative CC0 Robinson-projection map raster
-- `dashboard/assets/README.md` — map source, author, CC0 license, retrieval date, dimensions, and checksum
-- `dashboard/filter_model.js` — deterministic filtering, governed visualization summaries, and search
-- `dashboard/app.js` — six-view navigation, quality drill-down/action queue, accordions, charts, search, filters, Metric guide, accessibility, and fail-closed interactions
+- `docs/dashboard/dashboard_data.json` — generated governed data, filter, definition, quality-dimension, monitoring, and action-queue contract
+- `docs/dashboard/index.html` — landing brief, six-view menu, and semantic dashboard structure
+- `docs/dashboard/styles.css` — Figma-aligned responsive design
+- `docs/dashboard/assets/world-map.png` — locally vendored decorative CC0 Robinson-projection map raster
+- `docs/dashboard/assets/README.md` — map source, author, CC0 license, retrieval date, dimensions, and checksum
+- `docs/dashboard/filter_model.js` — deterministic filtering, governed visualization summaries, and search
+- `docs/dashboard/app.js` — landing-brief findings, six-view navigation, quality drill-down/action queue, accordions, charts, search, filters, Metric guide, accessibility, and fail-closed interactions
 - `tests/test_dashboard_data.py` — analytical contract tests
 - `tests/test_dashboard_filter_model.js` — filter, visualization reconciliation, search, date, mutation, and empty-scope tests
 - `tests/test_dashboard_ui.py` — menu routing, exact quality mappings, adversarial quality mutations, disclosure/search behavior, visualization, keyboard, claim, safety, and local-asset tests
