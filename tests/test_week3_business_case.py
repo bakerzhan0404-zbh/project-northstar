@@ -24,6 +24,8 @@ from week3_business_case import (  # noqa: E402
     INITIAL_ENVELOPE_LOW_USD,
     MODEL_OUTPUT_KEYS,
     MODEL_VERSION,
+    NA_Q4_FREEZE_FLOOR_MONTH,
+    PLANNING_COLUMNS,
     PROCESSED,
     RECOMMENDATION_TEST,
     SCENARIO_COLUMNS,
@@ -37,10 +39,13 @@ from week3_business_case import (  # noqa: E402
     WEEK3,
     build_business_case_model,
     build_controls,
+    build_scenario_planning,
     validate_control_contract,
     validate_model_contract,
+    validate_scenario_planning_contract,
     validate_week2_evidence,
     write_outputs,
+    write_scenario_planning,
 )
 
 
@@ -85,6 +90,15 @@ def all_control_mutations_fail(mutations) -> bool:
     return all(
         assertion_raises(
             lambda changed=changed: validate_control_contract(changed)
+        )
+        for changed in mutations
+    )
+
+
+def all_planning_mutations_fail(mutations) -> bool:
+    return all(
+        assertion_raises(
+            lambda changed=changed: validate_scenario_planning_contract(changed)
         )
         for changed in mutations
     )
@@ -411,6 +425,40 @@ def main() -> None:
         f"SA{number:02d}" for number in range(1, 8)
     ]
 
+    planning = build_scenario_planning()
+    planning_path = write_scenario_planning(planning)
+    stored_planning = pd.read_csv(planning_path, keep_default_na=False)
+    planning_round_trip_matches = (
+        assert_frame_equal(stored_planning, planning, check_dtype=False) is None
+    )
+
+    def planning_cell_mutation(column, value, row=0):
+        changed = planning.copy()
+        changed.loc[changed.index[row], column] = value
+        return changed
+
+    def planning_drop_column(column):
+        return planning.drop(columns=[column])
+
+    def planning_extra_column():
+        changed = planning.copy()
+        changed["unsafe_extra_column"] = "unsafe"
+        return changed
+
+    planning_mutations = [
+        planning_drop_column("scenario_name"),
+        planning_extra_column(),
+        planning_cell_mutation(
+            "illustrative_cost_low_usd", 900_000
+        ),  # below the disclosed FY2026 floor
+        planning_cell_mutation(
+            "illustrative_cost_high_usd", 1_600_000
+        ),  # above the disclosed FY2026 ceiling
+        planning_cell_mutation("steady_state_month_low", 999),
+        planning_cell_mutation("planning_status", "APPROVED VALUE"),
+        planning_cell_mutation("scenario_id", "downside", row=1),
+    ]
+
     checks = {
         "Week 2 liquidity screens reconcile exactly": (
             evidence["stress_liquidity_screen_usd"] == 21_000_000
@@ -633,17 +681,57 @@ def main() -> None:
         "model generation and stored outputs are deterministic": (
             deterministic and round_trip_matches
         ),
+        "illustrative planning range carries the exact governed schema": (
+            tuple(planning.columns) == PLANNING_COLUMNS
+            and list(planning["scenario_id"]) == list(SCENARIO_INPUTS)
+            and len(planning) == 3
+        ),
+        "illustrative cost range stays inside the disclosed FY2026 ceiling": (
+            planning.loc[planning["scenario_id"].eq("downside"), "illustrative_cost_low_usd"].item()
+            == INITIAL_ENVELOPE_LOW_USD
+            and planning.loc[planning["scenario_id"].eq("upside"), "illustrative_cost_high_usd"].item()
+            == INITIAL_ENVELOPE_HIGH_USD
+            and (planning["illustrative_cost_low_usd"] >= INITIAL_ENVELOPE_LOW_USD).all()
+            and (planning["illustrative_cost_high_usd"] <= INITIAL_ENVELOPE_HIGH_USD).all()
+            and (planning["illustrative_cost_low_usd"] <= planning["illustrative_cost_high_usd"]).all()
+        ),
+        "ramp-up and steady-state months reconcile to the confirmed NA Q4 floor": (
+            planning["earliest_benefit_realization_month"].eq(NA_Q4_FREEZE_FLOOR_MONTH).all()
+            and (
+                planning["steady_state_month_low"]
+                == planning["earliest_benefit_realization_month"] + planning["ramp_up_months_low"]
+            ).all()
+            and (
+                planning["steady_state_month_high"]
+                == planning["earliest_benefit_realization_month"] + planning["ramp_up_months_high"]
+            ).all()
+            and "eight-week" in planning["benefit_realization_basis"].iloc[0]
+            and "NA BU CFO" in planning["benefit_realization_basis"].iloc[0]
+        ),
+        "illustrative planning range stays excluded from recognized value and returns": (
+            planning["planning_status"].str.contains("ANALYST-ASSUMPTION").all()
+            and planning["planning_status"].str.contains("excluded from").all()
+            and not (forbidden_columns & set(planning.columns))
+        ),
+        "illustrative planning CSV round-trips deterministically": planning_round_trip_matches,
+        "unsafe illustrative planning mutations fail closed": all_planning_mutations_fail(
+            planning_mutations
+        ),
     }
 
-    if len(checks) != 38:
-        raise AssertionError(f"Expected 38 automated checks, found {len(checks)}")
+    if len(checks) != 44:
+        raise AssertionError(f"Expected 44 automated checks, found {len(checks)}")
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():
         print(f"{'PASS' if passed else 'FAIL'}: {name}")
     if failed:
         raise AssertionError(f"Week 3 business-case test failures: {failed}")
-    print("All 38 Week 3 business-case automated checks passed.")
+    print("All 44 Week 3 business-case automated checks passed.")
     print("12 model-control records remain separately labelled MODEL CONTROL PASS.")
+    print(
+        "3 illustrative Wave-1 planning rows remain separately labelled "
+        "ANALYST-ASSUMPTION and excluded from recognized value."
+    )
 
 
 if __name__ == "__main__":

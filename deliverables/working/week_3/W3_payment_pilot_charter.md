@@ -14,7 +14,19 @@
 
 This charter asks the CFO, Group Treasurer, Shared Services Lead, CIO, BU/Regional Finance, and management control owner to review a bounded payment-evidence and process-test design. Week 3 may approve further readiness and diagnostic work; it does not authorize production execution.
 
-A separate go/no-go approval is required after the source population and value reconcile, the selected records link to required evidence, the root-cause taxonomy and controlled baseline are approved, service/control owners sign off, costs are ranged, the pilot avoids the approved peak blackout, and rollback is rehearsed. Completion would not itself authorize ACG-wide extrapolation, automation scale, headcount action, capacity/P&L recognition, or a platform decision.
+A separate go/no-go approval is required after the source population and value reconcile, the selected records link to required evidence, the root-cause taxonomy and controlled baseline are approved, service/control owners sign off, costs are ranged, the pilot fits outside the confirmed NA Q4 change-freeze window (see below), and rollback is rehearsed. Completion would not itself authorize ACG-wide extrapolation, automation scale, headcount action, capacity/P&L recognition, or a platform decision.
+
+## Confirmed constraint: North America Q4 change freeze
+
+Rachel Kim, North America Business Unit CFO, has confirmed a binding constraint on any production intervention that this charter's later phases could produce:
+
+- **Freeze window:** North America will not accept payment-routing or approval-workflow **production** changes during the **eight weeks surrounding peak holiday operations**. The exact calendar dates are TBD and must be confirmed by NA BU Finance; this charter treats the eight-week duration and the no-production-change rule as fixed regardless of the exact dates.
+- **Permitted during the freeze:** data cleanup, design, testing, and low-risk account validation may continue. Phases 0–3 of this charter (source/owner readiness, the 120-record review, intervention design/baseline, and technical/control rehearsal in a safe environment) are not production changes and are not blocked by the freeze.
+- **Prohibited during the freeze:** Phase 4 (later bounded operation) may not begin, and no live payment-routing or approval-workflow configuration may change, for any cohort touching North America while the freeze is in effect.
+- **Sign-off requirement:** independent of timing, **any North America production change requires Rachel Kim's (NA BU CFO) sign-off** before launch. Sign-off inside the freeze window does not override the freeze; the two are separate, additive approvals.
+- **Sequencing consequence:** if Phase 3 evidence closes while the freeze is in effect, Phase 4 must wait until the freeze lifts and Rachel Kim signs off, rather than launching on evidence-readiness alone. This is reflected in the 90-day mobilization roadmap (`W3_interim_steering_deck.md`, Slide 10) and in the illustrative planning range (`W3_business_case.md`), both of which treat Month 5 as the earliest possible North America production start.
+
+This constraint is `ACG-DATA` (a confirmed client fact, not an analyst hypothesis) and is tracked as risk `R031` in `W3_risk_register.csv`/`W3_risk_register.md` and as a confirmed constraint in `W3_decision_log.md`.
 
 ## Objective and testable hypothesis
 
@@ -82,7 +94,7 @@ The final intervention cohort is **TBD after root-cause review**. It must:
 - target one or more evidenced, remediable causes rather than cohort membership alone;
 - have a controlled source population and like-for-like comparator;
 - exclude or separately protect payroll, tax, customer refunds, critical suppliers, and other owner-defined critical flows unless their owner explicitly approves a safe observation/test design;
-- fit outside the approved peak blackout;
+- fit outside the confirmed eight-week NA Q4 change-freeze window and carry NA BU CFO sign-off for any North America production change (see "Confirmed constraint: North America Q4 change freeze" above);
 - retain required approvals, segregation, access, sanctions/beneficiary, duplicate, audit-trail, reconciliation, emergency, and service controls; and
 - remain small enough to stop and restore under the approved four-hour rollback standard.
 
@@ -106,10 +118,10 @@ This charter excludes:
 | 1. Four-stratum review | Review 120 records under the locked selection/matching rule; assign evidence-based reasons and actions | All reviewed issues have evidence status, reason or explicit unknown, owner, action, and review QA | Duration TBD from evidence-linkage and reviewer capacity |
 | 2. Intervention design and baseline | Select an evidenced cause; define the standard change, comparator, KPI, service/control tests, costs, contingency, and rollback | Process and control owners approve a like-for-like baseline and target-setting rule | Duration TBD; target locked before viewing result |
 | 3. Technical/control rehearsal | Test workflow, access, change, failure modes, evidence capture, contingency and rollback in a safe environment | Architecture/cyber/control/service sign-off; verified restoration at or below four hours | Duration TBD from change plan |
-| 4. Later bounded operation | If separately approved, operate the signed intervention outside peak | Minimum four consecutive comparable operating weeks with all service/control gates | Proposed minimum four consecutive weeks; extend after material definition/population change |
+| 4. Later bounded operation | If separately approved, operate the signed intervention outside the confirmed eight-week NA Q4 change-freeze window and with NA BU CFO sign-off | Minimum four consecutive comparable operating weeks with all service/control gates | Proposed minimum four consecutive weeks; cannot start inside the freeze window even if Phases 0–3 finish early; extend after material definition/population change |
 | 5. Evaluation | Compare baseline and intervention; assess causes, KPI, service, controls, adoption, cost, and evidence limits | Written stop/extend/redesign/scale recommendation and separate CFO/SteerCo decision | Evaluation window TBD |
 
-The total calendar duration remains TBD because source linkage, baseline stability, intervention choice, reviewer capacity, and approved blackout dates are not supplied.
+The total calendar duration remains TBD because source linkage, baseline stability, intervention choice, and reviewer capacity are not supplied. The freeze itself is no longer an open unknown: North America production changes are confirmed excluded for eight weeks surrounding peak holiday operations, and any North America production change requires NA BU CFO sign-off regardless of timing; only the exact calendar dates remain TBD pending NA BU Finance confirmation.
 
 ## Required record-level evidence
 
@@ -194,7 +206,7 @@ No later launch may occur without:
 3. named business, process, data, technology, control, service, exception, and benefit/cost owners;
 4. approved intake, approval, SoD, access, duplicate, sanctions/beneficiary, audit, submission, reconciliation, emergency, and evidence-retention controls;
 5. a like-for-like baseline and target-setting rule locked before results;
-6. peak-blackout and critical-service definitions approved by affected BU/Regional Finance;
+6. critical-service definitions approved by affected BU/Regional Finance, timed outside the confirmed eight-week NA Q4 change-freeze window, and carrying NA BU CFO sign-off for any North America production change;
 7. architecture, cyber, change, resilience, contingency, and rollback approval with restoration rehearsed at or below four hours;
 8. one-time and recurring low/base/high cost ranges with source and Finance review; and
 9. a recorded CFO/SteerCo go/no-go decision.
@@ -240,7 +252,7 @@ Completion is not approval to scale. The CFO/SteerCo must separately decide to s
 1. What source population, value, period, status, and duplicate/resubmission logic is authoritative?
 2. Can the 120 records link to source documents, criticality, reason codes, event timestamps, control evidence, and outcomes?
 3. Which causes are evidenced strongly enough to select a bounded intervention and comparator?
-4. Which payment types are critical, what blackout calendar applies, and what service tolerance triggers pause?
+4. Which payment types are critical, what exact NA Q4 freeze calendar dates apply within the confirmed eight-week window, and what service tolerance triggers pause?
 5. Which process targets are reasonable after the controlled baseline, and who approves them?
 6. What low/base/high implementation and run-cost range is acceptable?
 7. Who has pause, rollback, restart, and later scale authority?
@@ -256,5 +268,6 @@ Until those decisions are evidenced and recorded, this remains a design-only cha
 - Future-state principles: `W3_design_principles.md`, especially DP-03 through DP-08.
 - Initial FY2026 affordability ceiling: start-of-Week-3 CFO update recorded in `W3_workplan.md` and `W3_analysis_log.md`; it is not a pilot cost estimate.
 - Client and stakeholder constraints: `client/CLIENT_BRIEF.md` and `client/STAKEHOLDER_PACK.md`.
+- Confirmed NA Q4 change-freeze constraint: Rachel Kim (NA BU CFO), Week 3, recorded in `W3_decision_log.md` and `W3_risk_register.csv`/`W3_risk_register.md` (R031).
 
 The supplied population and reproduced measures are `ACG-DATA` / `ANALYST-CALC`. The diagnostic selection, intervention, targets, timing, ownership, cost requirements, and gates are `ANALYST-JUDGMENT` / `ANALYST-ASSUMPTION` and do not authorize execution or value.

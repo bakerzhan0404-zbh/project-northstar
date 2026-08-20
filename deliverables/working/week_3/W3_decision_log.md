@@ -18,6 +18,15 @@ Named client owners and decision dates remain proposed until the accountable cli
 | Compare local, federated, and global options against common gates | Completed for design selection | All execution-evidence gates remain `OPEN`; no option is execution-ready |
 | Keep receivables and FX data-gated | Retained | No controlled receivables or executed FX exposure/trade data supports a Week 3 value claim |
 
+## Confirmed client constraints (Week 3)
+
+These are client-confirmed facts, not analyst decisions or recommendations. Every subsequent Week 3 decision, pilot phase, and roadmap date must respect them as given.
+
+| Constraint | Source | Confirmed limit | Downstream effect |
+|---|---|---|---|
+| FY2026 initial transformation envelope | Elena Marquez, Group CFO | `$1.0–$1.5m`; any larger commitment requires staged approval after demonstrated Wave 1 benefits | Treated only as a ceiling (DEC-24); anchors the illustrative Wave-1 cost range in `W3_business_case.md` |
+| North America Q4 change freeze | Rachel Kim, NA BU CFO | North America will not accept payment-routing or approval-workflow **production** changes during the **eight weeks surrounding peak holiday operations** (exact calendar TBD from NA BU Finance); data cleanup, design, testing, and low-risk account validation may continue; **any North America production change requires Rachel Kim's sign-off** | Payment pilot Phase 4 cannot launch inside the freeze window regardless of evidence-readiness date (`W3_payment_pilot_charter.md`); tracked as risk `R031`; reflected as the Month 5 earliest-production-start floor in the 90-day roadmap (`W3_interim_steering_deck.md`, Slide 10) and the illustrative planning range (`W3_business_case.md`) |
+
 ## Week 3 analyst decisions
 
 | ID | Date | Decision | Decision maker | Rationale | Conditions / limitation | Follow-up | Proposed owner | Status |
@@ -40,6 +49,7 @@ Named client owners and decision dates remain proposed until the accountable cli
 | Evidence and control ownership | Confirm accountable owners for authoritative data, mobility, payment causes, service, controls, costs, and benefits | Owner confirmation is required before any later go/no-go | CFO / functional executives | Not decided |
 | Affordability test | Require a bottom-up initial-stage cost range against the `$1.0–$1.5m` ceiling | The ceiling is not a cost estimate or authority to spend; ROI/NPV/payback remain unavailable | CFO / Finance | Not decided |
 | Stop and switch rules | Approve non-compensating gates and the local-stabilization fallback | Any failure of global ownership, minimum integration readiness, affordability, control, service, local-right, or rollback conditions blocks or narrows the direction | CFO / Steering Committee | Not decided |
+| NA Q4 freeze sequencing | Confirm the exact eight-week freeze calendar and require the payment pilot's later bounded operation (Phase 4) to sit outside it, with Rachel Kim's sign-off on any North America production change | The freeze duration and no-production-change rule are already confirmed (see "Confirmed client constraints" above); only the exact calendar dates and the resulting go/no-go date are open | NA BU CFO (Rachel Kim) / CFO / Steering Committee | Not decided |
 
 ## Decision-status convention
 

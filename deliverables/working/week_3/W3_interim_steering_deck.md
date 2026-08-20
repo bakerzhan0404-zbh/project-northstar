@@ -274,21 +274,24 @@ These packages combine the most decision-relevant risks into named closure work.
 | Decision day | Confirm federated direction, accountable owners, local fallback, and no-execution boundary | Recorded agreement/disagreement and named package owners |
 | Days 1–30 | Reconcile the 55-account and 7,600-record populations; lock definitions, source owners, calendars, and evidence gaps | Controlled population and metric-contract readout |
 | Days 31–60 | Complete local/control/architecture review; develop CR01–CR10 cost ranges; rehearse rollback only in an approved safe environment | Gate register, cost evidence, deficiencies, and remediation owners |
-| Days 61–90 | Lock pilot baselines and target rules; assess cohort readiness and evidence completeness | CFO/SteerCo pack recommending `stop / extend evidence work / approve a later bounded pilot` |
+| Days 61–90 | Lock pilot baselines and target rules; assess cohort readiness and evidence completeness | CFO/SteerCo pack recommending `stop / extend evidence work / approve a later bounded pilot`, subject to the confirmed NA Q4 freeze below |
 
-**Decisions requested now:** endorse the direction; assign evidence owners; approve the 90-day mobilization timebox; agree that any pilot launch, spend, value, or scale requires a later decision.
+**Confirmed constraint:** North America will not accept payment-routing or approval-workflow production changes during the eight weeks surrounding peak holiday operations (exact dates TBD from NA BU Finance), and any North America production change requires NA BU CFO (Rachel Kim) sign-off. Days 1–90 (data cleanup, design, testing, and low-risk validation) are unaffected, but Day 90 falls near the start of a typical Q4 freeze window — so even a clean evidence-readiness result at Day 90 does not guarantee an immediate North America launch. Treat Month 5 as the earliest realistic North America production start, not Day 90.
+
+**Decisions requested now:** endorse the direction; assign evidence owners; approve the 90-day mobilization timebox; agree that any pilot launch, spend, value, or scale requires a later decision; and confirm that any North America production change also waits for the freeze window to lift and for NA BU CFO sign-off, regardless of evidence-readiness date.
 
 ### Visual grammar
 
-Four-band report timeline with a persistent `EVIDENCE ONLY` rail. The last band ends at a decision gate, not a launch arrow.
+Four-band report timeline with a persistent `EVIDENCE ONLY` rail and a confirmed NA Q4 freeze marker. The last band ends at a decision gate, not a launch arrow.
 
 ### Speaker notes
 
-Close the loop by repeating the opening decision with the evidence attached. The 90 days are an analyst-proposed mobilization timebox, not a promise that every gate will close. Time does not override evidence: unfinished packages remain open and force an extension, redesign, or switch to local stabilization. No production pilot begins within this plan unless a separate go/no-go is granted after the relevant data, control, service, specialist, cost, and rollback gates are evidenced.
+Close the loop by repeating the opening decision with the evidence attached. The 90 days are an analyst-proposed mobilization timebox, not a promise that every gate will close. Time does not override evidence: unfinished packages remain open and force an extension, redesign, or switch to local stabilization. No production pilot begins within this plan unless a separate go/no-go is granted after the relevant data, control, service, specialist, cost, and rollback gates are evidenced. Separately, the confirmed NA Q4 change freeze means Day 90 evidence-readiness does not equal a Day 90 North America launch: any wave touching North America payment routing or approval workflows needs the freeze to lift and Rachel Kim's sign-off first, which the illustrative planning range treats as pushing the earliest funded North America production start to Month 5.
 
 ### Provenance
 
 - `deliverables/working/week_3/W3_future_state_operating_model.md` — evidence-readiness, pilot, and separate-scale stage gates.
 - `deliverables/working/week_3/W3_visibility_pilot_charter.md` and `deliverables/working/week_3/W3_payment_pilot_charter.md` — pre-launch evidence, rollback, stop, and no-scale rules.
-- `deliverables/working/week_3/W3_business_case.md` — investability stage gates and cost/value closure requirements.
+- `deliverables/working/week_3/W3_business_case.md` — investability stage gates, cost/value closure requirements, and the illustrative Wave-1 planning range.
 - `deliverables/working/week_3/W3_strategic_options.md` — decision, fallback, and no-execution boundary.
+- `deliverables/working/week_3/W3_decision_log.md` and `W3_risk_register.csv`/`W3_risk_register.md` (R031) — the confirmed NA Q4 change-freeze constraint and its sequencing effect.

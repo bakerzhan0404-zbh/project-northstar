@@ -25,6 +25,7 @@ No mitigation, contingency, owner, or status in this analyst register records cl
 | R028 | A validation-case output is presented as an investable case | Benefit / governance | 4 | 5 | 20 | ROI, NPV, payback, funding recommendation, or booked benefit appears before evidence gates close | Keep cash/P&L/capacity recognized value at `$0`, risk unquantified, and return metrics unavailable | Withdraw the investment request and complete value/cost evidence | Finance / value owners | Open | `ANALYST-CALC` |
 | R029 | Federated coordination proceeds without global data/control ownership or minimum integration readiness | Operating model / technology | 3 | 5 | 15 | No accountable global owner, interface plan, or retirement-aware architecture is agreed | Time-box owner and architecture decisions; keep modular interfaces and local rights | Switch to local stabilization with the common data/control minimum | CFO / Group Treasurer / CIO | Open | `ANALYST-JUDGMENT` |
 | R030 | Public cases or the Informatica data-quality article are treated as proof of ACG performance or solution fit | Evidence | 2 | 4 | 8 | External concepts substitute for ACG data, controls, or value evidence | Use public material only as context; retain publisher, limitation, and access status | Remove the unsupported claim or reclassify it as a hypothesis | Baker | Monitoring | `JPM-PUBLIC` / `PUBLIC-CONTEXT` |
+| R031 | A pilot or production change proceeds inside the confirmed eight-week NA Q4 change-freeze window, or without NA BU CFO sign-off, disrupting peak-season payment routing or approval workflows | Delivery / governance | 3 | 5 | 15 | A go/no-go, launch date, or evidence-readiness milestone lands inside the eight-week freeze window without a confirmed NA BU CFO sign-off, or the exact freeze calendar remains unconfirmed as the 90-day evidence timebox closes | Sequence Phase 4 (later bounded operation) outside the confirmed freeze window regardless of evidence-readiness date; obtain Rachel Kim's (NA BU CFO) sign-off for any North America production change; confirm exact freeze dates with NA BU Finance before locking the go/no-go date | Hold the pilot at Phase 3 (technical/control rehearsal) until the freeze lifts and sign-off is recorded; do not launch on evidence-readiness alone | NA BU CFO (Rachel Kim) / BU Finance / Shared Services Lead | Open | `ACG-DATA` / `ANALYST-JUDGMENT` |
 
 ## Highest-priority control actions
 
@@ -32,6 +33,7 @@ No mitigation, contingency, owner, or status in this analyst register records cl
 2. Prevent value leakage in communication: `$38.13m` is a screen, recognized cash/P&L/capacity is `$0`, and risk remains `NOT QUANTIFIED`.
 3. Complete CR01–CR10 before testing affordability or returns; the `$1.0–$1.5m` ceiling is not a cost.
 4. Preserve the documented fallback: use local stabilization if global ownership, minimum integration readiness, or affordability fails.
+5. Sequence any North America production change outside the confirmed eight-week NA Q4 change-freeze window and obtain NA BU CFO (Rachel Kim) sign-off; do not let evidence-readiness alone trigger a launch decision.
 
 ## Relationship to Week 2 risks
 

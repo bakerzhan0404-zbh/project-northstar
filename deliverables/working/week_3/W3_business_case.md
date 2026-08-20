@@ -140,6 +140,34 @@ What the downside changes:
 - It prevents any claim that the current analysis funds the program.
 - If global data/control ownership is not confirmed, minimum integration readiness is absent, or a bottom-up initial-stage cost cannot fit the `$1.0–$1.5m` ceiling, the decision switches to **local stabilization** while preserving the common data/control minimum.
 
+## Illustrative planning scenarios — analyst assumption, not a business case
+
+Zero recognized cash, P&L, and capacity value is an appropriate **control boundary**: it stops an unvalidated number from being spent, booked, or reported as if it were certified. It is not a substitute for a working business case, and it should not be read as "no planning view exists." Finance and the Steering Committee still need a distinction between **validated value** (stays `$0` until VG01–VG12 close, no matter how this section reads) and **hypothetical opportunity** (a bounded, clearly labelled range useful for sequencing and affordability conversation while that evidence work proceeds).
+
+The table below is that range. Every figure is `ANALYST-ASSUMPTION`, reproducible from `src/week3_business_case.py`, and excluded from `validated_value_usd`, `funded_value_usd`, `recognized_value_usd`, the four-value ledger, and any ROI/NPV/payback calculation. It does not relax BC01–BC12, and it is not a funding request.
+
+| Dimension | Conservative (downside-anchored) | Base | Upside |
+|---|---|---|---|
+| Anchored diagnostic case | `$21m` screen, 2 candidates, 50 hours/month | `$35m` screen, 4 candidates, 150 hours/month | `$46.2m` screen, 4 candidates, 150 hours/month |
+| Illustrative Wave-1 cost range | `$1.0m` (bottom of the disclosed ceiling; narrowest scope: visibility census plus one bounded payment cohort) | `$1.15m–$1.35m` (mid ceiling; both pilot charters at standard scope) | `$1.35m–$1.5m` (top of the disclosed ceiling; full Wave-1 scope) |
+| Cost basis | Illustrative allocation of the already-disclosed `$1.0–$1.5m` FY2026 ceiling by Wave-1 scope tier — **not** a vendor-sourced or bottom-up estimate; CR01–CR10 evidence still governs any real cost | Same basis | Same basis; any cost above `$1.5m` returns for staged CFO/SteerCo approval after demonstrated Wave 1 benefits |
+| Earliest possible benefit-realization start | Month 5 | Month 5 | Month 5 |
+| Ramp-up period (start to steady state) | 6–9 months | 4–6 months | 3–4 months |
+| Illustrative steady-state month | Month 11–14 | Month 9–11 | Month 8–9 |
+| Illustrative program duration (decision day through steady state) | 11–14 months | 9–11 months | 8–9 months |
+
+**Why every tier shares a Month 5 floor:** the earliest possible go/no-go follows the existing 90-day evidence-mobilization timebox (~Month 3 from the 18 August 2026 decision day). Any wave that changes North America payment-routing or approval-workflow production cannot execute inside the confirmed eight-week NA Q4 change-freeze and requires separate NA BU CFO sign-off (see `W3_payment_pilot_charter.md`), which pushes the earliest funded North America production start to Month 5 regardless of scenario tier or how quickly evidence closes. Data cleanup, design, testing, and low-risk account validation are not subject to this floor and can continue inside the freeze window. Optimism narrows the ramp-up and steady-state range; it cannot move the freeze-driven floor.
+
+**Key sensitivities:**
+
+1. **Evidence-gate closure rate** (VG01–VG12, CR01–CR10) — late closure shifts every month in the table to the right by the same margin.
+2. **NA Q4 freeze calendar** — exact dates remain TBD from NA BU Finance; a freeze that starts before Day 90 pushes the Month 5 floor later still.
+3. **Closure-validation and capacity-conversion rates** (2 vs. 4 candidates; 50 vs. 150 hours/month) — move eventual benefit magnitude, not this timeline.
+4. **Bottom-up CR01–CR10 cost outcome versus the disclosed ceiling** — a cost above `$1.5m` returns for staged CFO/SteerCo approval rather than proceeding within this Wave-1 range.
+5. **Global data/control ownership, minimum integration readiness, and affordability** — failing any one switches the direction to local stabilization, which this federated-only range does not model.
+
+The reproducible detail is in `data/processed/W3_business_case_scenario_planning.csv`, generated and validated alongside the other four governed outputs by `src/week3_business_case.py`.
+
 ## Later formulas — inactive until gates close
 
 These formulas define what Finance may calculate later; they are **not active in the current model**:
@@ -166,9 +194,9 @@ Passing a later gate does not retroactively convert a Week 2 screen into a benef
 
 ## Model controls and reproducibility
 
-`src/week3_business_case.py` regenerates the scenario table, non-additive value ledger, cost-evidence requirements, model controls, and assumptions register. `tests/test_week3_business_case.py` checks Week 2 reconciliation, exact scenario inputs, zero-value boundaries, cost completeness, envelope interpretation, non-additivity, deterministic output, and fail-closed mutations.
+`src/week3_business_case.py` regenerates the scenario table, non-additive value ledger, cost-evidence requirements, model controls, assumptions register, and the illustrative Wave-1 planning range. `tests/test_week3_business_case.py` checks Week 2 reconciliation, exact scenario inputs, zero-value boundaries, cost completeness, envelope interpretation, non-additivity, the illustrative planning-range schema and NA Q4 floor reconciliation, deterministic output, and fail-closed mutations.
 
-Current executable result: all **38 automated checks** pass. Separately, the model writes **12 model-control records** labelled `MODEL CONTROL PASS`; each also carries an `OPEN` or `BLOCKED` evidence-gate status so a passing model control cannot be read as closed client evidence. The control evidence is in `data/processed/W3_business_case_controls.csv`.
+Current executable result: all **44 automated checks** pass. Separately, the model writes **12 model-control records** labelled `MODEL CONTROL PASS`; each also carries an `OPEN` or `BLOCKED` evidence-gate status so a passing model control cannot be read as closed client evidence. The control evidence is in `data/processed/W3_business_case_controls.csv`. The illustrative planning range writes **3 rows**, each labelled `ANALYST-ASSUMPTION` and explicitly excluded from recognized value, in `data/processed/W3_business_case_scenario_planning.csv`.
 
 ## Final boundary
 

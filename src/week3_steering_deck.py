@@ -221,12 +221,12 @@ def title(slide, text, *, subtitle=None, y=Y_TITLE, size=PT_TITLE):
         write(g, subtitle, size=PT_BODY, color=TEAL_LT, font=F_BODY)
 
 
-def callout(slide, label, text, *, y=Y_BAR, fill=NAVY, label_color=None):
-    rect(slide, MARGIN, y, CONTENT_W, H_BAR, fill=fill)
+def callout(slide, label, text, *, y=Y_BAR, fill=NAVY, label_color=None, height=H_BAR):
+    rect(slide, MARGIN, y, CONTENT_W, height, fill=fill)
     f = textbox(slide, MARGIN + 10, y + 8, 96, 14)
     write(f, label.upper(), size=PT_EYEBROW, color=label_color or BLUE,
           bold=True, font=F_BODY, spacing=1.4)
-    g = textbox(slide, MARGIN + 112, y + 7, CONTENT_W - 124, H_BAR - 12,
+    g = textbox(slide, MARGIN + 112, y + 7, CONTENT_W - 124, height - 12,
                 anchor=MSO_ANCHOR.MIDDLE)
     write(g, text, size=PT_BODY, color=WHITE, font=F_BODY, line=1.15)
 
@@ -706,7 +706,8 @@ def slide_10(prs):
          "and safe-environment rollback rehearsal."),
         ("Days 61–90", "Lock and decide",
          "Lock baselines and target rules; return with stop, extend-evidence, "
-         "or a later bounded-pilot recommendation."),
+         "or a later bounded-pilot recommendation, subject to the confirmed "
+         "NA Q4 freeze below."),
     ]
     y = Y_BODY + 12
     for i, (label, head, body) in enumerate(bands):
@@ -722,11 +723,18 @@ def slide_10(prs):
         if i < len(bands) - 1:
             hrule(s, MARGIN, y - 5, CONTENT_W, color=RULE_LT, weight=0.5)
 
+    callout(s, "NA Q4 freeze",
+            "Confirmed: no NA payment-routing/approval-workflow production "
+            "change for 8 weeks around peak; any NA production change needs "
+            "BU CFO sign-off — earliest NA production start is Month 5.",
+            y=296, height=34, fill=OCHRE, label_color=NAVY)
     callout(s, "Decisions now",
             "Endorse the direction · assign owners · approve the evidence "
-            "timebox · reserve all launch, spend, value, and scale decisions.")
+            "timebox · reserve all launch, spend, value, and scale decisions.",
+            y=333)
     source(s, "Source: W3 future-state operating model; W3 pilot charters; "
-              "W3 business case and strategic options.")
+              "W3 business case and strategic options; W3 decision log and "
+              "risk register (R031).")
 
 
 BUILDERS = [slide_01, slide_02, slide_03, slide_04, slide_05,

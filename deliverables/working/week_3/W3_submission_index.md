@@ -43,6 +43,7 @@ The executive spine is consistent: **federated coordination is the provisional d
 | [Business-case validation narrative](W3_business_case.md) | Three diagnostic cases, four separate value types, cost gaps, downside, and stage gates | Validation case; not an investment or funding request |
 | [Assumptions register](W3_assumptions_register.csv) | VG01–VG12 and SA01–SA07 evidence/assumption ownership | Open or blocked pending evidence |
 | [`W3_business_case_scenarios.csv`](../../../data/processed/W3_business_case_scenarios.csv) | Downside/base/upper diagnostic quantities and zero-value boundaries | Reproducible; not benefits |
+| [`W3_business_case_scenario_planning.csv`](../../../data/processed/W3_business_case_scenario_planning.csv) | Illustrative Wave-1 cost range, benefit-realization month, ramp-up, steady state, and sensitivities per scenario | Reproducible; `ANALYST-ASSUMPTION` planning range, excluded from recognized value |
 | [`W3_business_case_value_ledger.csv`](../../../data/processed/W3_business_case_value_ledger.csv) | Cash, P&L, capacity, and risk kept non-additive | Cash/P&L/capacity recognized `$0`; risk `NOT QUANTIFIED` |
 | [`W3_cost_evidence_requirements.csv`](../../../data/processed/W3_cost_evidence_requirements.csv) | Ten cost and timing evidence packages | All open; actual cost unavailable |
 | [`W3_business_case_controls.csv`](../../../data/processed/W3_business_case_controls.csv) | Model-contract and fail-closed checks | Model-control pass does not close evidence gates |
@@ -98,5 +99,6 @@ python3 tests/test_week3_executive_pack.py
 - The provisional option result is federated `87`, local `72`, and global `60`; federated leads all five plausible sensitivities.
 - The visibility frame contains 10 purposive accounts. The payment frame contains 120 records with per-cohort `8 + 7 + 15` allocation, `Completed`-only controls, and 50 exact / 10 documented pair deviations.
 - The validation case contains no current recognized cash, P&L, or capacity benefit; risk exposure/value is `NOT QUANTIFIED`; actual costs and ROI/NPV/payback are unavailable.
+- A separate, clearly labelled illustrative Wave-1 planning range (conservative/base/upside cost, benefit-realization timing, ramp-up, and duration) supports sequencing and affordability conversation; it is `ANALYST-ASSUMPTION` only and does not change the zero recognized-value boundary above.
 - The FY2026 `$1.0–$1.5m` amount is a ceiling only—not an implementation-cost estimate, approved budget, spend authority, committed funding, or ROI denominator.
 - No client approval for pilot launch, production change, cash movement, account closure, labor action, benefit recognition, implementation spend, procurement, or scale is recorded in this pack.

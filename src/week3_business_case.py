@@ -228,6 +228,110 @@ SCENARIO_INPUTS: Dict[str, Dict[str, object]] = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# Illustrative Wave-1 planning range — analyst assumption, not a business case
+#
+# The recognized-value ledger stays at $0 by design (see BC03-BC06). That is
+# an appropriate control boundary, not a substitute for a working business
+# case: it should not be read as "no planning view exists." This block adds
+# a clearly separate, clearly labelled illustrative cost/timeline range so
+# the Steering Committee can reason about a plausible range while evidence
+# work proceeds. It never feeds validated_value_usd, funded_value_usd,
+# recognized_value_usd, the four-value ledger, or a ROI/NPV/payback
+# calculation, and it does not relax BC01-BC12.
+# ---------------------------------------------------------------------------
+PLANNING_COLUMNS = (
+    "scenario_id",
+    "scenario_name",
+    "illustrative_cost_low_usd",
+    "illustrative_cost_high_usd",
+    "cost_basis",
+    "cost_evidence_status",
+    "earliest_benefit_realization_month",
+    "benefit_realization_basis",
+    "ramp_up_months_low",
+    "ramp_up_months_high",
+    "steady_state_month_low",
+    "steady_state_month_high",
+    "program_duration_months_low",
+    "program_duration_months_high",
+    "key_sensitivities",
+    "planning_status",
+    "model_version",
+)
+PLANNING_STATUS = (
+    "ANALYST-ASSUMPTION — illustrative planning range only; excluded from "
+    "validated/funded/recognized value, the four-value ledger, and any "
+    "ROI/NPV/payback or funding calculation"
+)
+PLANNING_COST_EVIDENCE_STATUS = (
+    "OPEN — CR01-CR10 bottom-up evidence not yet supplied; this range is an "
+    "illustrative Wave-1 scope allocation of the disclosed ceiling, not a "
+    "vendor-sourced or bottom-up cost estimate"
+)
+NA_Q4_FREEZE_FLOOR_MONTH = 5
+BENEFIT_REALIZATION_BASIS = (
+    "The earliest possible go/no-go follows the 90-day evidence-mobilization "
+    "timebox (~Month 3 from the 18 Aug 2026 decision day). Any wave that "
+    "changes North America payment-routing or approval-workflow production "
+    "cannot execute inside the confirmed eight-week NA Q4 change-freeze and "
+    "requires separate NA BU CFO sign-off (see W3_payment_pilot_charter.md), "
+    "which pushes the earliest funded North America production start to "
+    "Month 5 regardless of scenario tier; data cleanup, design, testing, and "
+    "low-risk account validation are not subject to this floor"
+)
+KEY_SENSITIVITIES = (
+    "Evidence-gate closure rate (VG01-VG12, CR01-CR10): late closure shifts "
+    "every month in this table right by the same margin. NA Q4 freeze "
+    "calendar: exact dates remain TBD from NA BU Finance and could move the "
+    "Month 5 floor earlier or later. Closure-validation and "
+    "capacity-conversion rates (2 vs 4 candidates; 50 vs 150 hours/month): "
+    "move eventual benefit magnitude, not this timeline. Bottom-up CR01-CR10 "
+    "cost outcome versus the disclosed ceiling: a cost above $1.5m returns "
+    "for staged CFO/SteerCo approval under the FY2026 funding constraint "
+    "rather than proceeding within this Wave-1 range. Global data/control "
+    "ownership, minimum integration readiness, and affordability: failing "
+    "any one switches the direction to local stabilization, which this "
+    "federated-only range does not model"
+)
+SCENARIO_PLANNING_INPUTS: Dict[str, Dict[str, object]] = {
+    "downside": {
+        "illustrative_cost_low_usd": 1_000_000,
+        "illustrative_cost_high_usd": 1_000_000,
+        "cost_basis": (
+            "Narrowest defensible Wave-1 scope (visibility census plus one "
+            "bounded payment cohort), consistent with the two-candidate, "
+            "50-hour downside case, at the low end of the disclosed FY2026 "
+            "ceiling; not a per-unit cost saving"
+        ),
+        "ramp_up_months_low": 6,
+        "ramp_up_months_high": 9,
+    },
+    "base": {
+        "illustrative_cost_low_usd": 1_150_000,
+        "illustrative_cost_high_usd": 1_350_000,
+        "cost_basis": (
+            "Both pilot charters at the standard scope described in the "
+            "future-state operating model, at the middle of the disclosed "
+            "FY2026 ceiling"
+        ),
+        "ramp_up_months_low": 4,
+        "ramp_up_months_high": 6,
+    },
+    "upside": {
+        "illustrative_cost_low_usd": 1_350_000,
+        "illustrative_cost_high_usd": 1_500_000,
+        "cost_basis": (
+            "Full Wave-1 scope at the top of the disclosed FY2026 ceiling; "
+            "any cost beyond $1.5m returns for staged CFO/SteerCo approval "
+            "after demonstrated Wave 1 benefits, per the FY2026 funding "
+            "constraint"
+        ),
+        "ramp_up_months_low": 3,
+        "ramp_up_months_high": 4,
+    },
+}
+
 VALUE_CATEGORIES = (
     "cash_release",
     "annual_p_and_l",
@@ -642,6 +746,111 @@ def build_scenario_table() -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows, columns=SCENARIO_COLUMNS)
+
+
+def build_scenario_planning() -> pd.DataFrame:
+    """Build the illustrative Wave-1 cost/timeline planning range.
+
+    This is a planning aid, not a business case. Every dollar and month is
+    an analyst-assumption allocation of the already-disclosed FY2026 ceiling
+    and the already-disclosed 90-day mobilization timebox; it never feeds
+    ``validated_value_usd``, ``funded_value_usd``, ``recognized_value_usd``,
+    or a ROI/NPV/payback calculation.
+    """
+    rows = []
+    for scenario_id, inputs in SCENARIO_INPUTS.items():
+        planning = SCENARIO_PLANNING_INPUTS[scenario_id]
+        steady_low = NA_Q4_FREEZE_FLOOR_MONTH + planning["ramp_up_months_low"]
+        steady_high = NA_Q4_FREEZE_FLOOR_MONTH + planning["ramp_up_months_high"]
+        rows.append(
+            {
+                "scenario_id": scenario_id,
+                "scenario_name": inputs["scenario_name"],
+                "illustrative_cost_low_usd": int(
+                    planning["illustrative_cost_low_usd"]
+                ),
+                "illustrative_cost_high_usd": int(
+                    planning["illustrative_cost_high_usd"]
+                ),
+                "cost_basis": planning["cost_basis"],
+                "cost_evidence_status": PLANNING_COST_EVIDENCE_STATUS,
+                "earliest_benefit_realization_month": NA_Q4_FREEZE_FLOOR_MONTH,
+                "benefit_realization_basis": BENEFIT_REALIZATION_BASIS,
+                "ramp_up_months_low": int(planning["ramp_up_months_low"]),
+                "ramp_up_months_high": int(planning["ramp_up_months_high"]),
+                "steady_state_month_low": steady_low,
+                "steady_state_month_high": steady_high,
+                "program_duration_months_low": steady_low,
+                "program_duration_months_high": steady_high,
+                "key_sensitivities": KEY_SENSITIVITIES,
+                "planning_status": PLANNING_STATUS,
+                "model_version": MODEL_VERSION,
+            }
+        )
+    return pd.DataFrame(rows, columns=PLANNING_COLUMNS)
+
+
+def validate_scenario_planning_contract(planning: pd.DataFrame) -> None:
+    """Fail closed against the illustrative planning-range contract."""
+    failures = _exact_frame_failures(
+        "scenario_planning",
+        planning,
+        build_scenario_planning(),
+        PLANNING_COLUMNS,
+    )
+    if tuple(planning.columns) == PLANNING_COLUMNS:
+        if list(planning["scenario_id"]) != list(SCENARIO_INPUTS):
+            failures.append("planning scenario IDs or order changed")
+        if planning["scenario_id"].duplicated().any():
+            failures.append("planning scenario IDs are duplicated")
+        if not (
+            planning["illustrative_cost_low_usd"]
+            <= planning["illustrative_cost_high_usd"]
+        ).all():
+            failures.append("illustrative cost range is inverted")
+        if not (
+            planning["illustrative_cost_high_usd"] <= INITIAL_ENVELOPE_HIGH_USD
+        ).all():
+            failures.append("illustrative cost exceeds the disclosed FY2026 ceiling")
+        if not (
+            planning["illustrative_cost_low_usd"] >= INITIAL_ENVELOPE_LOW_USD
+        ).all():
+            failures.append("illustrative cost falls below the disclosed FY2026 floor")
+        if not (
+            planning["ramp_up_months_low"] <= planning["ramp_up_months_high"]
+        ).all():
+            failures.append("ramp-up range is inverted")
+        expected_steady_low = (
+            planning["earliest_benefit_realization_month"]
+            + planning["ramp_up_months_low"]
+        )
+        expected_steady_high = (
+            planning["earliest_benefit_realization_month"]
+            + planning["ramp_up_months_high"]
+        )
+        if not planning["steady_state_month_low"].eq(expected_steady_low).all():
+            failures.append("steady-state low month does not reconcile to ramp-up")
+        if not planning["steady_state_month_high"].eq(expected_steady_high).all():
+            failures.append("steady-state high month does not reconcile to ramp-up")
+        if not planning["planning_status"].str.contains("ANALYST-ASSUMPTION").all():
+            failures.append("planning status no longer labelled ANALYST-ASSUMPTION")
+        if not planning["planning_status"].str.contains("excluded from").all():
+            failures.append("planning status no longer states the exclusion boundary")
+        if not planning["model_version"].eq(MODEL_VERSION).all():
+            failures.append("planning model version changed")
+    if failures:
+        raise AssertionError(f"Week 3 scenario-planning failures: {failures}")
+
+
+def write_scenario_planning(planning: pd.DataFrame) -> Path:
+    """Write and round-trip the illustrative planning CSV."""
+    validate_scenario_planning_contract(planning)
+    path = PROCESSED / "W3_business_case_scenario_planning.csv"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    planning.to_csv(path, index=False)
+    stored = pd.read_csv(path, keep_default_na=False)
+    assert_frame_equal(stored, planning, check_dtype=False)
+    return path
 
 
 def _diagnostic_quantity(scenario: Mapping[str, object], category: str) -> object:
@@ -1217,6 +1426,8 @@ def write_outputs(outputs: Mapping[str, pd.DataFrame]) -> Dict[str, Path]:
 def main() -> None:
     outputs = build_business_case_model()
     paths = write_outputs(outputs)
+    planning = build_scenario_planning()
+    paths["scenario_planning"] = write_scenario_planning(planning)
     scenario_summary = outputs["scenarios"][[
         "scenario_id",
         "liquidity_screen_usd",
@@ -1225,8 +1436,18 @@ def main() -> None:
         "capacity_hypothesis_hours_monthly",
         "recognized_value_usd",
     ]]
+    planning_summary = planning[[
+        "scenario_id",
+        "illustrative_cost_low_usd",
+        "illustrative_cost_high_usd",
+        "earliest_benefit_realization_month",
+        "steady_state_month_low",
+        "steady_state_month_high",
+    ]]
     print("Week 3 validation case generated; no investment case is available.")
     print(scenario_summary.to_string(index=False))
+    print("Illustrative Wave-1 planning range (analyst assumption only):")
+    print(planning_summary.to_string(index=False))
     print("Outputs:")
     for path in paths.values():
         print(path.relative_to(ROOT))
