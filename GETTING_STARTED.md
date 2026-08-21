@@ -60,7 +60,9 @@ Follow `program/ONE_MONTH_PLAYBOOK.md`. Submit one integrated assignment and one
 
 ## 5. Open the interactive diagnostic dashboard
 
-Build the governed dashboard data and start a local server from the repository root:
+The dashboard is published at **https://bakerzhan0404-zbh.github.io/project-northstar/dashboard/** — open that link to view it without running anything.
+
+To work on it locally, build the governed dashboard data and start a local server from the repository root:
 
 ```bash
 python3 src/build_dashboard_data.py

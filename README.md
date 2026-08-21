@@ -27,6 +27,12 @@ My final submission will include:
 6. A complete evidence pack covering my workplan, sources, assumptions, analysis, decisions, findings, and risks.
 7. Four weekly updates and a reflection on how my thinking changed.
 
+## Live diagnostic dashboard
+
+**https://bakerzhan0404-zbh.github.io/project-northstar/dashboard/**
+
+An interactive Week 1–2 diagnostic dashboard covering cash visibility, liquidity screening, bank-account footprint, payment operations, process workload, and data-quality evidence. Published by GitHub Pages from [`docs/dashboard/`](docs/dashboard/); see its [README](docs/dashboard/README.md) for the interaction model, evidence boundaries, and refresh steps. It is a governed snapshot of supplied data for 1 January–30 June 2026, not a live operational system.
+
 ## How I use this repository
 
 I begin with [`GETTING_STARTED.md`](GETTING_STARTED.md), [`WELCOME_BAKER.md`](WELCOME_BAKER.md), and the [`program/ONE_MONTH_PLAYBOOK.md`](program/ONE_MONTH_PLAYBOOK.md). The client materials define the case, while the program and templates guide my work.
@@ -35,6 +41,7 @@ I begin with [`GETTING_STARTED.md`](GETTING_STARTED.md), [`WELCOME_BAKER.md`](WE
 client/        Client brief, stakeholder evidence, and data dictionary
 data/          Generated client case data and my processed outputs
 deliverables/  My working files and final deliverables
+docs/          The published GitHub Pages site (interactive dashboard)
 facilitator/   Mentor guidance and indicative findings
 program/       Charter, four-week playbook, standards, and evaluation rubric
 references/    JPMorgan public sources and evidence rules

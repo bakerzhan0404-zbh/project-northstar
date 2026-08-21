@@ -1,8 +1,14 @@
 # Interactive Dashboard V2
 
-This local dashboard turns the concise Figma V2 design into a data-connected diagnostic experience. It reads one governed JSON contract generated from the committed Week 1 and Week 2 processed outputs, including validated account-day and payment facts for filtering.
+This dashboard turns the concise Figma V2 design into a data-connected diagnostic experience. It reads one governed JSON contract generated from the committed Week 1 and Week 2 processed outputs, including validated account-day and payment facts for filtering.
 
-## Open the dashboard
+## Live dashboard
+
+**https://bakerzhan0404-zbh.github.io/project-northstar/dashboard/**
+
+Published from this folder by GitHub Pages (repository Settings → Pages, source: `main` branch, `/docs` folder). The repository is public, so anyone with the link can open it. Every push to `main` that changes this folder republishes the site automatically.
+
+## Open the dashboard locally
 
 From the repository root:
 
@@ -13,7 +19,7 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 Open `http://127.0.0.1:8000/docs/dashboard/`.
 
-The dashboard is intentionally local and has not been deployed or pushed.
+The published site is a static snapshot of this folder: pure HTML, CSS, and JavaScript reading one pre-generated JSON file, with no backend, no build step, and no live connection to any operational system.
 
 ## What is interactive—and why
 
