@@ -106,7 +106,8 @@ class DashboardUiTest(unittest.TestCase):
         self.assertEqual(self.parser.html_attrs.get("lang"), "en")
         self.assertEqual(sum(tag == "main" for tag, _ in self.parser.tags), 1)
         self.assertEqual(sum(tag == "h1" for tag, _ in self.parser.tags), 1)
-        self.assertEqual(sum(tag == "dialog" for tag, _ in self.parser.tags), 1)
+        # Two modals: the metric-guide drawer and the guided-review wizard.
+        self.assertEqual(sum(tag == "dialog" for tag, _ in self.parser.tags), 2)
         self.assertEqual(len(self.parser.ids), len(set(self.parser.ids)))
         required_ids = {
             "dashboard-menu-hub",
@@ -382,6 +383,7 @@ class DashboardUiTest(unittest.TestCase):
             "menu-page",
             "menu-decision-headline",
             "menu-decision-next",
+            "menu-decision-confidence",
             "menu-signal-visibility",
             "menu-signal-liquidity",
             "menu-signal-payments",
@@ -390,13 +392,30 @@ class DashboardUiTest(unittest.TestCase):
             "menu-stat-visibility",
             "menu-stat-liquidity",
             "menu-stat-payments",
+            "menu-next-actions",
+            "start-guided-review",
+        }
+        self.assertTrue(required_ids.issubset(tags_by_id))
+
+        # The simplified homepage carries exactly three KPIs. The former fourth
+        # KPI and the four finding cards now live on the secondary detail pages,
+        # so the homepage summarizes instead of presenting everything at once.
+        self.assertEqual(self.index.count('class="menu-stat menu-stat-'), 3)
+        for removed in (
             "menu-stat-quality",
+            "menu-finding-grid",
             "menu-finding-payments-bars",
             "menu-finding-liquidity-bars",
             "menu-finding-visibility-bars",
             "menu-finding-value-gates",
-        }
-        self.assertTrue(required_ids.issubset(tags_by_id))
+        ):
+            self.assertNotIn(removed, self.index)
+
+        # Exactly three next actions, each derived from a governed definition.
+        self.assertIn(
+            'const NEXT_ACTION_TOPICS = Object.freeze(["visibility", "liquidity", "payments"]);',
+            self.script,
+        )
 
         # The menu stays the routing spine and is still the only view selector.
         self.assertNotIn("hidden", tags_by_id["dashboard-menu-hub"])
@@ -420,7 +439,7 @@ class DashboardUiTest(unittest.TestCase):
         sync = self.script.split("function syncDashboardViewVisibility", 1)[1].split(
             "function selectDashboardView", 1
         )[0]
-        self.assertIn("if (menuPage) menuPage.hidden = Boolean(activeConfig);", sync)
+        self.assertIn("if (menuPage) menuPage.hidden = Boolean(activeConfig) || detailPageOpen;", sync)
         self.assertIn("node.hidden = !dashboardData;", sync)
 
         # Every headline number is read from the governed contract, never hard-coded.
@@ -432,22 +451,26 @@ class DashboardUiTest(unittest.TestCase):
             "dashboardData.payments",
             "dashboardData.decision",
             "liquidity.evidence_ladder",
-            "liquidity.scenarios",
             "dashboardData.guardrails",
             "quality.w1_checks",
             "quality.w2_controls",
         ):
             self.assertIn(source, findings)
         self.assertIn("replaceChildren", findings)
+        # Threshold scenarios moved off the homepage with the findings cards,
+        # but must still be read from the contract by the liquidity view.
+        self.assertIn("liquidity.scenarios", self.script)
+
+        # Next-action text comes from the contract, not from literals in the page.
+        self.assertIn("definition.next_action", findings)
 
         for token in (
             ".menu-page",
             ".menu-decision-band",
             ".menu-stat-strip",
-            ".menu-finding-grid",
+            ".menu-next-actions",
             ".menu-bar-fill",
-            ".menu-gate-list",
-            "grid-template-columns: minmax(300px, 372px) minmax(0, 1fr);",
+            "grid-template-columns: repeat(3, minmax(0, 1fr));",
             "@media (max-width: 1180px)",
         ):
             self.assertIn(token, self.styles)
@@ -648,7 +671,7 @@ class DashboardUiTest(unittest.TestCase):
         self.assertTrue(canvas.get("aria-label"))
         self.assertIn("View trend data table", self.index)
         self.assertIn("<caption>", self.index)
-        self.assertEqual(self.index.count("Definition, formula &amp; source"), 7)
+        self.assertEqual(self.index.count("Definition, formula &amp; source"), 8)
         self.assertIn("Separate signals—not a composite score.", self.index)
         self.assertIn(".analytics-card", self.styles)
         self.assertIn("background: var(--analytics);", self.styles)
@@ -1298,6 +1321,298 @@ process.stdout.write(JSON.stringify({
         self.assertIn('src="filter_model.js"', self.index)
         self.assertIn('src="app.js"', self.index)
         self.assertIn('fetch("dashboard_data.json"', self.script)
+
+    def test_guided_review_wizard_has_three_governed_steps_and_controls(self) -> None:
+        tags_by_id = {attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs}
+        for required in (
+            "guided-review-dialog",
+            "wizard-title",
+            "wizard-progress",
+            "wizard-step-1",
+            "wizard-step-2",
+            "wizard-step-3",
+            "wizard-decision-options",
+            "wizard-decision-error",
+            "wizard-scope-form",
+            "wizard-answer",
+            "wizard-back",
+            "wizard-next",
+            "wizard-finish",
+            "wizard-skip",
+            "wizard-close",
+        ):
+            self.assertIn(required, tags_by_id)
+
+        # Steps 2 and 3 start hidden; step 1 is the entry point.
+        self.assertNotIn("hidden", tags_by_id["wizard-step-1"])
+        self.assertIn("hidden", tags_by_id["wizard-step-2"])
+        self.assertIn("hidden", tags_by_id["wizard-step-3"])
+
+        # Back is hidden on step 1 and Finish only appears on the last step.
+        self.assertIn("hidden", tags_by_id["wizard-back"])
+        self.assertIn("hidden", tags_by_id["wizard-finish"])
+        self.assertNotIn("hidden", tags_by_id["wizard-next"])
+
+        # Skip to the full dashboard stays available on every step.
+        self.assertNotIn("hidden", tags_by_id["wizard-skip"])
+        self.assertIn("Skip to Full Dashboard", self.index)
+        self.assertIn("View Full Dashboard", self.index)
+
+        # Exactly the four required decision areas, and a blocked step 1.
+        self.assertIn('const WIZARD_DECISION_KEYS = Object.freeze(Object.keys(WIZARD_DECISIONS));', self.script)
+        for label in ("Cash Visibility", "Liquidity", "Payments", "Data Quality"):
+            self.assertIn(f'label: "{label}"', self.script)
+        advance = self.script.split("function advanceWizard", 1)[1].split(
+            "function selectWizardDecision", 1
+        )[0]
+        self.assertIn("if (!wizardState.decision)", advance)
+        self.assertIn("error.hidden = false", advance)
+
+        # Progress indicator is a live "Step N of 3".
+        self.assertIn('`Step ${step} of ${WIZARD_TOTAL_STEPS}`', self.script)
+        self.assertIn('const WIZARD_TOTAL_STEPS = 3;', self.script)
+
+        # Scope selections persist across Back/Next.
+        self.assertIn("wizardState.scope = readWizardScope();", self.script)
+        self.assertIn("select.value = scope[field]", self.script)
+
+        # Accessible radiogroup semantics and keyboard support.
+        self.assertIn('role="radiogroup"', self.index)
+        self.assertIn('option.setAttribute("role", "radio");', self.script)
+        self.assertIn('option.setAttribute("aria-checked", String(selected));', self.script)
+        self.assertIn('"ArrowDown"', self.script)
+
+        # The wizard reuses the governed filter pipeline rather than bypassing it.
+        apply_block = self.script.split("function applyWizardScopeToDashboard", 1)[1].split(
+            "\n}", 1
+        )[0]
+        self.assertIn("applyFilterCandidate(", apply_block)
+
+        for token in (".wizard-steps", ".wizard-option", ".wizard-answer", ".wizard-footer"):
+            self.assertIn(token, self.styles)
+
+    def test_wizard_answer_shows_one_finding_limit_action_and_approver(self) -> None:
+        answer = self.script.split("function renderWizardAnswer", 1)[1].split(
+            "function describeWizardScope", 1
+        )[0]
+        for label in (
+            '"Core finding"',
+            '"What this evidence cannot show"',
+            '"Recommended action"',
+            '"Approval required from"',
+        ):
+            self.assertIn(label, answer)
+
+        # Exactly one finding, one action, one approver — read from the contract.
+        self.assertIn("wizardFinding(key)", answer)
+        self.assertIn("definition.boundary", answer)
+        self.assertIn("definition.next_action", answer)
+        self.assertIn("config.approver", answer)
+
+        # Every decision area names a required approver.
+        decisions = self.script.split("const WIZARD_DECISIONS", 1)[1].split(
+            "const WIZARD_DECISION_KEYS", 1
+        )[0]
+        self.assertEqual(decisions.count("approver:"), 4)
+
+        # Depth is linked, not inlined, so the wizard stays a summary.
+        self.assertIn('dataset.openDetailPage = page', answer)
+        self.assertNotIn("definition.formula", answer)
+
+    def test_secondary_detail_pages_cover_the_four_reference_topics(self) -> None:
+        tags_by_id = {attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs}
+        for required in ("detail-pages", "detail-page-title", "detail-page-body", "detail-page-back"):
+            self.assertIn(required, tags_by_id)
+        self.assertIn("hidden", tags_by_id["detail-pages"])
+
+        self.assertIn(
+            'const DETAIL_PAGE_KEYS = Object.freeze(Object.keys(DETAIL_PAGES));',
+            self.script,
+        )
+        for page in ("formulas", "constraints", "methodology", "data"):
+            self.assertIn(f'data-open-detail-page="{page}"', self.index)
+            self.assertIn(f"  {page}: Object.freeze({{", self.script)
+
+        # Reachable from the Metric guide drawer and from contextual links.
+        drawer = self.index.split('<dialog id="evidence-dialog"', 1)[1]
+        for page in ("formulas", "constraints", "methodology", "data"):
+            self.assertIn(f'data-open-detail-page="{page}"', drawer)
+        menu_page = self.index.split('<div id="menu-page"', 1)[1].split("</main>", 1)[0]
+        self.assertIn("data-open-detail-page=", menu_page)
+
+        # Technical depth is rendered from the governed contract.
+        render = self.script.split("function renderDetailPage", 1)[1].split(
+            "function openDetailPage", 1
+        )[0]
+        for source in ("definition.formula", "definition.boundary", "definition.next_action", "quality.w1_checks"):
+            self.assertIn(source, render)
+        self.assertIn("replaceChildren", render)
+
+        # Opening a detail page takes over the main area and is fail-closed.
+        self.assertIn("const detailPageOpen = Boolean(state.detailPage);", self.script)
+        self.assertIn('if (!dashboardData || !DETAIL_PAGE_KEYS.includes(page)) return;', self.script)
+
+        for token in (".detail-pages", ".detail-page-tabs", ".detail-page-card"):
+            self.assertIn(token, self.styles)
+
+    def test_wizard_and_detail_contracts_resolve_against_governed_data(self) -> None:
+        node_script = """
+const {
+  WIZARD_DECISIONS,
+  WIZARD_DECISION_KEYS,
+  WIZARD_TOTAL_STEPS,
+  DETAIL_PAGE_KEYS,
+  NEXT_ACTION_TOPICS,
+} = require('./docs/dashboard/app.js');
+const fs = require('fs');
+const data = JSON.parse(fs.readFileSync('./docs/dashboard/dashboard_data.json', 'utf8'));
+const unresolved = WIZARD_DECISION_KEYS.filter((key) => {
+  const topic = WIZARD_DECISIONS[key].topic;
+  const definition = data.definitions[topic];
+  return !definition || !definition.boundary || !definition.next_action || !definition.title;
+});
+const actionsUnresolved = NEXT_ACTION_TOPICS.filter((topic) => {
+  const definition = data.definitions[topic];
+  return !definition || !definition.next_action;
+});
+process.stdout.write(JSON.stringify({
+  decisions: WIZARD_DECISION_KEYS,
+  steps: WIZARD_TOTAL_STEPS,
+  detailPages: DETAIL_PAGE_KEYS,
+  nextActions: NEXT_ACTION_TOPICS,
+  unresolved,
+  actionsUnresolved,
+  approvers: WIZARD_DECISION_KEYS.map((key) => WIZARD_DECISIONS[key].approver),
+}));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        result = json.loads(completed.stdout)
+
+        # The four required decision areas, in the order the wizard presents them.
+        self.assertEqual(result["decisions"], ["visibility", "liquidity", "payments", "quality"])
+        self.assertEqual(result["steps"], 3)
+        self.assertEqual(
+            result["detailPages"], ["formulas", "constraints", "methodology", "data"]
+        )
+        self.assertEqual(result["nextActions"], ["visibility", "liquidity", "payments"])
+
+        # Every wizard decision and next action resolves to a governed definition,
+        # so no step can render an invented finding, limit, or action.
+        self.assertEqual(result["unresolved"], [])
+        self.assertEqual(result["actionsUnresolved"], [])
+
+        # Every decision area names a real approver.
+        self.assertEqual(len(result["approvers"]), 4)
+        for approver in result["approvers"]:
+            self.assertTrue(approver.strip())
+
+    def test_guided_review_tour_spotlights_real_elements(self) -> None:
+        tags_by_id = {attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs}
+        for required in (
+            "tour-overlay",
+            "tour-scrim",
+            "tour-ring",
+            "tour-popover",
+            "tour-progress",
+            "tour-step-title",
+            "tour-step-body",
+            "tour-dots",
+            "tour-back",
+            "tour-next",
+            "tour-finish",
+            "tour-skip",
+            "tour-close",
+        ):
+            self.assertIn(required, tags_by_id)
+
+        # The overlay starts hidden; Back and Finish start hidden (step 1 of N).
+        self.assertIn("hidden", tags_by_id["tour-overlay"])
+        self.assertIn("hidden", tags_by_id["tour-back"])
+        self.assertIn("hidden", tags_by_id["tour-finish"])
+        self.assertNotIn("hidden", tags_by_id["tour-next"])
+        self.assertNotIn("hidden", tags_by_id["tour-skip"])
+
+        # Start Guided Review launches the tour, not the modal wizard.
+        self.assertIn(
+            'button.addEventListener("click", () => startTour(button));', self.script
+        )
+
+        # The popover is a real modal dialog for assistive technology.
+        popover = self.index.split('id="tour-popover"', 1)[1].split(">", 1)[0]
+        self.assertIn('role="dialog"', popover)
+        self.assertIn('aria-modal="true"', popover)
+
+        # Positioning must not depend on an animation frame alone, or a step that
+        # needs no scrolling would never move the spotlight off the previous one.
+        render = self.script.split("function renderTourStep", 1)[1].split(
+            "function goToTourStep", 1
+        )[0]
+        self.assertIn("positionTourStep();", render)
+
+        # Escape closes, arrow keys navigate, and focus stays inside the popover.
+        keys = self.script.split("function handleTourKeydown", 1)[1].split(
+            "\n}\n", 1
+        )[0]
+        for key in ('"Escape"', '"ArrowRight"', '"ArrowLeft"', '"Tab"'):
+            self.assertIn(key, keys)
+
+        # Scroll is locked while the tour runs and released when it ends.
+        self.assertIn('document.body.classList.add("tour-active");', self.script)
+        self.assertIn('document.body.classList.remove("tour-active");', self.script)
+
+        # Steps whose target is missing or collapsed are skipped, never pointed at.
+        visible = self.script.split("function tourVisibleSteps", 1)[1].split(
+            "\n}\n", 1
+        )[0]
+        self.assertIn("rect.width > 0 && rect.height > 0", visible)
+
+        for token in (".tour-overlay", ".tour-ring", ".tour-popover", "body.tour-active"):
+            self.assertIn(token, self.styles)
+        # The spotlight is the ring's outer shadow.
+        self.assertIn("box-shadow: 0 0 0 9999px", self.styles)
+
+    def test_tour_steps_target_elements_that_exist_in_the_page(self) -> None:
+        node_script = """
+const { TOUR_STEPS } = require('./docs/dashboard/app.js');
+process.stdout.write(JSON.stringify({
+  count: TOUR_STEPS.length,
+  targets: TOUR_STEPS.map((step) => step.target),
+  complete: TOUR_STEPS.every((step) => step.target && step.title && step.body),
+}));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        result = json.loads(completed.stdout)
+        self.assertTrue(result["complete"])
+        self.assertGreaterEqual(result["count"], 5)
+
+        # Every tour target must resolve to something in the shipped markup,
+        # otherwise the step silently disappears from the tour.
+        ids = set(self.parser.ids)
+        classes = set()
+        for _, attrs in self.parser.tags:
+            for value in (attrs.get("class") or "").split():
+                classes.add(value)
+        for target in result["targets"]:
+            if target.startswith("#"):
+                self.assertIn(target[1:], ids, f"tour target {target} missing")
+            else:
+                self.assertIn(target.lstrip("."), classes, f"tour target {target} missing")
+
+        # The primary CTA class must exist in the design system, or the button
+        # renders with the default surface fill and disappears on a dark band.
+        self.assertIn(".button-primary {", self.styles)
 
     def test_local_http_assets_are_served(self) -> None:
         handler = functools.partial(

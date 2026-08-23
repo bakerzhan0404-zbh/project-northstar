@@ -5,6 +5,7 @@ const FilterModel = typeof window !== "undefined"
   : (typeof module !== "undefined" && module.exports ? require("./filter_model.js") : null);
 
 const DEFAULT_VIEW = Object.freeze({
+  detailPage: null,
   liquidityDays: 14,
   paymentMeasure: "records",
   drawerTab: "overview",
@@ -201,6 +202,7 @@ let searchIndex = [];
 let searchResults = [];
 let activeSearchIndex = -1;
 let lastDrawerOpener = null;
+let lastDetailPageOpener = null;
 let lastFilterOpener = null;
 let trendResizeObserver = null;
 let trendAnimationFrame = null;
@@ -324,18 +326,19 @@ function syncDashboardViewVisibility() {
   const filterToolbar = get("#filter-toolbar");
   const footer = get("#evidence-footer");
 
-  if (menuHub) menuHub.hidden = Boolean(activeConfig);
-  if (menuPage) menuPage.hidden = Boolean(activeConfig);
+  const detailPageOpen = Boolean(state.detailPage);
+  if (menuHub) menuHub.hidden = Boolean(activeConfig) || detailPageOpen;
+  if (menuPage) menuPage.hidden = Boolean(activeConfig) || detailPageOpen;
   getAll("[data-menu-evidence]").forEach((node) => {
     node.hidden = !dashboardData;
   });
-  if (selectedHeader) selectedHeader.hidden = !activeConfig;
-  if (signals) signals.hidden = !activeConfig || activeView === "evidence";
-  if (qualityView) qualityView.hidden = activeView !== "evidence";
+  if (selectedHeader) selectedHeader.hidden = !activeConfig || detailPageOpen;
+  if (signals) signals.hidden = !activeConfig || activeView === "evidence" || detailPageOpen;
+  if (qualityView) qualityView.hidden = activeView !== "evidence" || detailPageOpen;
   if (filterToolbar) {
     filterToolbar.hidden = !dashboardData;
   }
-  if (footer) footer.hidden = !activeConfig;
+  if (footer) footer.hidden = !activeConfig || detailPageOpen;
 
   getAll("[data-inline-detail]").forEach((detail) => {
     const visible = Boolean(activeConfig) && activeConfig.topics.includes(detail.dataset.inlineDetail);
@@ -852,89 +855,62 @@ function renderMenuFindings() {
   );
   setMenuMeter("#menu-stat-payments-meter", payments.overall.exception_rate_pct);
 
-  setText("#menu-stat-quality", `${formatNumber(quality.w1_checks.passed)} / ${formatNumber(quality.w1_checks.total)}`);
-  setText("#menu-stat-quality-unit", "Week 1 structural checks");
+  // Evidence-strength qualifier for the recommendation. This is a caveat on the
+  // recommendation, not a fourth KPI: it says how far the supplied evidence goes.
   setText(
-    "#menu-stat-quality-note",
-    `${formatNumber(quality.w2_controls.reconciled)} / ${formatNumber(quality.w2_controls.total)} Week 2 reconciliation controls reconciled; source certification open.`,
+    "#menu-decision-confidence",
+    `Evidence base: ${formatNumber(quality.w1_checks.passed)} / ${formatNumber(quality.w1_checks.total)} structural checks passed and ${formatNumber(quality.w2_controls.reconciled)} / ${formatNumber(quality.w2_controls.total)} reconciliation controls reconciled. Source certification remains open.`,
   );
-  setMenuMeter("#menu-stat-quality-meter", safePercentage(quality.w1_checks.passed, quality.w1_checks.total));
 
-  const union = payments.priority_union;
-  setText(
-    "#menu-finding-payments-lede",
-    `${formatNumber(union.records)} deduplicated records — ${formatPercent(union.record_contribution_pct)} of the supplied population — carry ${formatPercent(union.exception_contribution_pct)} of exceptions and ${formatPercent(union.repair_contribution_pct)} of repair minutes.`,
-  );
-  const paymentBars = get("#menu-finding-payments-bars");
-  if (paymentBars) {
-    paymentBars.replaceChildren(
-      menuBarRow("Share of records", union.record_contribution_pct, formatPercent(union.record_contribution_pct), "var(--sky)"),
-      menuBarRow("Share of exceptions", union.exception_contribution_pct, formatPercent(union.exception_contribution_pct), "var(--orange)"),
-      menuBarRow("Share of repair minutes", union.repair_contribution_pct, formatPercent(union.repair_contribution_pct), "var(--purple)"),
-    );
-  }
+  renderNextActions();
+}
 
-  const sevenDayBase = liquidity.scenarios["7"].thresholds.base;
-  const fourteenDayBase = liquidity.scenarios["14"].thresholds.base;
-  const fourteenDayStress = liquidity.scenarios["14"].thresholds.stress;
-  const fourteenDayUpside = liquidity.scenarios["14"].thresholds.upside;
-  setText(
-    "#menu-finding-liquidity-lede",
-    `Every seven-day window clears the ${formatUsdCompact(sevenDayBase.threshold_usd)} base threshold. At fourteen days only ${formatNumber(fourteenDayBase.windows_met)} of ${formatNumber(fourteenDayBase.complete_windows)} do, though all of them clear the ${formatUsdCompact(fourteenDayStress.threshold_usd)} stress threshold and none clears ${formatUsdCompact(fourteenDayUpside.threshold_usd)}.`,
-  );
-  const liquidityBars = get("#menu-finding-liquidity-bars");
-  if (liquidityBars) {
-    liquidityBars.replaceChildren(
-      menuBarRow(`7-day · ${formatUsdCompact(sevenDayBase.threshold_usd)} base`, sevenDayBase.met_rate_pct, formatPercent(sevenDayBase.met_rate_pct), "var(--teal)"),
-      menuBarRow(`14-day · ${formatUsdCompact(fourteenDayBase.threshold_usd)} base`, fourteenDayBase.met_rate_pct, formatPercent(fourteenDayBase.met_rate_pct), "var(--coral)"),
-      menuBarRow(`14-day · ${formatUsdCompact(fourteenDayStress.threshold_usd)} stress`, fourteenDayStress.met_rate_pct, formatPercent(fourteenDayStress.met_rate_pct), "var(--sky)"),
-    );
-  }
+// The three next actions are governed method next-steps read from the contract.
+// Each pairs one supplied measure with the action its own definition prescribes,
+// so the homepage never invents an action or implies an approved workplan.
+const NEXT_ACTION_TOPICS = Object.freeze(["visibility", "liquidity", "payments"]);
 
-  const beyondOneDayShare = isFiniteNumber(visibility.within_one_day_rate_pct)
-    ? Math.round((100 - visibility.within_one_day_rate_pct) * 100) / 100
-    : null;
-  const beyondOneDayAccounts = isFiniteNumber(beyondOneDayShare)
-    ? Math.round((beyondOneDayShare / 100) * visibility.accounts_total)
-    : null;
-  setText(
-    "#menu-finding-visibility-lede",
-    `${formatNumber(visibility.delayed_accounts)} of ${formatNumber(visibility.accounts_total)} accounts miss same-day reporting, yet ${formatPercent(visibility.within_one_day_rate_pct)} report within one day — roughly ${formatNumber(beyondOneDayAccounts)} accounts lag beyond it.`,
-  );
-  const visibilityBars = get("#menu-finding-visibility-bars");
-  if (visibilityBars) {
-    visibilityBars.replaceChildren(
-      menuBarRow("Same-day reporting", visibility.same_day_rate_pct, formatPercent(visibility.same_day_rate_pct), "var(--aqua)"),
-      menuBarRow("Within one day", visibility.within_one_day_rate_pct, formatPercent(visibility.within_one_day_rate_pct), "var(--sky)"),
-      menuBarRow("Beyond one day", beyondOneDayShare, formatPercent(beyondOneDayShare), "var(--purple)"),
-    );
+function nextActionContext(topic) {
+  const visibility = dashboardData.visibility;
+  const payments = dashboardData.payments;
+  const liquidity = dashboardData.liquidity;
+  const guardrails = dashboardData.guardrails;
+  if (topic === "visibility") {
+    return `${formatNumber(visibility.delayed_accounts)} of ${formatNumber(visibility.accounts_total)} accounts miss same-day reporting.`;
   }
+  if (topic === "liquidity") {
+    const gross = liquidity.evidence_ladder[0];
+    return `${formatUsdCompact(gross.value_usd)} gross positive availability; funded case ${liquidity.funded_case.display}; ${plural(guardrails.closures.approved_closures, "approved closure")}.`;
+  }
+  return `${formatPercent(payments.priority_union.exception_contribution_pct)} of exceptions sit in ${formatNumber(payments.priority_union.records)} deduplicated records.`;
+}
 
-  setText(
-    "#menu-finding-value-lede",
-    `Four benefit candidates are measurable in the supplied data. None has cleared the validation gate that would let it be booked as value.`,
-  );
-  const valueGates = get("#menu-finding-value-gates");
-  if (valueGates) {
-    valueGates.replaceChildren(
-      menuGateRow(
-        `Liquidity — ${formatUsdCompact(grossAvailability.value_usd)} gross positive availability`,
-        "Mobility not established",
-      ),
-      menuGateRow(
-        `Workload — ${formatNumber(capacity.total_estimated_manual_hours_monthly, 1)} est. manual hours monthly`,
-        "Capacity value not fundable",
-      ),
-      menuGateRow(
-        `Closures — ${plural(closures.validation_candidates, "candidate")} · ${formatUsdCompact(closures.estimated_annual_fees_usd)} annual fees`,
-        `Closure value not fundable · ${formatNumber(closures.approved_closures)} approved`,
-      ),
-      menuGateRow(
-        `Evidence — ${plural(quality.source_artifacts, "source artifact")} · ${plural(quality.issue_queue.length, "open item")}`,
-        "Source certification open",
-      ),
+function renderNextActions() {
+  const list = get("#menu-next-actions");
+  if (!list) return;
+  const items = NEXT_ACTION_TOPICS.map((topic, index) => {
+    const definition = dashboardData.definitions[topic];
+    const view = dashboardViewForTopic(topic);
+    const item = make("li", "menu-next-action");
+    const rank = make("span", "menu-action-rank", String(index + 1));
+    const body = make("div", "menu-action-body");
+    body.append(
+      make("p", "menu-action-title", definition.title),
+      make("p", "menu-action-text", definition.next_action),
+      make("p", "menu-action-context", nextActionContext(topic)),
     );
-  }
+    const open = make("button", "menu-action-open", "Open evidence");
+    open.type = "button";
+    open.dataset.selectDashboardView = view;
+    open.setAttribute("data-requires-data", "");
+    const arrow = make("span", "", "→");
+    arrow.setAttribute("aria-hidden", "true");
+    open.append(arrow);
+    body.append(open);
+    item.append(rank, body);
+    return item;
+  });
+  list.replaceChildren(...items);
 }
 
 function renderHeader() {
@@ -2142,6 +2118,629 @@ function selectDrawerTab(topic, { focusTab = false } = {}) {
   renderDrawerPanel(topic);
 }
 
+// ---------------------------------------------------------------------------
+// Guided review tour
+//
+// A spotlight walkthrough of the homepage: it dims the page and highlights one
+// real element at a time, so a first-time reader learns what they are looking
+// at before being asked to decide anything. Steps whose target is missing or
+// hidden are skipped, so the tour degrades rather than pointing at nothing.
+// It ends by handing off to the focused three-step review.
+// ---------------------------------------------------------------------------
+const TOUR_STEPS = Object.freeze([
+  Object.freeze({
+    target: ".menu-decision-band",
+    title: "Start with the recommendation",
+    body: "This is the one thing the dashboard is recommending, and the status it carries. Everything else on the page exists to support or qualify it.",
+  }),
+  Object.freeze({
+    target: "#menu-decision-confidence",
+    title: "Check how far the evidence goes",
+    body: "Structural checks and reconciliation controls tell you how much weight the recommendation can bear. Source certification is still open, so nothing here is audit-grade.",
+  }),
+  Object.freeze({
+    target: ".menu-stat-strip",
+    title: "Three measures, held apart",
+    body: "Reporting delay, available balance, and payment exceptions. They are deliberately not combined into one score — each carries its own limit, shown beneath it.",
+  }),
+  Object.freeze({
+    target: "#menu-next-actions",
+    title: "What to do next",
+    body: "Three governed next steps, each tied to the measure above it. These are method next-steps, not an approved workplan or a funding decision.",
+  }),
+  Object.freeze({
+    target: "#dashboard-menu-hub",
+    title: "Go deeper on one question",
+    body: "Open one focused evidence view at a time. The menu is the only way into the detailed analysis, which keeps a single investigation on screen.",
+  }),
+  Object.freeze({
+    target: "#filter-toolbar",
+    title: "Narrow the scope",
+    body: "Date, currency, region, entity, and bank. Views that cannot honour a filter say so rather than showing a misleading number.",
+  }),
+  Object.freeze({
+    target: ".guide-button",
+    title: "Definitions live in the Metric guide",
+    body: "Formulas, sources, and method limits stay out of the main page. The guide also links to the full reference pages.",
+  }),
+]);
+
+const tourState = { step: 0, active: false };
+let lastTourOpener = null;
+let tourReposition = null;
+
+function tourVisibleSteps() {
+  return TOUR_STEPS.filter((step) => {
+    const node = get(step.target);
+    if (!node) return false;
+    const rect = node.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
+}
+
+let activeTourSteps = [];
+
+function positionTourStep() {
+  const step = activeTourSteps[tourState.step];
+  if (!step) return;
+  const node = get(step.target);
+  const ring = get("#tour-ring");
+  const popover = get("#tour-popover");
+  if (!node || !ring || !popover) return;
+
+  const rect = node.getBoundingClientRect();
+  const pad = 6;
+  ring.style.top = `${rect.top - pad}px`;
+  ring.style.left = `${rect.left - pad}px`;
+  ring.style.width = `${rect.width + pad * 2}px`;
+  ring.style.height = `${rect.height + pad * 2}px`;
+
+  const gap = 14;
+  const pop = popover.getBoundingClientRect();
+  const below = rect.bottom + gap;
+  const above = rect.top - gap - pop.height;
+  let top = below;
+  if (below + pop.height > window.innerHeight - 12 && above > 12) top = above;
+  top = Math.max(12, Math.min(top, window.innerHeight - pop.height - 12));
+
+  let left = rect.left;
+  if (left + pop.width > window.innerWidth - 12) left = window.innerWidth - pop.width - 12;
+  left = Math.max(12, left);
+
+  popover.style.top = `${top}px`;
+  popover.style.left = `${left}px`;
+}
+
+function renderTourStep() {
+  const step = activeTourSteps[tourState.step];
+  if (!step) return;
+  const total = activeTourSteps.length;
+  const index = tourState.step;
+  setText("#tour-progress", `Step ${index + 1} of ${total}`);
+  setText("#tour-step-title", step.title);
+  setText("#tour-step-body", step.body);
+
+  const dots = get("#tour-dots");
+  if (dots) {
+    dots.replaceChildren(...activeTourSteps.map((_, position) => {
+      const dot = make("span", position === index ? "is-active" : position < index ? "is-done" : "");
+      return dot;
+    }));
+  }
+
+  const back = get("#tour-back");
+  const next = get("#tour-next");
+  const finish = get("#tour-finish");
+  if (back) back.hidden = index === 0;
+  if (next) next.hidden = index === total - 1;
+  if (finish) finish.hidden = index !== total - 1;
+
+  const node = get(step.target);
+  if (node && typeof node.scrollIntoView === "function") {
+    node.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+  // Position synchronously so the spotlight is correct even when the step
+  // needs no scrolling (no scroll event) and before any animation frame runs.
+  // The scroll listener keeps refining it while a smooth scroll settles.
+  positionTourStep();
+  if (typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(positionTourStep);
+  }
+  const title = get("#tour-step-title");
+  if (title) title.focus();
+}
+
+function goToTourStep(index) {
+  if (!activeTourSteps.length) return;
+  tourState.step = Math.min(Math.max(index, 0), activeTourSteps.length - 1);
+  renderTourStep();
+}
+
+function startTour(opener) {
+  if (!dashboardData) return;
+  activeTourSteps = tourVisibleSteps();
+  if (!activeTourSteps.length) return;
+  lastTourOpener = opener || null;
+  tourState.active = true;
+  tourState.step = 0;
+  const overlay = get("#tour-overlay");
+  if (overlay) overlay.hidden = false;
+  document.body.classList.add("tour-active");
+  renderTourStep();
+  tourReposition = () => positionTourStep();
+  window.addEventListener("resize", tourReposition);
+  window.addEventListener("scroll", tourReposition, true);
+  announce(`Guided review tour started. Step 1 of ${activeTourSteps.length}.`);
+}
+
+function endTour({ openReview = false } = {}) {
+  if (!tourState.active) return;
+  tourState.active = false;
+  const overlay = get("#tour-overlay");
+  if (overlay) overlay.hidden = true;
+  document.body.classList.remove("tour-active");
+  if (tourReposition) {
+    window.removeEventListener("resize", tourReposition);
+    window.removeEventListener("scroll", tourReposition, true);
+    tourReposition = null;
+  }
+  if (openReview) {
+    openGuidedReview(lastTourOpener);
+  } else if (lastTourOpener && document.contains(lastTourOpener)) {
+    lastTourOpener.focus();
+  }
+  lastTourOpener = null;
+}
+
+function handleTourKeydown(event) {
+  if (!tourState.active) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    endTour();
+    return;
+  }
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
+    if (tourState.step < activeTourSteps.length - 1) goToTourStep(tourState.step + 1);
+    return;
+  }
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    goToTourStep(tourState.step - 1);
+    return;
+  }
+  if (event.key === "Tab") {
+    // Keep focus inside the tour popover while it is open.
+    const focusables = getAll(
+      "button:not([hidden])",
+      get("#tour-popover"),
+    ).filter((node) => !node.disabled);
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Guided review wizard
+//
+// Three steps: choose a decision, set the scope, read one answer. The answer is
+// deliberately narrow — one finding, its evidence limit, one action, and the
+// approver — so the wizard never becomes a second dashboard. Depth lives on the
+// secondary detail pages, which the answer links to.
+// ---------------------------------------------------------------------------
+const WIZARD_DECISIONS = Object.freeze({
+  visibility: Object.freeze({
+    label: "Cash Visibility",
+    topic: "visibility",
+    summary: "How current is the reported cash position?",
+    approver: "Group Treasurer — with the source-system owner for reporting timing",
+  }),
+  liquidity: Object.freeze({
+    label: "Liquidity",
+    topic: "liquidity",
+    summary: "How much of the screened balance could be considered available?",
+    approver: "Group Treasurer — with Finance for any recognition of value",
+  }),
+  payments: Object.freeze({
+    label: "Payments",
+    topic: "payments",
+    summary: "Where does payment friction concentrate?",
+    approver: "Shared Services Lead — with the process owner for any change",
+  }),
+  quality: Object.freeze({
+    label: "Data Quality",
+    topic: "quality",
+    summary: "How far can the supplied evidence be trusted?",
+    approver: "Data owner — with Internal Audit consulted on certification",
+  }),
+});
+const WIZARD_DECISION_KEYS = Object.freeze(Object.keys(WIZARD_DECISIONS));
+const WIZARD_TOTAL_STEPS = 3;
+const wizardState = { step: 1, decision: null, scope: null };
+let lastWizardOpener = null;
+
+function wizardFinding(decisionKey) {
+  const visibility = dashboardData.visibility;
+  const payments = dashboardData.payments;
+  const liquidity = dashboardData.liquidity;
+  const quality = dashboardData.quality;
+  const summary = currentSummary;
+  if (decisionKey === "visibility") {
+    const scoped = summary && summary.visibility ? summary.visibility : visibility;
+    return `${formatNumber(scoped.delayed_accounts)} of ${formatNumber(scoped.accounts_total)} accounts in scope miss same-day reporting; ${formatPercent(scoped.within_one_day_rate_pct)} still report within one day.`;
+  }
+  if (decisionKey === "liquidity") {
+    const gross = liquidity.evidence_ladder[0];
+    return `${formatUsdCompact(gross.value_usd)} of gross positive availability screens in the supplied window, while the funded case remains ${liquidity.funded_case.display}.`;
+  }
+  if (decisionKey === "payments") {
+    const union = payments.priority_union;
+    return `${formatNumber(union.records)} deduplicated records — ${formatPercent(union.record_contribution_pct)} of the population — carry ${formatPercent(union.exception_contribution_pct)} of exceptions.`;
+  }
+  return `${formatNumber(quality.w1_checks.passed)} of ${formatNumber(quality.w1_checks.total)} structural checks pass and ${formatNumber(quality.w2_controls.reconciled)} of ${formatNumber(quality.w2_controls.total)} reconciliation controls reconcile.`;
+}
+
+function renderWizardDecisions() {
+  const container = get("#wizard-decision-options");
+  if (!container) return;
+  const options = WIZARD_DECISION_KEYS.map((key) => {
+    const config = WIZARD_DECISIONS[key];
+    const option = make("button", "wizard-option");
+    option.type = "button";
+    option.setAttribute("role", "radio");
+    option.dataset.wizardDecision = key;
+    const selected = wizardState.decision === key;
+    option.setAttribute("aria-checked", String(selected));
+    option.tabIndex = selected || (!wizardState.decision && key === WIZARD_DECISION_KEYS[0]) ? 0 : -1;
+    option.append(
+      make("strong", "wizard-option-label", config.label),
+      make("small", "wizard-option-summary", config.summary),
+    );
+    return option;
+  });
+  container.replaceChildren(...options);
+}
+
+function renderWizardAnswer() {
+  const container = get("#wizard-answer");
+  if (!container || !wizardState.decision) return;
+  const key = wizardState.decision;
+  const config = WIZARD_DECISIONS[key];
+  const definition = dashboardData.definitions[config.topic];
+  const scopeText = wizardState.scope ? describeWizardScope(wizardState.scope) : currentScopeText();
+
+  const blocks = [];
+  const scope = make("p", "wizard-answer-scope", `Scope: ${scopeText}`);
+  blocks.push(scope);
+
+  const finding = make("section", "wizard-answer-block");
+  finding.append(
+    make("p", "wizard-answer-label", "Core finding"),
+    make("p", "wizard-answer-finding", wizardFinding(key)),
+  );
+  blocks.push(finding);
+
+  const limit = make("section", "wizard-answer-block");
+  limit.append(
+    make("p", "wizard-answer-label", "What this evidence cannot show"),
+    make("p", "wizard-answer-text boundary-section", definition.boundary),
+  );
+  blocks.push(limit);
+
+  const action = make("section", "wizard-answer-block");
+  action.append(
+    make("p", "wizard-answer-label", "Recommended action"),
+    make("p", "wizard-answer-text", definition.next_action),
+  );
+  blocks.push(action);
+
+  const approval = make("section", "wizard-answer-block wizard-answer-approver");
+  approval.append(
+    make("p", "wizard-answer-label", "Approval required from"),
+    make("p", "wizard-answer-text", config.approver),
+  );
+  blocks.push(approval);
+
+  const links = make("div", "wizard-answer-links");
+  [["formulas", "How this is calculated"], ["constraints", "Constraints & limitations"], ["methodology", "Methodology"], ["data", "Detailed data"]].forEach(([page, label]) => {
+    const link = make("button", "menu-inline-link", label);
+    link.type = "button";
+    link.dataset.openDetailPage = page;
+    links.append(link);
+  });
+  const linkWrap = make("section", "wizard-answer-block");
+  linkWrap.append(make("p", "wizard-answer-label", "Go deeper"), links);
+  blocks.push(linkWrap);
+
+  container.replaceChildren(...blocks);
+}
+
+function describeWizardScope(scope) {
+  const parts = [formatDateRange(scope.dateFrom, scope.dateTo)];
+  parts.push(scope.region || "All regions");
+  parts.push(scope.entity ? entityLabel(scope.entity) : "All entities");
+  parts.push(scope.bank || "All banks");
+  parts.push(scope.currency || "All currencies");
+  return parts.join(" · ");
+}
+
+function readWizardScope() {
+  const scope = { ...(wizardState.scope || appliedFilters || defaultFilters) };
+  getAll("[data-wizard-field]").forEach((field) => {
+    scope[field.dataset.wizardField] = field.value;
+  });
+  return scope;
+}
+
+function populateWizardScope() {
+  if (!filterOptions) return;
+  const scope = wizardState.scope || appliedFilters || defaultFilters;
+  const selects = [
+    ["region", filterOptions.regions, "All regions"],
+    ["entity", filterOptions.entities, "All entities"],
+    ["bank", filterOptions.banks, "All banks"],
+    ["currency", filterOptions.currencies, "All currencies"],
+  ];
+  selects.forEach(([field, values, allLabel]) => {
+    const select = get(`[data-wizard-field="${field}"]`);
+    if (!select) return;
+    const options = [make("option", "", allLabel)];
+    options[0].value = "";
+    (values || []).forEach((entry) => {
+      const isEntity = field === "entity";
+      const value = isEntity ? entry.value : entry;
+      const option = make("option", "", isEntity ? `${entry.value} — ${entry.label}` : entry);
+      option.value = value;
+      options.push(option);
+    });
+    select.replaceChildren(...options);
+    select.value = scope[field] || "";
+  });
+  const from = get('[data-wizard-field="dateFrom"]');
+  const to = get('[data-wizard-field="dateTo"]');
+  if (from) from.value = scope.dateFrom;
+  if (to) to.value = scope.dateTo;
+}
+
+function syncWizardChrome() {
+  const step = wizardState.step;
+  setText("#wizard-progress", `Step ${step} of ${WIZARD_TOTAL_STEPS}`);
+  for (let index = 1; index <= WIZARD_TOTAL_STEPS; index += 1) {
+    const panel = get(`#wizard-step-${index}`);
+    if (panel) panel.hidden = index !== step;
+    const dot = get(`[data-wizard-dot="${index}"]`);
+    if (dot) {
+      dot.classList.toggle("is-complete", index < step);
+      if (index === step) dot.setAttribute("aria-current", "step");
+      else dot.removeAttribute("aria-current");
+    }
+  }
+  const back = get("#wizard-back");
+  const next = get("#wizard-next");
+  const finish = get("#wizard-finish");
+  if (back) back.hidden = step === 1;
+  if (next) next.hidden = step === WIZARD_TOTAL_STEPS;
+  if (finish) finish.hidden = step !== WIZARD_TOTAL_STEPS;
+}
+
+function goToWizardStep(step) {
+  wizardState.step = Math.min(Math.max(step, 1), WIZARD_TOTAL_STEPS);
+  if (wizardState.step === 2) populateWizardScope();
+  if (wizardState.step === 3) renderWizardAnswer();
+  syncWizardChrome();
+  const heading = get(`#wizard-step-${wizardState.step}-title`);
+  if (heading) {
+    heading.setAttribute("tabindex", "-1");
+    heading.focus();
+  }
+  announce(`Guided review step ${wizardState.step} of ${WIZARD_TOTAL_STEPS}.`);
+}
+
+function advanceWizard() {
+  if (wizardState.step === 1) {
+    const error = get("#wizard-decision-error");
+    if (!wizardState.decision) {
+      if (error) error.hidden = false;
+      const first = get("[data-wizard-decision]");
+      if (first) first.focus();
+      return;
+    }
+    if (error) error.hidden = true;
+    goToWizardStep(2);
+    return;
+  }
+  if (wizardState.step === 2) {
+    const scope = readWizardScope();
+    const error = get("#wizard-scope-error");
+    if (scope.dateFrom && scope.dateTo && scope.dateFrom > scope.dateTo) {
+      if (error) error.hidden = false;
+      return;
+    }
+    if (error) error.hidden = true;
+    wizardState.scope = scope;
+    goToWizardStep(3);
+  }
+}
+
+function selectWizardDecision(key) {
+  if (!WIZARD_DECISION_KEYS.includes(key)) return;
+  wizardState.decision = key;
+  const error = get("#wizard-decision-error");
+  if (error) error.hidden = true;
+  renderWizardDecisions();
+  const selected = get(`[data-wizard-decision="${key}"]`);
+  if (selected) selected.focus();
+}
+
+function openGuidedReview(opener) {
+  if (!dashboardData) return;
+  lastWizardOpener = opener || null;
+  if (!wizardState.scope) wizardState.scope = { ...(appliedFilters || defaultFilters) };
+  renderWizardDecisions();
+  goToWizardStep(wizardState.decision ? wizardState.step : 1);
+  const dialog = get("#guided-review-dialog");
+  if (dialog && !dialog.open) dialog.showModal();
+}
+
+function closeGuidedReview({ applyScope = false } = {}) {
+  const dialog = get("#guided-review-dialog");
+  if (applyScope && wizardState.scope) {
+    applyWizardScopeToDashboard(wizardState.scope);
+  }
+  if (dialog && dialog.open) dialog.close();
+}
+
+function applyWizardScopeToDashboard(scope) {
+  if (!dashboardData) return;
+  // Reuse the governed apply pipeline so the wizard cannot bypass validation,
+  // the empty-scope guard, or the announcement the dashboard already makes.
+  const applied = applyFilterCandidate(scope, {
+    closePanel: false,
+    message: "Guided review scope applied.",
+  });
+  if (applied) writeFilterForm(draftFilters);
+}
+
+// ---------------------------------------------------------------------------
+// Secondary detail pages
+//
+// Formulas, constraints, methodology, and detailed data are reference material.
+// They are deliberately kept off the homepage and rendered here from the same
+// governed contract, so the homepage can stay a summary without losing rigour.
+// ---------------------------------------------------------------------------
+const DETAIL_PAGES = Object.freeze({
+  formulas: Object.freeze({
+    eyebrow: "Reference",
+    title: "Calculation formulas",
+    description: "How every governed measure is computed. Formulas are stable and do not change with dashboard filters.",
+  }),
+  constraints: Object.freeze({
+    eyebrow: "Reference",
+    title: "Constraints & limitations",
+    description: "What each measure may not be used to claim. Read these before using any figure in a funding or execution decision.",
+  }),
+  methodology: Object.freeze({
+    eyebrow: "Reference",
+    title: "Methodology",
+    description: "What each measure means, the population it is drawn from, and the next action its method prescribes.",
+  }),
+  data: Object.freeze({
+    eyebrow: "Reference",
+    title: "Detailed data",
+    description: "Governed population controls, structural checks, reconciliation controls, and source artifacts behind the dashboard.",
+  }),
+});
+const DETAIL_PAGE_KEYS = Object.freeze(Object.keys(DETAIL_PAGES));
+
+function detailPageCard(heading, nodes) {
+  const card = make("section", "detail-page-card");
+  card.append(make("h3", "detail-page-card-title", heading));
+  nodes.forEach((node) => card.append(node));
+  return card;
+}
+
+function renderDetailPage(page) {
+  const body = get("#detail-page-body");
+  if (!body || !dashboardData) return;
+  const definitions = dashboardData.definitions;
+  const cards = [];
+
+  if (page === "data") {
+    const quality = dashboardData.quality;
+    const meta = dashboardData.meta;
+    const rows = [
+      ["Reporting period", formatDateRange(meta.period_start, meta.period_end)],
+      ["Week 1 structural checks", `${formatNumber(quality.w1_checks.passed)} / ${formatNumber(quality.w1_checks.total)} passed`],
+      ["Week 2 reconciliation controls", `${formatNumber(quality.w2_controls.reconciled)} / ${formatNumber(quality.w2_controls.total)} reconciled`],
+      ["Governed source artifacts", formatNumber(quality.source_artifacts)],
+      ["Open evidence items", formatNumber(quality.issue_queue.length)],
+    ];
+    const dl = make("dl", "detail-page-facts");
+    rows.forEach(([term, value]) => {
+      const wrap = make("div", "");
+      wrap.append(make("dt", "", term), make("dd", "", value));
+      dl.append(wrap);
+    });
+    cards.push(detailPageCard("Population & controls", [
+      dl,
+      make("p", "detail-page-boundary-note", "Passing internal checks establishes structural consistency and reconciliation only; it does not certify source completeness, semantic accuracy, operational timing, causation, or decision authority."),
+    ]));
+    GUIDE_TOPICS.forEach((topic) => {
+      const definition = definitions[topic];
+      cards.push(detailPageCard(definition.title, [
+        make("p", "detail-page-text", definition.meaning),
+        make("p", "detail-page-label", "Data source"),
+        sourceList(definition.sources),
+      ]));
+    });
+  } else {
+    GUIDE_TOPICS.forEach((topic) => {
+      const definition = definitions[topic];
+      const nodes = [];
+      if (page === "formulas") {
+        nodes.push(make("p", "detail-page-text", definition.calculation));
+        nodes.push(make("p", "formula", definition.formula));
+      } else if (page === "constraints") {
+        nodes.push(make("p", "detail-page-label", "Method limit"));
+        nodes.push(make("p", "detail-page-text boundary-section", definition.boundary));
+      } else {
+        nodes.push(make("p", "detail-page-text", definition.meaning));
+        nodes.push(make("p", "detail-page-label", "Next action"));
+        nodes.push(make("p", "detail-page-text", definition.next_action));
+      }
+      cards.push(detailPageCard(definition.title, nodes));
+    });
+  }
+  body.replaceChildren(...cards);
+}
+
+function openDetailPage(page, opener) {
+  if (!dashboardData || !DETAIL_PAGE_KEYS.includes(page)) return;
+  const config = DETAIL_PAGES[page];
+  state.detailPage = page;
+  lastDetailPageOpener = opener || lastDetailPageOpener;
+  setText("#detail-page-eyebrow", config.eyebrow);
+  setText("#detail-page-title", config.title);
+  setText("#detail-page-description", config.description);
+  getAll("[data-open-detail-page]").forEach((button) => {
+    const selected = button.dataset.openDetailPage === page;
+    if (button.closest(".detail-page-tabs")) {
+      button.setAttribute("aria-current", selected ? "page" : "false");
+    }
+  });
+  renderDetailPage(page);
+  closeDrawer();
+  const section = get("#detail-pages");
+  if (section) section.hidden = false;
+  syncDashboardViewVisibility();
+  const title = get("#detail-page-title");
+  if (title) title.focus();
+  announce(`${config.title} reference page open.`);
+}
+
+function closeDetailPage({ focus = true } = {}) {
+  const section = get("#detail-pages");
+  if (!section || section.hidden) return;
+  state.detailPage = null;
+  section.hidden = true;
+  syncDashboardViewVisibility();
+  if (focus && lastDetailPageOpener && document.contains(lastDetailPageOpener)) {
+    lastDetailPageOpener.focus();
+  } else if (focus) {
+    const heading = get("#dashboard-menu-title");
+    if (heading) heading.focus();
+  }
+  lastDetailPageOpener = null;
+}
+
 function openDrawer(topic, opener) {
   if (!dashboardData) return;
   closeSearch();
@@ -2572,6 +3171,83 @@ function bindEvents() {
     button.addEventListener("click", () => openDrawer(button.dataset.openDrawer, button));
   });
   getAll("[data-close-drawer]").forEach((button) => button.addEventListener("click", closeDrawer));
+
+  // Secondary detail pages. Delegated so links rendered later (wizard answer,
+  // next actions) work without rebinding.
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-open-detail-page]");
+    if (!trigger || trigger.disabled) return;
+    event.preventDefault();
+    openDetailPage(trigger.dataset.openDetailPage, trigger);
+  });
+  getAll("[data-close-detail-page]").forEach((button) => {
+    button.addEventListener("click", () => closeDetailPage());
+  });
+
+  // Guided review wizard.
+  getAll("[data-start-guided-review]").forEach((button) => {
+    button.addEventListener("click", () => startTour(button));
+  });
+  getAll("[data-open-focused-review]").forEach((button) => {
+    button.addEventListener("click", () => openGuidedReview(button));
+  });
+  getAll("[data-tour-skip]").forEach((button) => {
+    button.addEventListener("click", () => endTour());
+  });
+  const tourNext = get("#tour-next");
+  if (tourNext) tourNext.addEventListener("click", () => goToTourStep(tourState.step + 1));
+  const tourBack = get("#tour-back");
+  if (tourBack) tourBack.addEventListener("click", () => goToTourStep(tourState.step - 1));
+  const tourFinish = get("#tour-finish");
+  if (tourFinish) tourFinish.addEventListener("click", () => endTour({ openReview: true }));
+  const tourScrim = get("#tour-scrim");
+  if (tourScrim) tourScrim.addEventListener("click", () => endTour());
+  document.addEventListener("keydown", handleTourKeydown, true);
+  getAll("[data-close-wizard]").forEach((button) => {
+    button.addEventListener("click", () => closeGuidedReview());
+  });
+  const wizardNext = get("#wizard-next");
+  if (wizardNext) wizardNext.addEventListener("click", () => advanceWizard());
+  const wizardBack = get("#wizard-back");
+  if (wizardBack) wizardBack.addEventListener("click", () => goToWizardStep(wizardState.step - 1));
+  const wizardSkip = get("#wizard-skip");
+  if (wizardSkip) wizardSkip.addEventListener("click", () => closeGuidedReview());
+  const wizardFinish = get("#wizard-finish");
+  if (wizardFinish) {
+    wizardFinish.addEventListener("click", () => closeGuidedReview({ applyScope: true }));
+  }
+  const wizardOptions = get("#wizard-decision-options");
+  if (wizardOptions) {
+    wizardOptions.addEventListener("click", (event) => {
+      const option = event.target.closest("[data-wizard-decision]");
+      if (option) selectWizardDecision(option.dataset.wizardDecision);
+    });
+    wizardOptions.addEventListener("keydown", (event) => {
+      if (!["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+      const options = getAll("[data-wizard-decision]", wizardOptions);
+      if (!options.length) return;
+      const current = options.findIndex((node) => node === document.activeElement);
+      let index = current < 0 ? 0 : current;
+      if (event.key === "Home") index = 0;
+      else if (event.key === "End") index = options.length - 1;
+      else if (event.key === "ArrowDown" || event.key === "ArrowRight") index = (index + 1) % options.length;
+      else index = (index - 1 + options.length) % options.length;
+      event.preventDefault();
+      selectWizardDecision(options[index].dataset.wizardDecision);
+    });
+  }
+  const wizardDialog = get("#guided-review-dialog");
+  if (wizardDialog) {
+    wizardDialog.addEventListener("close", () => {
+      if (lastWizardOpener && document.contains(lastWizardOpener)) lastWizardOpener.focus();
+      lastWizardOpener = null;
+    });
+  }
+  getAll("[data-wizard-field]").forEach((field) => {
+    field.addEventListener("change", () => {
+      wizardState.scope = readWizardScope();
+    });
+  });
   getAll("[data-reset]").forEach((button) => button.addEventListener("click", () => resetView()));
   get("#regional-all-button").addEventListener("click", () => applyRegionalSelection("", "marker"));
   setupLiquidityTrendResizeHandling();
@@ -2804,6 +3480,13 @@ if (typeof module !== "undefined" && module.exports) {
     assertDashboardData,
     qualityDimensionsAreValid,
     metricSearchDefinitions,
+    WIZARD_DECISIONS,
+    WIZARD_DECISION_KEYS,
+    WIZARD_TOTAL_STEPS,
+    DETAIL_PAGES,
+    DETAIL_PAGE_KEYS,
+    NEXT_ACTION_TOPICS,
+    TOUR_STEPS,
   });
 }
 

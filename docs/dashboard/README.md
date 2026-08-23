@@ -23,24 +23,61 @@ The published site is a static snapshot of this folder: pure HTML, CSS, and Java
 
 ## What is interactive—and why
 
-### The landing page: baseline findings beside the menu
+### The landing page: one recommendation, three KPIs, three actions
 
-The dashboard opens on a landing page with two parts: a **baseline-evidence brief** and the **six-view menu** that remains the routing spine for everything else.
-
-The brief is a fixed, portfolio-wide read of the Week 1–2 snapshot. It does not respond to filters, and it says so on every band. It carries:
+The homepage answers three questions in one viewport — *what should we do*, *what does the evidence say*, and *what happens next* — and nothing more. Everything technical moved to the secondary detail pages.
 
 | Element | Shows | Boundary kept visible |
 |---|---|---|
-| Portfolio decision band | The governed decision headline, its next step, and the three portfolio signals held apart | `Three separate signals—not a composite score. Portfolio-wide · filters do not apply.` |
-| Four headline measures | Accounts reporting late, gross positive availability, payment exception rate, and Week 1 structural checks | Each tile carries its own proxy, mobility, causation, or certification limit |
-| Finding 01 · Payment friction | Record, exception, and repair-minute shares of the deduplicated priority union | Overlap records are counted once; association, not causation |
-| Finding 02 · Liquidity screening | Share of complete windows meeting the base and stress thresholds at 7 and 14 days | A screening sensitivity—not surplus cash or transfer authorization |
-| Finding 03 · Reporting visibility | Same-day, within-one-day, and beyond-one-day shares of the account population | Reporting-date proxy—not start-of-day or elapsed-24-hour performance |
-| Finding 04 · Value not yet bookable | The four benefit candidates and the validation gate each still fails | Capacity and closure value not fundable; no approved closures; source certification open |
+| Primary recommendation | The governed decision headline, its next step, and an evidence-strength line | `Three separate signals—not a composite score. Portfolio-wide · filters do not apply.` |
+| Three KPIs | Accounts reporting late, gross positive availability, and payment exception rate | Each tile carries its own proxy, mobility, or causation limit |
+| Three next actions | The governed `next_action` for visibility, liquidity, and payments, each with its supplied measure | Method next-steps, not an approved workplan, funding decision, or execution authority |
+| Start Guided Review | Opens the three-step guided review | — |
 
-Every number is read from the governed JSON contract at render time; none is hard-coded in the page. If the contract fails validation, both the decision band and the findings section are removed and only the disabled menu and the failure banner remain — the page never shows a conclusion it cannot source.
+Every number is read from the governed JSON contract at render time; none is hard-coded. If the contract fails validation, the recommendation and evidence are removed and only the disabled menu and failure banner remain — the page never shows a conclusion it cannot source.
 
-Why the change: the earlier build opened on a menu with no evidence at all, which asked users to choose an investigation before knowing what the snapshot contained. The brief answers *what did we find* in one viewport; the menu still answers *what do you want to investigate*, and remains the only way to open a view.
+Why the change: the earlier build presented six menu options, four KPI cards, and four finding cards at once, which asked users to absorb seven conclusions before choosing an investigation. The homepage now summarizes and routes; depth lives one click away.
+
+### Guided review
+
+`Start Guided Review` on the homepage launches a **spotlight tour**: the page dims and one real element is highlighted at a time, so a first-time reader learns what they are looking at before being asked to decide anything.
+
+| Step | Highlights | Answers |
+|---|---|---|
+| 1 | The recommendation band | What is this dashboard recommending? |
+| 2 | The evidence-base line | How much weight can that recommendation bear? |
+| 3 | The three KPIs | Which measures support it, and what are their limits? |
+| 4 | The three next actions | What should happen next? |
+| 5 | The view menu | Where do I go deeper? |
+| 6 | The filter toolbar | How do I narrow the scope? |
+| 7 | The Metric guide button | Where are definitions, formulas, and limits? |
+
+Every step shows `Step N of 7`, progress dots, `Back` (except step 1), `Next` (except the last), and `Skip to Full Dashboard`, available throughout. The last step offers `Open focused review`, which hands off to the three-step review below. Escape closes the tour, arrow keys move between steps, focus is trapped in the popover, and page scroll is locked while it runs. A step whose target is missing or collapsed is skipped rather than pointing at nothing, so the tour adapts to viewport and data state.
+
+### Focused review
+
+`Focused review` — and the tour's final step — opens a three-step modal built on the same `<dialog>` pattern as the Metric guide.
+
+1. **Choose the decision** — Cash Visibility, Liquidity, Payments, or Data Quality, as an accessible radiogroup with arrow-key support. Step 1 cannot be advanced until a decision is chosen.
+2. **Select the scope** — the same governed date, region, entity, bank, and currency filters the dashboard uses. Selections persist across Back and Next.
+3. **Review the answer** — deliberately narrow: one core finding, what the evidence cannot show, one recommended action, and the role whose approval is required. Formulas, methodology, and datasets are *linked*, not inlined.
+
+Each step shows `Step N of 3`, a Back button (except step 1), a Next button (except step 3), and `Skip to Full Dashboard`. The final step offers `View Full Dashboard`, which applies the chosen scope through the same governed filter pipeline the toolbar uses — the review cannot bypass validation or the empty-scope guard.
+
+The approver named in step 3 is an analyst-proposed accountable role, not a recorded client approval.
+
+### Secondary detail pages
+
+Four reference pages hold the technical depth that used to crowd the homepage:
+
+| Page | Contains |
+|---|---|
+| Calculation formulas | The calculation narrative and formula for all seven governed topics |
+| Constraints & limitations | Each topic's method limit — what it may not be used to claim |
+| Methodology | What each measure means and the next action its method prescribes |
+| Detailed data | Population controls, structural checks, reconciliation controls, source artifacts, and per-topic sources |
+
+They are reachable from the Metric guide drawer, from the homepage constraints link, and from the "Go deeper" links in the guided review answer. Opening one takes over the main area and hides the menu; `Back to dashboard` restores it and returns focus to the trigger.
 
 ### Menu navigation
 
@@ -202,12 +239,12 @@ The final UI test opens a temporary loopback server when the environment permits
 - `data/processed/W2_dashboard_account_day_facts.csv` — governed visibility and liquidity filter facts
 - `data/processed/W2_dashboard_payment_facts.csv` — governed payment filter facts
 - `docs/dashboard/dashboard_data.json` — generated governed data, filter, definition, quality-dimension, monitoring, and action-queue contract
-- `docs/dashboard/index.html` — landing brief, six-view menu, and semantic dashboard structure
+- `docs/dashboard/index.html` — simplified landing page, six-view menu, secondary detail pages, guided-review wizard, and semantic dashboard structure
 - `docs/dashboard/styles.css` — Figma-aligned responsive design
 - `docs/dashboard/assets/world-map.png` — locally vendored decorative CC0 Robinson-projection map raster
 - `docs/dashboard/assets/README.md` — map source, author, CC0 license, retrieval date, dimensions, and checksum
 - `docs/dashboard/filter_model.js` — deterministic filtering, governed visualization summaries, and search
-- `docs/dashboard/app.js` — landing-brief findings, six-view navigation, quality drill-down/action queue, accordions, charts, search, filters, Metric guide, accessibility, and fail-closed interactions
+- `docs/dashboard/app.js` — recommendation and next actions, guided-review wizard, secondary detail pages, six-view navigation, quality drill-down/action queue, accordions, charts, search, filters, Metric guide, accessibility, and fail-closed interactions
 - `tests/test_dashboard_data.py` — analytical contract tests
 - `tests/test_dashboard_filter_model.js` — filter, visualization reconciliation, search, date, mutation, and empty-scope tests
 - `tests/test_dashboard_ui.py` — menu routing, exact quality mappings, adversarial quality mutations, disclosure/search behavior, visualization, keyboard, claim, safety, and local-asset tests

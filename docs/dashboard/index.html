@@ -195,10 +195,16 @@
             <div class="menu-decision-copy">
               <p class="menu-decision-eyebrow">
                 <span class="menu-decision-dot" aria-hidden="true"></span>
-                Portfolio decision · <span id="menu-decision-status">Validation required</span>
+                Primary recommendation · <span id="menu-decision-status">Validation required</span>
               </p>
               <h2 id="menu-decision-headline">Design and test; do not fund or execute yet.</h2>
               <p id="menu-decision-next">Prioritize delayed reporting sources and payment root causes; certify mobility before booking value.</p>
+              <p id="menu-decision-confidence" class="menu-decision-confidence">Loading evidence-base strength…</p>
+              <div class="menu-decision-actions">
+                <button id="start-guided-review" class="button button-primary" type="button" data-start-guided-review data-requires-data disabled>Start Guided Review</button>
+                <button id="open-focused-review" class="button button-secondary" type="button" data-open-focused-review data-requires-data disabled>Focused review</button>
+                <button class="detail-guide-button" type="button" data-open-drawer="overview" data-requires-data>Definition, formula &amp; source <span aria-hidden="true">→</span></button>
+              </div>
             </div>
             <dl class="menu-decision-signals" aria-label="Portfolio signals, held separate">
               <div><dt>Reporting visibility</dt><dd id="menu-signal-visibility">—</dd></div>
@@ -279,47 +285,14 @@
                   <div class="menu-stat-meter" aria-hidden="true"><span id="menu-stat-payments-meter"></span></div>
                   <p id="menu-stat-payments-note" class="menu-stat-note">Supplied records only; association, not causation.</p>
                 </li>
-                <li class="menu-stat menu-stat-blue">
-                  <p class="menu-stat-label">Checks and controls</p>
-                  <p class="menu-stat-value"><strong id="menu-stat-quality">—</strong><span id="menu-stat-quality-unit">structural checks</span></p>
-                  <div class="menu-stat-meter" aria-hidden="true"><span id="menu-stat-quality-meter"></span></div>
-                  <p id="menu-stat-quality-note" class="menu-stat-note">Reconciled to supplied controls; source certification open.</p>
-                </li>
               </ul>
 
-              <div class="menu-finding-grid">
-                <article class="menu-finding" aria-labelledby="menu-finding-payments-title">
-                  <p class="menu-finding-kicker">Finding 01 · Payment friction</p>
-                  <h3 id="menu-finding-payments-title">A minority of records carries most of the repair burden</h3>
-                  <p id="menu-finding-payments-lede" class="menu-finding-lede">Loading deduplicated cohort evidence…</p>
-                  <ul id="menu-finding-payments-bars" class="menu-bars" aria-label="Deduplicated priority union share of records, exceptions and repair minutes"></ul>
-                  <p class="menu-finding-boundary">Manual touch or cross-border wire, deduplicated—overlap records are counted once.</p>
-                </article>
-
-                <article class="menu-finding" aria-labelledby="menu-finding-liquidity-title">
-                  <p class="menu-finding-kicker">Finding 02 · Liquidity screening</p>
-                  <h3 id="menu-finding-liquidity-title">The screen holds at 7 days and thins at 14</h3>
-                  <p id="menu-finding-liquidity-lede" class="menu-finding-lede">Loading governed screening sensitivities…</p>
-                  <ul id="menu-finding-liquidity-bars" class="menu-bars" aria-label="Share of complete windows meeting each screening threshold"></ul>
-                  <p class="menu-finding-boundary">A screening sensitivity—not surplus cash or transfer authorization.</p>
-                </article>
-
-                <article class="menu-finding" aria-labelledby="menu-finding-visibility-title">
-                  <p class="menu-finding-kicker">Finding 03 · Reporting visibility</p>
-                  <h3 id="menu-finding-visibility-title">Late is common; more than a day late is not</h3>
-                  <p id="menu-finding-visibility-lede" class="menu-finding-lede">Loading account reporting composition…</p>
-                  <ul id="menu-finding-visibility-bars" class="menu-bars" aria-label="Account reporting timeliness composition"></ul>
-                  <p class="menu-finding-boundary">Reporting-date proxy—not start-of-day or elapsed-24-hour performance.</p>
-                </article>
-
-                <article class="menu-finding" aria-labelledby="menu-finding-value-title">
-                  <p class="menu-finding-kicker">Finding 04 · Value not yet bookable</p>
-                  <h3 id="menu-finding-value-title">Every candidate benefit still fails a validation gate</h3>
-                  <p id="menu-finding-value-lede" class="menu-finding-lede">Loading guardrail evidence…</p>
-                  <ul id="menu-finding-value-gates" class="menu-gate-list" aria-label="Validation gates that remain open"></ul>
-                  <p class="menu-finding-boundary">Capacity value not fundable · Closure value not fundable · no approved closures.</p>
-                </article>
-              </div>
+              <ul class="menu-next-actions" id="menu-next-actions" aria-label="Next actions">
+              </ul>
+              <p class="menu-actions-boundary">
+                Actions are governed method next-steps, not an approved workplan, funding decision, or execution authority.
+                <button class="menu-inline-link" type="button" data-open-detail-page="constraints" data-requires-data>See constraints &amp; limitations <span aria-hidden="true">→</span></button>
+              </p>
             </section>
           </div>
         </div>
@@ -709,6 +682,32 @@
           </details>
         </section>
 
+        <section id="detail-pages" class="detail-pages" aria-labelledby="detail-page-title" hidden>
+          <header class="detail-page-header">
+            <button id="detail-page-back" class="all-views-button" type="button" data-close-detail-page data-requires-data>
+              <span aria-hidden="true">←</span> Back to dashboard
+            </button>
+            <div>
+              <p id="detail-page-eyebrow" class="selected-view-eyebrow">Reference</p>
+              <h2 id="detail-page-title" tabindex="-1">Detail</h2>
+              <p id="detail-page-description">Stable reference material. These pages do not change with dashboard filters.</p>
+            </div>
+          </header>
+
+          <nav class="detail-page-tabs" aria-label="Detail pages">
+            <button type="button" data-open-detail-page="formulas" data-requires-data>Calculation formulas</button>
+            <button type="button" data-open-detail-page="constraints" data-requires-data>Constraints &amp; limitations</button>
+            <button type="button" data-open-detail-page="methodology" data-requires-data>Methodology</button>
+            <button type="button" data-open-detail-page="data" data-requires-data>Detailed data</button>
+          </nav>
+
+          <div id="detail-page-body" class="detail-page-body"></div>
+
+          <p class="detail-page-boundary">
+            Reference only. Nothing on these pages authorizes funding, execution, cash movement, or benefit recognition.
+          </p>
+        </section>
+
         <footer id="evidence-footer" class="evidence-footer" hidden><p>Review the Metric guide before using any figure in a funding or execution decision.</p></footer>
       </main>
     </div>
@@ -748,8 +747,120 @@
           <section id="panel-quality" class="drawer-panel" role="tabpanel" aria-labelledby="tab-quality" hidden></section>
         </div>
 
+        <div class="drawer-detail-links">
+          <p class="drawer-detail-links-label">Full reference pages</p>
+          <div class="drawer-detail-links-grid">
+            <button type="button" data-open-detail-page="formulas" data-requires-data>Calculation formulas <span aria-hidden="true">→</span></button>
+            <button type="button" data-open-detail-page="constraints" data-requires-data>Constraints &amp; limitations <span aria-hidden="true">→</span></button>
+            <button type="button" data-open-detail-page="methodology" data-requires-data>Methodology <span aria-hidden="true">→</span></button>
+            <button type="button" data-open-detail-page="data" data-requires-data>Detailed data <span aria-hidden="true">→</span></button>
+          </div>
+        </div>
+
         <footer class="drawer-footer">
           <button class="button button-quiet" type="button" data-reset>Reset dashboard</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <div id="tour-overlay" class="tour-overlay" hidden>
+      <div id="tour-scrim" class="tour-scrim"></div>
+      <div id="tour-ring" class="tour-ring" aria-hidden="true"></div>
+      <div
+        id="tour-popover"
+        class="tour-popover"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tour-step-title"
+        aria-describedby="tour-step-body"
+      >
+        <div class="tour-popover-head">
+          <p id="tour-progress" class="tour-progress" aria-live="polite">Step 1 of 6</p>
+          <button id="tour-close" class="tour-close" type="button" data-tour-skip aria-label="Skip the guided review">×</button>
+        </div>
+        <h2 id="tour-step-title" class="tour-step-title" tabindex="-1">Step</h2>
+        <p id="tour-step-body" class="tour-step-body">Step description.</p>
+        <div id="tour-dots" class="tour-dots" aria-hidden="true"></div>
+        <div class="tour-actions">
+          <button id="tour-skip" class="button button-quiet" type="button" data-tour-skip>Skip to Full Dashboard</button>
+          <div class="tour-nav">
+            <button id="tour-back" class="button button-secondary" type="button" data-tour-back hidden>Back</button>
+            <button id="tour-next" class="button button-primary" type="button" data-tour-next>Next</button>
+            <button id="tour-finish" class="button button-primary" type="button" data-tour-finish hidden>Open focused review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <dialog id="guided-review-dialog" class="evidence-dialog guided-dialog" aria-labelledby="wizard-title" aria-describedby="wizard-progress">
+      <div class="drawer-shell wizard-shell">
+        <header class="drawer-header">
+          <div>
+            <h2 id="wizard-title" tabindex="-1">Guided review</h2>
+            <p id="wizard-progress" class="wizard-progress" aria-live="polite">Step 1 of 3</p>
+          </div>
+          <button id="wizard-close" class="drawer-close" type="button" data-close-wizard aria-label="Close guided review">×</button>
+        </header>
+
+        <ol class="wizard-steps" aria-label="Guided review progress">
+          <li data-wizard-dot="1" aria-current="step"><span aria-hidden="true">1</span> Decision</li>
+          <li data-wizard-dot="2"><span aria-hidden="true">2</span> Scope</li>
+          <li data-wizard-dot="3"><span aria-hidden="true">3</span> Answer</li>
+        </ol>
+
+        <div class="wizard-panels">
+          <section id="wizard-step-1" class="wizard-panel" aria-labelledby="wizard-step-1-title">
+            <h3 id="wizard-step-1-title">Choose the decision you are reviewing</h3>
+            <p class="wizard-help">Pick one decision area. Each maps to a governed evidence view.</p>
+            <div id="wizard-decision-options" class="wizard-options" role="radiogroup" aria-labelledby="wizard-step-1-title" aria-required="true"></div>
+            <p id="wizard-decision-error" class="filter-message filter-validation" role="alert" hidden>Select a decision area to continue.</p>
+          </section>
+
+          <section id="wizard-step-2" class="wizard-panel" aria-labelledby="wizard-step-2-title" hidden>
+            <h3 id="wizard-step-2-title">Select the scope</h3>
+            <p class="wizard-help">These are the same governed filters used by the dashboard. Leave any field on “All” to keep it unscoped.</p>
+            <form id="wizard-scope-form" novalidate>
+              <fieldset class="date-filter-group">
+                <legend>Date range <span>Inclusive dates</span></legend>
+                <label for="wizard-date-from"><span>From</span>
+                  <input id="wizard-date-from" type="date" min="2026-01-01" max="2026-06-30" data-wizard-field="dateFrom">
+                </label>
+                <label for="wizard-date-to"><span>To</span>
+                  <input id="wizard-date-to" type="date" min="2026-01-01" max="2026-06-30" data-wizard-field="dateTo">
+                </label>
+              </fieldset>
+              <div class="filter-field-grid">
+                <label for="wizard-region"><span>Region</span>
+                  <select id="wizard-region" data-wizard-field="region"><option value="">All regions</option></select>
+                </label>
+                <label for="wizard-entity"><span>Entity</span>
+                  <select id="wizard-entity" data-wizard-field="entity"><option value="">All entities</option></select>
+                </label>
+                <label for="wizard-bank"><span>Bank</span>
+                  <select id="wizard-bank" data-wizard-field="bank"><option value="">All banks</option></select>
+                </label>
+                <label for="wizard-currency"><span>Currency</span>
+                  <select id="wizard-currency" data-wizard-field="currency"><option value="">All currencies</option></select>
+                </label>
+              </div>
+              <p id="wizard-scope-error" class="filter-message filter-validation" role="alert" hidden>From date must be on or before To date.</p>
+              <p id="wizard-scope-empty" class="filter-message filter-empty-state" role="status" hidden>No comparable records match this scope. Widen it to continue with evidence.</p>
+            </form>
+          </section>
+
+          <section id="wizard-step-3" class="wizard-panel" aria-labelledby="wizard-step-3-title" hidden>
+            <h3 id="wizard-step-3-title">Review the answer</h3>
+            <div id="wizard-answer" class="wizard-answer"></div>
+          </section>
+        </div>
+
+        <footer class="drawer-footer wizard-footer">
+          <button id="wizard-skip" class="button button-quiet" type="button" data-wizard-skip>Skip to Full Dashboard</button>
+          <div class="wizard-nav">
+            <button id="wizard-back" class="button button-secondary" type="button" data-wizard-back hidden>Back</button>
+            <button id="wizard-next" class="button button-primary" type="button" data-wizard-next>Next</button>
+            <button id="wizard-finish" class="button button-primary" type="button" data-wizard-finish hidden>View Full Dashboard</button>
+          </div>
         </footer>
       </div>
     </dialog>
