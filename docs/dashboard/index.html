@@ -54,6 +54,11 @@
 
         <div class="header-actions">
           <p id="data-status" class="status-chip">Checking supplied controls…</p>
+          <p id="data-provenance" class="data-provenance">
+            <span>Last updated <time id="data-last-updated" datetime="">—</time></span>
+            <span aria-hidden="true">·</span>
+            <span>Data <code id="data-version">—</code></span>
+          </p>
           <button class="button button-secondary guide-button" type="button" data-open-drawer="overview" data-requires-data>
             <span class="button-glyph" aria-hidden="true">?</span>
             <span>Metric guide</span>
@@ -99,6 +104,18 @@
             hidden
           >
             Clear filters
+          </button>
+
+          <button
+            id="export-filtered"
+            class="button button-secondary export-button"
+            type="button"
+            data-export-filtered
+            data-requires-data
+            disabled
+          >
+            <span aria-hidden="true">↓</span>
+            <span>Export filtered results (CSV)</span>
           </button>
         </div>
 

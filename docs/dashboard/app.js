@@ -887,6 +887,7 @@ function renderNextActions() {
 }
 
 function renderHeader() {
+  renderProvenance();
   const scopeState = currentSummary.scope.has_matches
     ? plural(currentSummary.scope.account_count, "account")
     : "No matching accounts";
@@ -2092,6 +2093,177 @@ function selectDrawerTab(topic, { focusTab = false } = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Provenance and filtered export
+//
+// An exported file outlives the page it came from, so every row carries the
+// scope it was taken under and the limit that applies to it. A number that
+// leaves the dashboard without its boundary is exactly the failure mode the
+// rest of this contract is built to prevent.
+// ---------------------------------------------------------------------------
+function renderProvenance() {
+  if (!dashboardData) return;
+  const meta = dashboardData.meta;
+  const stamp = get("#data-last-updated");
+  if (stamp) {
+    stamp.textContent = formatIsoDate(meta.last_updated);
+    stamp.setAttribute("datetime", meta.last_updated);
+  }
+  setText("#data-version", meta.data_version);
+  const provenance = get("#data-provenance");
+  if (provenance) {
+    provenance.title =
+      `Dataset ${meta.data_version}, published ${formatIsoDate(meta.last_updated)}. `
+      + "The version is a fingerprint of the published numbers; it changes whenever any value, label, or boundary changes.";
+  }
+}
+
+// Excel and Sheets treat a leading =, +, -, or @ as a formula. Neutralize it.
+function csvCell(value) {
+  const text = value === null || value === undefined ? "" : String(value);
+  const guarded = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  return `"${guarded.replace(/"/g, '""')}"`;
+}
+
+function csvFromRows(rows, columns) {
+  const lines = [columns.map(csvCell).join(",")];
+  rows.forEach((row) => {
+    lines.push(columns.map((column) => csvCell(row[column])).join(","));
+  });
+  return lines.join("\r\n") + "\r\n";
+}
+
+function filteredExportRows() {
+  const summary = currentSummary;
+  const meta = dashboardData.meta;
+  const filters = appliedFilters || defaultFilters;
+  const scopeText = currentScopeText();
+  const rows = [];
+  const push = (section, metric, value, unit, boundary) => {
+    rows.push({
+      section,
+      metric,
+      value,
+      unit,
+      applied_scope: scopeText,
+      evidence_boundary: boundary,
+      data_version: meta.data_version,
+      last_updated: meta.last_updated,
+    });
+  };
+
+  push("Provenance", "Dataset version", meta.data_version, "identifier",
+    "Fingerprint of the published payload; changes when any value or label changes.");
+  push("Provenance", "Last updated", meta.last_updated, "date",
+    "Declared release date of the supplied dataset.");
+  push("Provenance", "Source period", `${meta.period_start} to ${meta.period_end}`, "date range", meta.scope);
+  push("Provenance", "Filters applied", scopeText, "scope",
+    "Rows below reflect this scope only; portfolio-wide measures are labelled as such.");
+
+  if (!summary || !summary.scope.has_matches) {
+    push("Scope", "Matching accounts", 0, "accounts",
+      "No records match this scope. No rate has been calculated; an empty scope is not a zero result.");
+    return rows;
+  }
+
+  const v = summary.visibility;
+  push("Scope", "Accounts in scope", summary.scope.account_count, "accounts", "Selected account population.");
+  push("Cash visibility", "Accounts reporting late", v.delayed_accounts, "accounts",
+    "Reporting-date proxy — not start-of-day or elapsed-24-hour performance.");
+  push("Cash visibility", "Same-day reporting rate", v.same_day_rate_pct, "%",
+    "Reporting-date proxy — not a service-level measurement.");
+  push("Cash visibility", "Within-one-day rate", v.within_one_day_rate_pct, "%",
+    "Reporting-date proxy — not a service-level measurement.");
+
+  const l = summary.liquidity;
+  if (l && l.complete) {
+    const scenario = l.scenarios[String(state.liquidityDays)];
+    push("Liquidity", `Screen (${state.liquidityDays}-day)`, scenario ? scenario.screen_usd : "",
+      "USD", "Scenario screen only; no threshold is validated movable cash.");
+    push("Liquidity", "Positive estimated availability", l.positive_available_usd, "USD",
+      "Before restrictions, buffers, and local operating needs.");
+  } else {
+    push("Liquidity", "Screen", "unavailable", "USD",
+      "No complete trailing window in this scope. Not reported as zero.");
+  }
+  push("Liquidity", "Validated movable cash", "not_established", "USD",
+    "Not established by supplied data. This is not a zero balance.");
+
+  const pay = summary.payments;
+  push("Payment operations", "Records in scope", pay.overall.records, "records", "Supplied extract only.");
+  push("Payment operations", "Exceptions", pay.overall.exceptions, "records",
+    "Supplied flags; association, not causation.");
+  push("Payment operations", "Exception rate", pay.overall.exception_rate_pct, "%",
+    "Supplied flags; association, not causation.");
+  push("Payment operations", "Repair minutes", pay.overall.repair_minutes, "minutes",
+    "Supplied estimate; not observed time and not removable capacity.");
+  const union = pay.priority_union;
+  if (union) {
+    push("Payment operations", "Priority-union records", union.records, "records",
+      "Manual touch or cross-border wire, deduplicated — overlap counted once.");
+    push("Payment operations", "Priority-union share of exceptions", union.exception_contribution_pct, "%",
+      "Concentration, not cause.");
+  }
+
+  const c = summary.closures;
+  if (c) {
+    push("Bank account footprint", "Closure-validation candidates", c.validation_candidates, "accounts",
+      "Candidate only — not approved closures. Fixed 30 June 2026 snapshot.");
+    push("Bank account footprint", "Estimated annual fees on candidates", c.estimated_annual_fees_usd, "USD/year",
+      "Estimated fees, not invoiced amounts, and not a realized saving.");
+    push("Bank account footprint", "Approved closures", 0, "accounts", "No closure is approved.");
+  }
+
+  const capacity = dashboardData.guardrails.capacity;
+  push("Process workload", "Estimated manual hours", capacity.total_estimated_manual_hours_monthly,
+    "hours/month", "Enterprise-global management estimate; filters do not apply. Not removable labour.");
+
+  push("Decision", "Recommendation", dashboardData.decision.headline, "text",
+    "Portfolio-wide; filters do not apply.");
+  push("Decision", "Recognized value", 0, "USD",
+    "No cash, P&L, or capacity value is recognized. Risk exposure is not quantified.");
+  return rows;
+}
+
+const EXPORT_COLUMNS = Object.freeze([
+  "section",
+  "metric",
+  "value",
+  "unit",
+  "applied_scope",
+  "evidence_boundary",
+  "data_version",
+  "last_updated",
+]);
+
+function exportFilenameStem() {
+  const meta = dashboardData.meta;
+  const filters = appliedFilters || defaultFilters;
+  const parts = ["northstar-filtered", filters.dateFrom, "to", filters.dateTo];
+  ["region", "entity", "bank", "currency"].forEach((key) => {
+    if (filters[key]) parts.push(String(filters[key]).toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+  });
+  parts.push(meta.data_version.replace(/[^A-Za-z0-9.+]/g, ""));
+  return parts.join("-").replace(/-+/g, "-");
+}
+
+function exportFilteredResults() {
+  if (!dashboardData) return;
+  const rows = filteredExportRows();
+  const csv = csvFromRows(rows, EXPORT_COLUMNS);
+  // A BOM keeps the em dashes and boundary text readable when Excel opens it.
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${exportFilenameStem()}.csv`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  announce(`Exported ${rows.length} rows for the current scope as CSV.`);
+}
+
+// ---------------------------------------------------------------------------
 // Guided review tour
 //
 // A spotlight walkthrough of the homepage: it dims the page and highlights one
@@ -3160,6 +3332,9 @@ function bindEvents() {
   // Guided review wizard.
   // Each control does what its label says: the tour walks the page, the guided
   // review is the three-step decision -> scope -> answer flow.
+  getAll("[data-export-filtered]").forEach((button) => {
+    button.addEventListener("click", () => exportFilteredResults());
+  });
   getAll("[data-start-tour]").forEach((button) => {
     button.addEventListener("click", () => startTour(button));
   });
@@ -3462,6 +3637,9 @@ if (typeof module !== "undefined" && module.exports) {
     DETAIL_PAGE_KEYS,
     NEXT_ACTION_TOPICS,
     TOUR_STEPS,
+    EXPORT_COLUMNS,
+    csvCell,
+    csvFromRows,
   });
 }
 

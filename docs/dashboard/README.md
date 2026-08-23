@@ -21,6 +21,12 @@ Open `http://127.0.0.1:8000/docs/dashboard/`.
 
 The published site is a static snapshot of this folder: pure HTML, CSS, and JavaScript reading one pre-generated JSON file, with no backend, no build step, and no live connection to any operational system.
 
+## Traceability and export
+
+The header carries a **Last updated** date and a **Data** version, e.g. `2.0+d410f256ec`. The version is a fingerprint of the published payload: it changes whenever any value, label, or boundary changes, so two readers can confirm they are looking at the same numbers. The date is a declared release constant in `src/build_dashboard_data.py`, not a build clock — the build must stay byte-identical for identical inputs, and a wall-clock stamp would break that.
+
+**Export filtered results (CSV)** in the filter toolbar downloads the current scope. Every row carries the applied scope, the evidence boundary that governs it, and the dataset version and date, because an exported file outlives the page it came from. Unestablished values export as `not_established`, never as `0`, and an empty scope exports a stated no-match row rather than a zero. Cells are quoted and leading `=`, `+`, `-`, `@` are neutralised so a spreadsheet cannot execute exported text.
+
 ## What is interactive—and why
 
 ### The landing page: one recommendation, three KPIs, three actions

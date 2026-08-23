@@ -10,6 +10,7 @@ balance.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
@@ -20,6 +21,12 @@ from typing import Any, Dict, Mapping
 
 import pandas as pd
 
+
+# Declared release date for the published dataset. It is a deliberate constant
+# rather than a build clock: the build must stay deterministic (identical inputs
+# produce an identical file), and a wall-clock stamp would make every rebuild
+# differ. Bump it when the supplied data is genuinely refreshed.
+DATA_RELEASE_DATE = "2026-08-23"
 
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED = ROOT / "data" / "processed"
@@ -2142,6 +2149,10 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
             "period_end": "2026-06-30",
             "scope": "Week 1–2 diagnostic snapshot; supplied data, not live operations",
             "status": "reconciled_to_supplied_controls_source_certification_open",
+            "last_updated": DATA_RELEASE_DATE,
+            # Filled in below once the payload is complete: a content fingerprint
+            # so two people can confirm they are reading the same numbers.
+            "data_version": "",
         },
         "decision": {
             "status": "validation_required",
@@ -2256,7 +2267,25 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
             for key, filename in INPUT_FILES.items()
         ],
     }
+    payload["meta"]["data_version"] = _content_version(payload)
     return payload
+
+
+def _content_version(payload: Mapping[str, Any]) -> str:
+    """Fingerprint the built payload so a reader can identify the exact dataset.
+
+    The hash is taken over the payload with ``data_version`` blank, so the value
+    is stable for identical inputs and changes whenever any published number,
+    label, or boundary changes.
+    """
+    canonical = json.loads(json.dumps(payload, sort_keys=True, allow_nan=False))
+    canonical["meta"]["data_version"] = ""
+    digest = hashlib.sha256(
+        json.dumps(
+            canonical, sort_keys=True, allow_nan=False, separators=(",", ":")
+        ).encode("utf-8")
+    ).hexdigest()
+    return f"{payload['schema_version']}+{digest[:10]}"
 
 
 def write_dashboard_data(

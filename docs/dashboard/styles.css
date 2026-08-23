@@ -4447,3 +4447,47 @@ body.tour-active { overflow: hidden; }
 
 .menu-decision-copy h2 { max-width: 62ch; }
 .menu-decision-copy > p { max-width: 78ch; }
+
+/* ---------------------------------------------------------------------------
+   Provenance stamp and filtered export
+   --------------------------------------------------------------------------- */
+
+.data-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.data-provenance code {
+  padding: 1px 5px;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.data-provenance time { font-weight: 600; color: var(--text); }
+
+.export-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--radius-control);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.export-button:disabled { color: var(--muted); border-color: var(--border); cursor: not-allowed; }
+
+@media (max-width: 760px) {
+  .data-provenance { justify-content: flex-start; }
+  .export-button { width: 100%; justify-content: center; }
+}

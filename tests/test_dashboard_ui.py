@@ -1634,6 +1634,85 @@ process.stdout.write(JSON.stringify({
         # renders with the default surface fill and disappears on a dark band.
         self.assertIn(".button-primary {", self.styles)
 
+    def test_provenance_stamp_is_visible_and_read_from_the_contract(self) -> None:
+        tags_by_id = {attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs}
+        for required in ("data-provenance", "data-last-updated", "data-version"):
+            self.assertIn(required, tags_by_id)
+        # Shown in the header, not hidden behind a disclosure.
+        self.assertNotIn("hidden", tags_by_id["data-provenance"])
+        # A real <time> element so the date is machine-readable.
+        self.assertEqual(tags_by_id["data-last-updated"].get("datetime"), "")
+        self.assertIn("<time id=\"data-last-updated\"", self.index)
+
+        # Both values come from the governed contract, never hard-coded.
+        render = self.script.split("function renderProvenance", 1)[1].split(
+            "\n}\n", 1
+        )[0]
+        self.assertIn("meta.last_updated", render)
+        self.assertIn("meta.data_version", render)
+
+        self.assertIn("last_updated", self.payload["meta"])
+        self.assertIn("data_version", self.payload["meta"])
+        self.assertTrue(self.payload["meta"]["data_version"].startswith(
+            f"{self.payload['schema_version']}+"
+        ))
+        self.assertRegex(self.payload["meta"]["last_updated"], r"^\d{4}-\d{2}-\d{2}$")
+        self.assertIn(".data-provenance", self.styles)
+
+    def test_filtered_export_carries_scope_and_boundaries(self) -> None:
+        tags_by_id = {attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs}
+        self.assertIn("export-filtered", tags_by_id)
+        self.assertIn("data-requires-data", tags_by_id["export-filtered"])
+        self.assertIn("Export filtered results", self.index)
+
+        rows = self.script.split("function filteredExportRows", 1)[1].split(
+            "const EXPORT_COLUMNS", 1
+        )[0]
+        # Export reads the filtered summary, not the unfiltered payload.
+        self.assertIn("currentSummary", rows)
+        self.assertIn("currentScopeText()", rows)
+
+        # An empty scope must not export a zero result.
+        self.assertIn("summary.scope.has_matches", rows)
+        self.assertIn("an empty scope is not a zero result", rows)
+
+        # Unestablished values stay unestablished in the file.
+        self.assertIn('"not_established"', rows)
+        self.assertIn("This is not a zero balance.", rows)
+
+        # Every row carries its scope, its limit, and the dataset identity.
+        for column in ("applied_scope", "evidence_boundary", "data_version", "last_updated"):
+            self.assertIn(column, self.script.split("const EXPORT_COLUMNS", 1)[1][:400])
+
+        self.assertIn(".export-button", self.styles)
+
+    def test_csv_export_escapes_quotes_and_blocks_formula_injection(self) -> None:
+        node_script = """
+const { csvCell, csvFromRows, EXPORT_COLUMNS } = require('./docs/dashboard/app.js');
+process.stdout.write(JSON.stringify({
+  formula: ['=1+1', '+1', '-1', '@x'].map(csvCell),
+  plain: csvCell('Design and test'),
+  quoted: csvCell('say "hi"'),
+  comma: csvFromRows([{ a: 'x,y', b: 'z' }], ['a', 'b']),
+  columns: EXPORT_COLUMNS,
+}));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        result = json.loads(completed.stdout)
+        # Leading =, +, -, @ are neutralised so a spreadsheet cannot execute them.
+        for cell in result["formula"]:
+            self.assertTrue(cell.startswith("\"'"), cell)
+        self.assertEqual(result["plain"], '"Design and test"')
+        self.assertEqual(result["quoted"], '"say ""hi"""')
+        self.assertIn('"x,y"', result["comma"])
+        self.assertEqual(result["columns"][0], "section")
+
     def test_local_http_assets_are_served(self) -> None:
         handler = functools.partial(
             http.server.SimpleHTTPRequestHandler,
