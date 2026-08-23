@@ -25,6 +25,7 @@ from week3_business_case import (  # noqa: E402
     MODEL_OUTPUT_KEYS,
     MODEL_VERSION,
     NA_Q4_FREEZE_FLOOR_MONTH,
+    COST_ESTIMATE_COLUMNS,
     PLANNING_COLUMNS,
     PROCESSED,
     RECOMMENDATION_TEST,
@@ -39,12 +40,16 @@ from week3_business_case import (  # noqa: E402
     WEEK3,
     build_business_case_model,
     build_controls,
+    build_cost_estimates,
     build_scenario_planning,
+    cost_estimate_totals,
     validate_control_contract,
     validate_model_contract,
+    validate_cost_estimate_contract,
     validate_scenario_planning_contract,
     validate_week2_evidence,
     write_outputs,
+    write_cost_estimates,
     write_scenario_planning,
 )
 
@@ -459,6 +464,29 @@ def main() -> None:
         planning_cell_mutation("scenario_id", "downside", row=1),
     ]
 
+    estimates = build_cost_estimates()
+    estimate_path = write_cost_estimates(estimates)
+    stored_estimates = pd.read_csv(estimate_path, keep_default_na=False)
+    estimates_round_trip = (
+        assert_frame_equal(stored_estimates, estimates, check_dtype=False) is None
+    )
+    totals = cost_estimate_totals(estimates)
+
+    def estimate_mutation(column, value, row=0):
+        changed = estimates.copy()
+        changed.loc[changed.index[row], column] = value
+        return changed
+
+    estimate_mutations = [
+        estimates.drop(columns=["estimate_basis"]),
+        estimate_mutation("one_time_high_usd", 1),
+        estimate_mutation("recurring_annual_base_usd", -5),
+        estimate_mutation("assumption_label", "EVIDENCED COST"),
+        estimate_mutation("evidence_status", "CLOSED — cost evidenced"),
+        estimate_mutation("estimate_basis", ""),
+        estimate_mutation("one_time_base_usd", 900_000),
+    ]
+
     checks = {
         "Week 2 liquidity screens reconcile exactly": (
             evidence["stress_liquidity_screen_usd"] == 21_000_000
@@ -717,16 +745,58 @@ def main() -> None:
         "unsafe illustrative planning mutations fail closed": all_planning_mutations_fail(
             planning_mutations
         ),
+        "provisional cost estimate covers CR01-CR10 with the governed schema": (
+            tuple(estimates.columns) == COST_ESTIMATE_COLUMNS
+            and list(estimates["cost_requirement_id"]) == list(COST_REQUIREMENTS)
+            and len(estimates) == 10
+        ),
+        "one-time and recurring costs are reported separately and ordered": (
+            (estimates["one_time_low_usd"] <= estimates["one_time_base_usd"]).all()
+            and (estimates["one_time_base_usd"] <= estimates["one_time_high_usd"]).all()
+            and (
+                estimates["recurring_annual_low_usd"]
+                <= estimates["recurring_annual_base_usd"]
+            ).all()
+            and (
+                estimates["recurring_annual_base_usd"]
+                <= estimates["recurring_annual_high_usd"]
+            ).all()
+            and totals["one_time_base_usd"] == 1_155_000
+            and totals["recurring_annual_base_usd"] == 281_000
+        ),
+        "base one-time fits the ceiling while the high case breaches it": (
+            INITIAL_ENVELOPE_LOW_USD
+            <= totals["one_time_base_usd"]
+            <= INITIAL_ENVELOPE_HIGH_USD
+            and totals["one_time_high_usd"] > INITIAL_ENVELOPE_HIGH_USD
+        ),
+        "every cost estimate is labelled an assumption with a stated basis": (
+            estimates["assumption_label"].str.startswith("ANALYST-ASSUMPTION").all()
+            and estimates["estimate_basis"].str.strip().astype(bool).all()
+        ),
+        "the estimate does not close the CR evidence gate": (
+            estimates["evidence_status"].str.startswith("OPEN").all()
+            and costs["current_evidence_status"].str.startswith("OPEN").all()
+            and costs["current_cost_status"].str.startswith("NOT AVAILABLE").all()
+            and costs["model_use"].eq(COST_MODEL_USE).all()
+        ),
+        "provisional cost CSV round-trips deterministically": estimates_round_trip,
+        "unsafe cost estimate mutations fail closed": all(
+            assertion_raises(
+                lambda changed=changed: validate_cost_estimate_contract(changed)
+            )
+            for changed in estimate_mutations
+        ),
     }
 
-    if len(checks) != 44:
-        raise AssertionError(f"Expected 44 automated checks, found {len(checks)}")
+    if len(checks) != 51:
+        raise AssertionError(f"Expected 51 automated checks, found {len(checks)}")
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():
         print(f"{'PASS' if passed else 'FAIL'}: {name}")
     if failed:
         raise AssertionError(f"Week 3 business-case test failures: {failed}")
-    print("All 44 Week 3 business-case automated checks passed.")
+    print("All 51 Week 3 business-case automated checks passed.")
     print("12 model-control records remain separately labelled MODEL CONTROL PASS.")
     print(
         "3 illustrative Wave-1 planning rows remain separately labelled "

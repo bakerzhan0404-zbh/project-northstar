@@ -21,7 +21,7 @@ The supplied evidence supports a **validation case**, not a bankable business ca
 - Three diagnostic cases test `$21m / $35m / $46.2m` liquidity screens, `2 / 4 / 4` closure-validation candidates, `$3,900 / $7,800 / $7,800` arithmetic portfolio-fee sensitivities, and `50 / 150 / 150` productive-capacity hours per month. The downside `$3,900` is independently `50% × $7,800`; it is not the fee total for the two-candidate hypothesis.
 - None of those quantities is a validated benefit. Cash, P&L, and capacity validated/funded/recognized fields remain `$0`; risk exposure and value are not quantified, with `$0` appearing only as the current recognized-value ledger entry.
 - Cash release, annual P&L, capacity, and risk remain separate and non-additive. Capacity remains in hours and is not converted to labor or P&L.
-- Actual implementation and run costs, benefit start, ramp, persistence, attribution, discount rate, and approved horizon are unavailable. ROI, NPV, payback, and a funding case therefore cannot be calculated responsibly.
+- Actual implementation and run costs, benefit start, ramp, persistence, attribution, discount rate, and approved horizon are unavailable. ROI, NPV, payback, and a funding case therefore cannot be calculated responsibly. A provisional `ANALYST-ASSUMPTION` cost range is stated separately — one-time `$755k / $1,155k / $1,715k` and recurring `$175k / $281k / $442k` per year — for planning only; the base case fits the FY2026 ceiling while the high case breaches it and would return for staged approval.
 - The manager downside does not change the **design-direction** recommendation because federated coordination was selected for evidence fit, controls, local rights, staged integration, and reversibility—not because a particular value number was assumed. It does not prove that the recommendation is affordable or investable.
 
 ## Scenario view — diagnostic quantities, not benefits
@@ -63,7 +63,7 @@ The row-level ledger and required gate IDs are in `data/processed/W3_business_ca
 | Account closure and actual fee removal | Four candidates only; fees estimated | Annual P&L fixed at `$0` |
 | Observed/removable work and productive redeployment | Management estimates; source mismatch unresolved | Capacity retained in hours; monetary value fixed at `$0` |
 | Risk baseline and approved valuation | Not supplied | Exposure/value `NOT QUANTIFIED`; only the current recognized-value ledger entry is `$0` |
-| Implementation and recurring costs | Not supplied | Cost status is `NOT AVAILABLE`; no numeric cost is populated |
+| Implementation and recurring costs | Not supplied; a provisional `ANALYST-ASSUMPTION` range is stated separately | Cost status is `NOT AVAILABLE`; no numeric cost is populated in the value model |
 | Benefit start, ramp, persistence, and attribution | Not supplied | No benefit cash-flow schedule |
 | Discount rate and investment horizon | Not approved | No NPV |
 | Cost and benefit timing | Not available | No payback |
@@ -92,7 +92,43 @@ The model intentionally contains no calculated ROI, NPV, payback, total-benefit,
 | CR09 | Decommissioning, exit, and contingency | Dual-run, retention, termination, rollback, legacy exit, and risk-based contingency | CIO / Procurement / Finance |
 | CR10 | Cost and benefit timing model | Finance-approved low/base/high ranges, monthly timing, ramp, persistence, attribution, rate, and horizon | Finance |
 
-All ten requirements are open. Do not calculate returns or decide funding until they are populated. Their detailed source-document and timing requirements are in `data/processed/W3_cost_evidence_requirements.csv`.
+All ten requirements are open. Do not calculate returns or decide funding until they are populated. A provisional low/base/high range for these same ten categories is given in the next section; it is a planning aid, not evidence, and does not close any requirement. Their detailed source-document and timing requirements are in `data/processed/W3_cost_evidence_requirements.csv`.
+
+## Provisional cost estimate — one-time and recurring
+
+The ten cost requirements above remain **open**: no vendor quote, statement of work, or rate card has been supplied, and nothing in this section closes them. What follows is a **provisional planning range** so that "cost is unavailable" is not read as "cost is unknowable." Every figure is `ANALYST-ASSUMPTION` — an analyst allocation of the disclosed FY2026 ceiling by Wave-1 scope tier, with a stated basis per line. None is evidence, and none can be used to authorize spend.
+
+One-time and recurring costs are kept separate because they are funded differently: the one-time case is what the FY2026 `$1.0–$1.5m` envelope is a ceiling for; the recurring run rate begins only after go-live and requires its own budget line that no one has yet approved.
+
+| ID | Cost category | One-time low / base / high | Recurring per year low / base / high |
+|---|---|---:|---:|
+| CR01 | Software, licenses, subscriptions | `$40k / $75k / $120k` | `$60k / $95k / $150k` |
+| CR02 | Integration and data engineering | `$220k / $320k / $470k` | `—` |
+| CR03 | Cybersecurity, access, control assurance | `$70k / $110k / $165k` | `$25k / $40k / $60k` |
+| CR04 | Pilot, testing, program delivery | `$150k / $215k / $300k` | `—` |
+| CR05 | Change, training, local adoption | `$60k / $95k / $140k` | `$10k / $18k / $30k` |
+| CR06 | Internal capacity and backfill | `$120k / $175k / $250k` | `—` |
+| CR07 | Bank, account, transfer, tax, FX | `$15k / $30k / $55k` | `$5k / $10k / $20k` |
+| CR08 | Run support, hosting, service management | `$20k / $35k / $55k` | `$70k / $110k / $170k` |
+| CR09 | Decommissioning, exit, contingency | `$45k / $75k / $120k` | `—` |
+| CR10 | Cost and benefit timing model | `$15k / $25k / $40k` | `$5k / $8k / $12k` |
+| | **Total** | **`$755k / $1,155k / $1,715k`** | **`$175k / $281k / $442k`** |
+
+### What the range tells the Steering Committee
+
+1. **The base case fits the envelope.** A `$1,155k` one-time Wave 1 sits inside the `$1.0–$1.5m` ceiling. Affordability is plausible — not demonstrated.
+2. **The high case breaches it.** At `$1,715k` the one-time cost exceeds the ceiling by `$215k`, which under the FY2026 constraint returns for staged CFO/SteerCo approval after demonstrated Wave 1 benefits rather than proceeding. The affordability question is therefore live, not settled.
+3. **The recurring line is the one most often missed.** A `$281k` base run rate is roughly a quarter of the one-time cost *every year*, indefinitely, and it is not covered by the FY2026 envelope at all. It needs its own approved budget before go-live, not after.
+4. **The spread is wide because the evidence is absent.** High is roughly `2.3×` low. That spread is the honest width of an unsourced estimate; it should narrow as CR01–CR10 close, and a narrower range should not be claimed before they do.
+
+### What this does not do
+
+- It does **not** close CR01–CR10. Their evidence status remains `OPEN` and their cost status remains `NOT AVAILABLE`.
+- It does **not** create a return. ROI, NPV, and payback stay unavailable because the *benefit* side is still `$0` — a cost estimate alone cannot produce a return.
+- It does **not** authorize spend, procurement, or commitment.
+- It assumes the federated direction and the Wave-1 scope in the two pilot charters. A switch to local stabilization would require a different estimate.
+
+The reproducible line-by-line model, including each estimate's stated basis, is in `data/processed/W3_provisional_cost_estimates.csv`, generated and validated by `src/week3_business_case.py`.
 
 ## Value evidence gates
 
@@ -194,9 +230,9 @@ Passing a later gate does not retroactively convert a Week 2 screen into a benef
 
 ## Model controls and reproducibility
 
-`src/week3_business_case.py` regenerates the scenario table, non-additive value ledger, cost-evidence requirements, model controls, assumptions register, and the illustrative Wave-1 planning range. `tests/test_week3_business_case.py` checks Week 2 reconciliation, exact scenario inputs, zero-value boundaries, cost completeness, envelope interpretation, non-additivity, the illustrative planning-range schema and NA Q4 floor reconciliation, deterministic output, and fail-closed mutations.
+`src/week3_business_case.py` regenerates the scenario table, non-additive value ledger, cost-evidence requirements, model controls, assumptions register, the illustrative Wave-1 planning range, and the provisional one-time/recurring cost estimate. `tests/test_week3_business_case.py` checks Week 2 reconciliation, exact scenario inputs, zero-value boundaries, cost completeness, envelope interpretation, non-additivity, the illustrative planning-range schema and NA Q4 floor reconciliation, deterministic output, and fail-closed mutations.
 
-Current executable result: all **44 automated checks** pass. Separately, the model writes **12 model-control records** labelled `MODEL CONTROL PASS`; each also carries an `OPEN` or `BLOCKED` evidence-gate status so a passing model control cannot be read as closed client evidence. The control evidence is in `data/processed/W3_business_case_controls.csv`. The illustrative planning range writes **3 rows**, each labelled `ANALYST-ASSUMPTION` and explicitly excluded from recognized value, in `data/processed/W3_business_case_scenario_planning.csv`.
+Current executable result: all **51 automated checks** pass. Separately, the model writes **12 model-control records** labelled `MODEL CONTROL PASS`; each also carries an `OPEN` or `BLOCKED` evidence-gate status so a passing model control cannot be read as closed client evidence. The control evidence is in `data/processed/W3_business_case_controls.csv`. The illustrative planning range writes **3 rows**, each labelled `ANALYST-ASSUMPTION` and explicitly excluded from recognized value, in `data/processed/W3_business_case_scenario_planning.csv`. The provisional cost estimate writes **10 rows**, one per cost requirement, in `data/processed/W3_provisional_cost_estimates.csv`; a passing model control there confirms the range is ordered, labelled, and inside the disclosed ceiling — not that any cost has been evidenced.
 
 ## Final boundary
 

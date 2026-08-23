@@ -46,6 +46,7 @@ The executive spine is consistent: **federated coordination is the provisional d
 | [`W3_business_case_scenario_planning.csv`](../../../data/processed/W3_business_case_scenario_planning.csv) | Illustrative Wave-1 cost range, benefit-realization month, ramp-up, steady state, and sensitivities per scenario | Reproducible; `ANALYST-ASSUMPTION` planning range, excluded from recognized value |
 | [`W3_business_case_value_ledger.csv`](../../../data/processed/W3_business_case_value_ledger.csv) | Cash, P&L, capacity, and risk kept non-additive | Cash/P&L/capacity recognized `$0`; risk `NOT QUANTIFIED` |
 | [`W3_cost_evidence_requirements.csv`](../../../data/processed/W3_cost_evidence_requirements.csv) | Ten cost and timing evidence packages | All open; actual cost unavailable |
+| [`W3_provisional_cost_estimates.csv`](../../../data/processed/W3_provisional_cost_estimates.csv) | Provisional one-time and recurring low/base/high range per cost requirement | `ANALYST-ASSUMPTION`; does not close CR01–CR10 |
 | [`W3_business_case_controls.csv`](../../../data/processed/W3_business_case_controls.csv) | Model-contract and fail-closed checks | Model-control pass does not close evidence gates |
 
 ## Executive controls and traceability

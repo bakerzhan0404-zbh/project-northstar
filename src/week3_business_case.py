@@ -332,6 +332,93 @@ SCENARIO_PLANNING_INPUTS: Dict[str, Dict[str, object]] = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# Provisional Wave-1 cost estimate — ANALYST-ASSUMPTION, not sourced cost
+#
+# CR01-CR10 remain OPEN: no vendor quote, statement of work, or rate card has
+# been supplied. This block does NOT close them. It gives the Steering Committee
+# a defensible low/base/high shape to plan against, with one-time and recurring
+# separated, so "cost is unavailable" stops being read as "cost is unknowable".
+#
+# Every figure is an analyst allocation of the already-disclosed FY2026 ceiling
+# by scope tier. None is evidence. It never feeds recognized value, and it
+# cannot unlock ROI/NPV/payback, which stay blocked on the benefit side.
+# ---------------------------------------------------------------------------
+COST_ESTIMATE_COLUMNS = (
+    "cost_requirement_id",
+    "cost_category",
+    "one_time_low_usd",
+    "one_time_base_usd",
+    "one_time_high_usd",
+    "recurring_annual_low_usd",
+    "recurring_annual_base_usd",
+    "recurring_annual_high_usd",
+    "estimate_basis",
+    "assumption_label",
+    "evidence_status",
+    "model_version",
+)
+COST_ESTIMATE_ASSUMPTION_LABEL = (
+    "ANALYST-ASSUMPTION — provisional planning range; no vendor quote, statement "
+    "of work, or rate card supplied"
+)
+COST_ESTIMATE_EVIDENCE_STATUS = (
+    "OPEN — CR evidence not supplied; this estimate does not close the requirement"
+)
+# (one_time low/base/high, recurring low/base/high, basis)
+COST_ESTIMATE_INPUTS: Dict[str, Dict[str, object]] = {
+    "CR01": {
+        "one_time": (40_000, 75_000, 120_000),
+        "recurring": (60_000, 95_000, 150_000),
+        "basis": "Configuration and setup one-time; subscription priced per module and user recurring",
+    },
+    "CR02": {
+        "one_time": (220_000, 320_000, 470_000),
+        "recurring": (0, 0, 0),
+        "basis": "Bank interfaces plus three ERP environments, data remediation, and testing; build effort only",
+    },
+    "CR03": {
+        "one_time": (70_000, 110_000, 165_000),
+        "recurring": (25_000, 40_000, 60_000),
+        "basis": "Control and SoD design, access model, and penetration testing one-time; recurring control operation and retest",
+    },
+    "CR04": {
+        "one_time": (150_000, 215_000, 300_000),
+        "recurring": (0, 0, 0),
+        "basis": "Pilot delivery, environments, QA, PMO, and rollback rehearsal; ends at the exit decision",
+    },
+    "CR05": {
+        "one_time": (60_000, 95_000, 140_000),
+        "recurring": (10_000, 18_000, 30_000),
+        "basis": "Role and region training, procedure change, and hypercare one-time; recurring refresh training",
+    },
+    "CR06": {
+        "one_time": (120_000, 175_000, 250_000),
+        "recurring": (0, 0, 0),
+        "basis": "Named internal effort and approved backfill at loaded rates for the initial stage",
+    },
+    "CR07": {
+        "one_time": (15_000, 30_000, 55_000),
+        "recurring": (5_000, 10_000, 20_000),
+        "basis": "Account closure and transfer charges one-time; recurring tariff and FX effects",
+    },
+    "CR08": {
+        "one_time": (20_000, 35_000, 55_000),
+        "recurring": (70_000, 110_000, 170_000),
+        "basis": "Service transition one-time; recurring hosting, monitoring, incident response, and data operations",
+    },
+    "CR09": {
+        "one_time": (45_000, 75_000, 120_000),
+        "recurring": (0, 0, 0),
+        "basis": "Legacy exit, dual running, retention, and risk-based contingency",
+    },
+    "CR10": {
+        "one_time": (15_000, 25_000, 40_000),
+        "recurring": (5_000, 8_000, 12_000),
+        "basis": "Finance effort to build and then maintain the integrated cost and benefit timing model",
+    },
+}
+
 VALUE_CATEGORIES = (
     "cash_release",
     "annual_p_and_l",
@@ -915,6 +1002,95 @@ def build_cost_requirements() -> pd.DataFrame:
     return pd.DataFrame(rows, columns=COST_REQUIREMENT_COLUMNS)
 
 
+def build_cost_estimates() -> pd.DataFrame:
+    """Build the provisional one-time and recurring low/base/high cost range."""
+    rows = []
+    for requirement_id, requirement in COST_REQUIREMENTS.items():
+        inputs = COST_ESTIMATE_INPUTS[requirement_id]
+        one_time = inputs["one_time"]
+        recurring = inputs["recurring"]
+        rows.append(
+            {
+                "cost_requirement_id": requirement_id,
+                "cost_category": requirement["cost_category"],
+                "one_time_low_usd": int(one_time[0]),
+                "one_time_base_usd": int(one_time[1]),
+                "one_time_high_usd": int(one_time[2]),
+                "recurring_annual_low_usd": int(recurring[0]),
+                "recurring_annual_base_usd": int(recurring[1]),
+                "recurring_annual_high_usd": int(recurring[2]),
+                "estimate_basis": inputs["basis"],
+                "assumption_label": COST_ESTIMATE_ASSUMPTION_LABEL,
+                "evidence_status": COST_ESTIMATE_EVIDENCE_STATUS,
+                "model_version": MODEL_VERSION,
+            }
+        )
+    return pd.DataFrame(rows, columns=COST_ESTIMATE_COLUMNS)
+
+
+def cost_estimate_totals(estimates: pd.DataFrame) -> Dict[str, int]:
+    """Return the summed one-time and recurring ranges."""
+    return {
+        column: int(estimates[column].sum())
+        for column in (
+            "one_time_low_usd",
+            "one_time_base_usd",
+            "one_time_high_usd",
+            "recurring_annual_low_usd",
+            "recurring_annual_base_usd",
+            "recurring_annual_high_usd",
+        )
+    }
+
+
+def validate_cost_estimate_contract(estimates: pd.DataFrame) -> None:
+    """Fail closed on the provisional cost range's structure and boundaries."""
+    failures = _exact_frame_failures(
+        "cost_estimates", estimates, build_cost_estimates(), COST_ESTIMATE_COLUMNS
+    )
+    if tuple(estimates.columns) == COST_ESTIMATE_COLUMNS:
+        if list(estimates["cost_requirement_id"]) != list(COST_REQUIREMENTS):
+            failures.append("cost estimate IDs or order changed")
+        for band in ("one_time", "recurring_annual"):
+            low = estimates[f"{band}_low_usd"]
+            base = estimates[f"{band}_base_usd"]
+            high = estimates[f"{band}_high_usd"]
+            if not (low <= base).all() or not (base <= high).all():
+                failures.append(f"{band} range is not ordered low <= base <= high")
+            if (low < 0).any():
+                failures.append(f"{band} range contains a negative amount")
+        if not estimates["assumption_label"].str.startswith("ANALYST-ASSUMPTION").all():
+            failures.append("cost estimate is no longer labelled ANALYST-ASSUMPTION")
+        if not estimates["evidence_status"].str.startswith("OPEN").all():
+            failures.append("cost estimate implies the CR evidence gate is closed")
+        if not estimates["estimate_basis"].str.strip().astype(bool).all():
+            failures.append("a cost estimate has no stated basis")
+        if not estimates["model_version"].eq(MODEL_VERSION).all():
+            failures.append("cost estimate model version changed")
+        totals = cost_estimate_totals(estimates)
+        # The base one-time case must remain inside the disclosed FY2026 ceiling,
+        # or the pack would be proposing a Wave 1 the CFO has not authorized.
+        if not (
+            INITIAL_ENVELOPE_LOW_USD
+            <= totals["one_time_base_usd"]
+            <= INITIAL_ENVELOPE_HIGH_USD
+        ):
+            failures.append("base one-time total falls outside the disclosed FY2026 ceiling")
+    if failures:
+        raise AssertionError(f"Week 3 cost-estimate failures: {failures}")
+
+
+def write_cost_estimates(estimates: pd.DataFrame) -> Path:
+    """Write and round-trip the provisional cost CSV."""
+    validate_cost_estimate_contract(estimates)
+    path = PROCESSED / "W3_provisional_cost_estimates.csv"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    estimates.to_csv(path, index=False)
+    stored = pd.read_csv(path, keep_default_na=False)
+    assert_frame_equal(stored, estimates, check_dtype=False)
+    return path
+
+
 def build_assumptions_register() -> pd.DataFrame:
     """Build the Week 3 assumptions and evidence-gate register."""
     rows = []
@@ -1428,6 +1604,8 @@ def main() -> None:
     paths = write_outputs(outputs)
     planning = build_scenario_planning()
     paths["scenario_planning"] = write_scenario_planning(planning)
+    estimates = build_cost_estimates()
+    paths["cost_estimates"] = write_cost_estimates(estimates)
     scenario_summary = outputs["scenarios"][[
         "scenario_id",
         "liquidity_screen_usd",
@@ -1448,6 +1626,18 @@ def main() -> None:
     print(scenario_summary.to_string(index=False))
     print("Illustrative Wave-1 planning range (analyst assumption only):")
     print(planning_summary.to_string(index=False))
+    totals = cost_estimate_totals(estimates)
+    print(
+        "Provisional Wave-1 cost (ANALYST-ASSUMPTION, CR01-CR10 still OPEN): "
+        "one-time ${:,}/${:,}/${:,} · recurring ${:,}/${:,}/${:,} per year".format(
+            totals["one_time_low_usd"],
+            totals["one_time_base_usd"],
+            totals["one_time_high_usd"],
+            totals["recurring_annual_low_usd"],
+            totals["recurring_annual_base_usd"],
+            totals["recurring_annual_high_usd"],
+        )
+    )
     print("Outputs:")
     for path in paths.values():
         print(path.relative_to(ROOT))

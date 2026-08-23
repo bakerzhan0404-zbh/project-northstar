@@ -2524,7 +2524,7 @@ function wizardFinding(decisionKey) {
   }
   if (decisionKey === "liquidity") {
     const gross = liquidity.evidence_ladder[0];
-    return `${formatUsdCompact(gross.value_usd)} of gross positive availability screens in the supplied window, while the funded case remains ${liquidity.funded_case.display}.`;
+    return `${formatUsdCompact(gross.value_usd)} of gross positive balance screens in the supplied window, while the funded case remains ${liquidity.funded_case.display}.`;
   }
   if (decisionKey === "payments") {
     const union = payments.priority_union;

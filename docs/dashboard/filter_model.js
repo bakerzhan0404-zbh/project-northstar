@@ -578,7 +578,7 @@
     return [
       {
         key: "gross_positive_estimated_availability",
-        label: "Gross positive estimated availability",
+        label: "Gross positive balance — screening only",
         role: "starting_total",
         delta_usd: values.gross ?? null,
         total_usd: values.gross ?? null,

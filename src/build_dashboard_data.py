@@ -1997,7 +1997,7 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
     liquidity_evidence_ladder = [
         {
             "key": "gross_positive_estimated_availability",
-            "label": "Gross positive estimated availability",
+            "label": "Gross positive balance — screening only",
             "value_usd": _as_float(
                 gross_positive["value_usd"], "gross positive estimated availability"
             ),

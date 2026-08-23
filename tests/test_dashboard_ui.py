@@ -1634,6 +1634,23 @@ process.stdout.write(JSON.stringify({
         # renders with the default surface fill and disappears on a dark band.
         self.assertIn(".button-primary {", self.styles)
 
+    def test_liquidity_headline_is_labelled_as_a_screen_not_available_cash(self) -> None:
+        # "availability" reads as spendable money. The headline number is a
+        # screening total, so the label has to say so where the figure is read.
+        self.assertIn("Gross positive balance — screening only", self.index)
+        self.assertNotIn("Gross positive availability", self.index)
+        self.assertNotIn("Gross positive estimated availability", self.index)
+
+        ladder = self.payload["liquidity"]["evidence_ladder"][0]
+        self.assertEqual(ladder["label"], "Gross positive balance — screening only")
+        # The contract key is an identifier and stays stable across the rename.
+        self.assertEqual(ladder["key"], "gross_positive_estimated_availability")
+
+        # The screen is still separated from validated movable cash.
+        self.assertEqual(
+            self.payload["liquidity"]["validated_mobility"]["status"], "not_established"
+        )
+
     def test_provenance_stamp_is_visible_and_read_from_the_contract(self) -> None:
         tags_by_id = {attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs}
         for required in ("data-provenance", "data-last-updated", "data-version"):
