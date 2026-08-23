@@ -384,10 +384,8 @@ class DashboardUiTest(unittest.TestCase):
             "menu-decision-headline",
             "menu-decision-next",
             "menu-decision-confidence",
-            "menu-signal-visibility",
-            "menu-signal-liquidity",
-            "menu-signal-payments",
             "menu-findings",
+            "menu-actions-title",
             "menu-findings-scope",
             "menu-stat-visibility",
             "menu-stat-liquidity",
@@ -426,10 +424,22 @@ class DashboardUiTest(unittest.TestCase):
 
         # Findings are declared portfolio-wide and never imply a composite score.
         self.assertIn("portfolio-wide · filters do not apply", self.script)
-        self.assertIn(
-            "Three separate signals—not a composite score. Portfolio-wide · filters do not apply.",
-            self.index,
-        )
+        self.assertIn("Three separate signals—not a composite score.", self.index)
+
+        # The three signals are shown once, as the KPI strip. Repeating them in
+        # the band and again under each action made the page read as three
+        # copies of the same evidence.
+        self.assertNotIn("menu-decision-signals", self.index)
+        self.assertNotIn("menu-action-context", self.script)
+
+        # Each block states what it is, so the three groups are self-evident.
+        for label in (
+            "The three measures behind the recommendation",
+            "Three next actions",
+            "Primary recommendation",
+        ):
+            self.assertIn(label, self.index)
+        self.assertNotIn("What the supplied data shows", self.index)
 
         # Evidence on the menu page is hidden until the governed contract validates.
         evidence_sections = [

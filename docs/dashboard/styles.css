@@ -607,8 +607,8 @@ main {
   position: relative;
   display: grid;
   overflow: hidden;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: 18px 32px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
   padding: 22px 26px 18px;
   color: #fff;
   background:
@@ -4434,3 +4434,16 @@ body.tour-active { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .tour-ring, .tour-popover { transition: none; }
 }
+
+/* Explicit block labels so the homepage says what each group is. */
+.menu-measures-boundary {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+.menu-actions-heading { margin-top: 22px; }
+
+.menu-decision-copy h2 { max-width: 62ch; }
+.menu-decision-copy > p { max-width: 78ch; }

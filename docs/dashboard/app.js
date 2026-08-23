@@ -816,18 +816,6 @@ function renderMenuFindings() {
   setText("#menu-decision-next", dashboardData.decision.next_step);
   setText("#menu-decision-status", "Validation required");
   setText(
-    "#menu-signal-visibility",
-    `${formatNumber(visibility.delayed_accounts)} / ${formatNumber(visibility.accounts_total)} accounts delayed`,
-  );
-  setText(
-    "#menu-signal-liquidity",
-    `${liquidity.funded_case.display} funded case · mobility not established`,
-  );
-  setText(
-    "#menu-signal-payments",
-    `${formatPercent(payments.priority_union.exception_contribution_pct)} of exceptions in the priority union`,
-  );
-  setText(
     "#menu-findings-scope",
     `${formatDateRange(dashboardData.meta.period_start, dashboardData.meta.period_end)} · portfolio-wide · filters do not apply`,
   );
@@ -866,24 +854,10 @@ function renderMenuFindings() {
 }
 
 // The three next actions are governed method next-steps read from the contract.
-// Each pairs one supplied measure with the action its own definition prescribes,
-// so the homepage never invents an action or implies an approved workplan.
+// The supporting measure is deliberately NOT repeated here: the KPI strip sits
+// directly above, so restating it made the page read as three copies of the
+// same three signals.
 const NEXT_ACTION_TOPICS = Object.freeze(["visibility", "liquidity", "payments"]);
-
-function nextActionContext(topic) {
-  const visibility = dashboardData.visibility;
-  const payments = dashboardData.payments;
-  const liquidity = dashboardData.liquidity;
-  const guardrails = dashboardData.guardrails;
-  if (topic === "visibility") {
-    return `${formatNumber(visibility.delayed_accounts)} of ${formatNumber(visibility.accounts_total)} accounts miss same-day reporting.`;
-  }
-  if (topic === "liquidity") {
-    const gross = liquidity.evidence_ladder[0];
-    return `${formatUsdCompact(gross.value_usd)} gross positive availability; funded case ${liquidity.funded_case.display}; ${plural(guardrails.closures.approved_closures, "approved closure")}.`;
-  }
-  return `${formatPercent(payments.priority_union.exception_contribution_pct)} of exceptions sit in ${formatNumber(payments.priority_union.records)} deduplicated records.`;
-}
 
 function renderNextActions() {
   const list = get("#menu-next-actions");
@@ -897,7 +871,6 @@ function renderNextActions() {
     body.append(
       make("p", "menu-action-title", definition.title),
       make("p", "menu-action-text", definition.next_action),
-      make("p", "menu-action-context", nextActionContext(topic)),
     );
     const open = make("button", "menu-action-open", "Open evidence");
     open.type = "button";
