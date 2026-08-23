@@ -1548,10 +1548,20 @@ process.stdout.write(JSON.stringify({
         self.assertNotIn("hidden", tags_by_id["tour-next"])
         self.assertNotIn("hidden", tags_by_id["tour-skip"])
 
-        # Start Guided Review launches the tour, not the modal wizard.
+        # Each control does what its label says: "Take a tour" starts the tour
+        # and "Start Guided Review" opens the three-step review.
+        self.assertIn('data-start-tour', self.index)
         self.assertIn(
-            'button.addEventListener("click", () => startTour(button));', self.script
+            'getAll("[data-start-tour]").forEach((button) => {\n'
+            '    button.addEventListener("click", () => startTour(button));',
+            self.script,
         )
+        self.assertIn(
+            'getAll("[data-start-guided-review]").forEach((button) => {\n'
+            '    button.addEventListener("click", () => openGuidedReview(button));',
+            self.script,
+        )
+        self.assertNotIn("Focused review", self.index)
 
         # The popover is a real modal dialog for assistive technology.
         popover = self.index.split('id="tour-popover"', 1)[1].split(">", 1)[0]

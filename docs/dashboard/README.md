@@ -38,9 +38,9 @@ Every number is read from the governed JSON contract at render time; none is har
 
 Why the change: the earlier build presented six menu options, four KPI cards, and four finding cards at once, which asked users to absorb seven conclusions before choosing an investigation. The homepage now summarizes and routes; depth lives one click away.
 
-### Guided review
+### Take a tour
 
-`Start Guided Review` on the homepage launches a **spotlight tour**: the page dims and one real element is highlighted at a time, so a first-time reader learns what they are looking at before being asked to decide anything.
+`Take a tour` on the homepage launches a **spotlight tour**: the page dims and one real element is highlighted at a time, so a first-time reader learns what they are looking at before being asked to decide anything.
 
 | Step | Highlights | Answers |
 |---|---|---|
@@ -52,11 +52,11 @@ Why the change: the earlier build presented six menu options, four KPI cards, an
 | 6 | The filter toolbar | How do I narrow the scope? |
 | 7 | The Metric guide button | Where are definitions, formulas, and limits? |
 
-Every step shows `Step N of 7`, progress dots, `Back` (except step 1), `Next` (except the last), and `Skip to Full Dashboard`, available throughout. The last step offers `Open focused review`, which hands off to the three-step review below. Escape closes the tour, arrow keys move between steps, focus is trapped in the popover, and page scroll is locked while it runs. A step whose target is missing or collapsed is skipped rather than pointing at nothing, so the tour adapts to viewport and data state.
+Every step shows `Step N of 7`, progress dots, `Back` (except step 1), `Next` (except the last), and `Skip to Full Dashboard`, available throughout. The last step offers `Start Guided Review`, which hands off to the three-step review below. Escape closes the tour, arrow keys move between steps, focus is trapped in the popover, and page scroll is locked while it runs. A step whose target is missing or collapsed is skipped rather than pointing at nothing, so the tour adapts to viewport and data state.
 
-### Focused review
+### Guided review
 
-`Focused review` — and the tour's final step — opens a three-step modal built on the same `<dialog>` pattern as the Metric guide.
+`Start Guided Review` — and the tour's final step — opens a three-step modal built on the same `<dialog>` pattern as the Metric guide.
 
 1. **Choose the decision** — Cash Visibility, Liquidity, Payments, or Data Quality, as an accessible radiogroup with arrow-key support. Step 1 cannot be advanced until a decision is chosen.
 2. **Select the scope** — the same governed date, region, entity, bank, and currency filters the dashboard uses. Selections persist across Back and Next.

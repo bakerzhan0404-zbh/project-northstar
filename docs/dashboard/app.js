@@ -3158,10 +3158,12 @@ function bindEvents() {
   });
 
   // Guided review wizard.
-  getAll("[data-start-guided-review]").forEach((button) => {
+  // Each control does what its label says: the tour walks the page, the guided
+  // review is the three-step decision -> scope -> answer flow.
+  getAll("[data-start-tour]").forEach((button) => {
     button.addEventListener("click", () => startTour(button));
   });
-  getAll("[data-open-focused-review]").forEach((button) => {
+  getAll("[data-start-guided-review]").forEach((button) => {
     button.addEventListener("click", () => openGuidedReview(button));
   });
   getAll("[data-tour-skip]").forEach((button) => {
