@@ -1,0 +1,20 @@
+{
+  "topic": "Project Northstar — Final Steering Committee",
+  "__readme__": "Delete this __readme__ key and populate the arrays below with real image/chart/icon requests for THIS topic. See references/outline_schema.md and references/deck_workspace_mode.md for the schemas. If the deck doesn't need staged assets, delete this whole file.",
+  "images": [],
+  "backgrounds": [],
+  "charts": [],
+  "tables": [],
+  "generated_images": [],
+  "icons": [],
+  "asset_posture": {
+    "palette": "restrained palette chosen by best judgment",
+    "background_visuals": "clean report with source-backed or generated visuals only when useful",
+    "evidence_assets": "use local/generated figures when data exists; otherwise use source-backed visuals selectively",
+    "source_policy": "cite key claims",
+    "proof_burden": "Use reconciled ACG project outputs first, then analyst assumptions and judgments with explicit labels.",
+    "research_needed": false,
+    "local_data_needed": false,
+    "background_system": "white board report with dark navy cover and restrained blue/cyan accents"
+  }
+}

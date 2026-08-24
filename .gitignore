@@ -1,2 +1,10 @@
 # macOS
 .DS_Store
+
+# Presentation-tool caches and scaffold diagnostics
+decks/*/build/
+decks/*/agent_brief.*
+decks/*/deck_start_packet.json
+decks/*/*_apply_report.json
+decks/*/assets/icons/starter_icon.png
+decks/*/assets/style_reference/

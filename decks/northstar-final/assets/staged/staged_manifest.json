@@ -1,0 +1,23 @@
+{
+  "workspace_assets_version": 1,
+  "topic": "Project Northstar \u2014 Final Steering Committee",
+  "palette_path": "assets/staged/palette.json",
+  "palette": {
+    "topic": "Project Northstar \u2014 Final Steering Committee",
+    "palette_id": "space_mission_v1",
+    "palette_key": "enterprise_graphite_v1",
+    "palette": {
+      "dominant": "07111F",
+      "support": "102443",
+      "accent": "6FE7FF",
+      "neutral": "EAF1FA"
+    },
+    "matched_keywords": []
+  },
+  "images": [],
+  "backgrounds": [],
+  "charts": [],
+  "tables": [],
+  "generated_images": [],
+  "attribution_csv": "assets/attribution.csv"
+}
