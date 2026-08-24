@@ -1,0 +1,24 @@
+source_id,source_type,source_path_or_title,evidence_label,claim_or_use,limitation,status
+W4S01,Program,program/ENGAGEMENT_CHARTER.md,PROGRAM-STANDARD,"Executive question, required answer, success definition","Project instruction; not client operating evidence",Used
+W4S02,Program,program/ONE_MONTH_PLAYBOOK.md,PROGRAM-STANDARD,"Week 4 deliverable and final deck requirements","Program instruction; not client operating evidence",Used
+W4S03,Program,program/CONSULTING_STANDARDS.md,PROGRAM-STANDARD,"Evidence ladder, value separation, quality gate","Method standard; not client performance evidence",Used
+W4S04,Client,client/CLIENT_BRIEF.md,ACG-DATA,"Objectives, constraints, final decisions, no ERP replacement, funding limit","Management brief contains starting claims requiring validation",Used
+W4S05,Client,client/STAKEHOLDER_PACK.md,ACG-DATA,"Service, local rights, data ownership, control and resilience concerns","Stakeholder perceptions are not proof",Used
+W4S06,Analysis,data/processed/W2_reconciliation_metrics.csv,ANALYST-CALC,"55 accounts, 9,955 account-days, 7,600 payments","Supplied project populations",Used
+W4S07,Analysis,data/processed/W2_visibility_diagnostic.csv,ANALYST-CALC,"58.18% same-day proxy; 2,534 two-plus-day delayed observations","Calendar-date proxy only",Used
+W4S08,Analysis,data/processed/W2_liquidity_thresholds.csv,ANALYST-CALC / ANALYST-ASSUMPTION,"$21m/$35m/$46.2m 14-day screens","Not movable cash",Used
+W4S09,Analysis,data/processed/W2_payment_diagnostic.csv,ANALYST-CALC,"31.51% manual touch; 6.30% exceptions; 5.00% late release","Within 7,600 records; association not causality",Used
+W4S10,Analysis,data/processed/W2_account_diagnostic.csv,ANALYST-CALC,"Four closure-validation candidates and $7,800 fees","Local dependencies and fee removal unvalidated",Used
+W4S11,Analysis,data/processed/W2_process_capacity.csv,ANALYST-CALC,"617.72 management-estimated manual hours/month","Not observed labor or cashable savings",Used
+W4S12,Strategy,data/processed/W3_option_summary.csv,ANALYST-JUDGMENT,"Option scores 87/72/60 and switch conditions","Scores are not readiness or value",Used
+W4S13,Strategy,deliverables/working/week_3/W3_future_state_operating_model.md,ANALYST-JUDGMENT,"Federated ownership, processes, controls, service and local rights","Proposed design",Used
+W4S14,Strategy,deliverables/working/week_3/W3_business_case.md,ANALYST-CALC / ANALYST-ASSUMPTION,"Non-additive value ledgers, zero recognition, open returns","Validation case only",Used
+W4S15,Analysis,data/processed/W3_provisional_cost_estimates.csv,ANALYST-ASSUMPTION,"$755k/$1.155m/$1.715m one-time and $175k/$281k/$442k recurring","No quotes, SOWs, or rate cards",Used
+W4S16,Strategy,deliverables/working/week_3/W3_payment_pilot_charter.md,ANALYST-JUDGMENT,"120-record root-cause design, rollback, NA freeze","Design only; no production approval",Used
+W4S17,Strategy,deliverables/working/week_3/W3_visibility_pilot_charter.md,ANALYST-JUDGMENT,"All-55 census and ten-account cohort","Read-only design; readiness open",Used
+W4S18,Week4,src/week4_implementation.py,ANALYST-CALC / ANALYST-JUDGMENT,"Initiatives, gates, roadmap, KPI and benefit output generation","Validates model contract, not client evidence",Used
+W4S19,Week4,data/processed/W4_kpi_dictionary.csv,ANALYST-CALC / ANALYST-JUDGMENT,"Final KPI definitions and target logic","Owner/target approval open",Used
+W4S20,Week4,data/processed/W4_benefits_tracker.csv,ANALYST-JUDGMENT,"Final four-value recognition control","Future value uncertain",Used
+W4S21,Week4,data/processed/W4_initiative_portfolio.csv,ANALYST-JUDGMENT,"Initiative prioritization, prerequisites, owners, gates, and evidence exits","Scores and proposed owners require client approval",Used
+W4S22,Week4,data/processed/W4_stage_gates.csv,ANALYST-JUDGMENT,"G0–G6 minimum evidence and allowed decisions","Gate design is proposed; all gates remain open",Used
+W4S23,Week4,data/processed/W4_roadmap_milestones.csv,ANALYST-JUDGMENT,"30/60/90-day and 12–18 month sequencing","Timing depends on G0 approval, evidence closure, and exact freeze calendar",Used
