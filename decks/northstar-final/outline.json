@@ -1,0 +1,1180 @@
+{
+  "title": "Project Northstar — Final Steering Committee",
+  "subtitle": "Decision on a 90-day treasury transformation mobilization · 24 August 2026",
+  "deck_style": {
+    "font_pair": "clean_modern_v1",
+    "visual_density": "high",
+    "emoji_mode": "none",
+    "page_system": "board-ledger",
+    "structural_motif": "board-index",
+    "title_layout": "split-hero",
+    "footer_mode": "source-line",
+    "footer_page_numbers": true,
+    "chart_treatment": "facts-right",
+    "table_treatment": "compact-ledger",
+    "figure_table_treatment": "table-first",
+    "stats_mode": "policy-bands",
+    "matrix_mode": "open-quadrants",
+    "summary_callout_mode": "default",
+    "comparison_mode": "scorecard",
+    "header_mode": "bar"
+  },
+  "slides": [
+    {
+      "slide_id": "s01",
+      "type": "title",
+      "title": "Authorize 90 days to make the next treasury decision",
+      "subtitle": "Federated coordination · local-stabilization fallback · no production or funding authorization",
+      "notes": "Decision requested: authorize evidence mobilization, named owners, G0–G6 gates, and the explicit fallback. Day 90 returns for a separate stop / extend / bounded-pilot decision. Nothing in this deck authorizes production change, cash movement, account closure, labor action, procurement, spend, benefit recognition, or scale. Classification: Confidential — simulated client material.",
+      "sources": [
+        "Final recommendation memo · 24 Aug 2026"
+      ]
+    },
+    {
+      "slide_id": "s02",
+      "type": "content",
+      "variant": "stats",
+      "slide_intent": "decision",
+      "visual_intent": "data",
+      "title": "ACG has enough evidence to choose a direction—not enough to approve value or production",
+      "subtitle": "The first commitment is ownership and controlled evidence",
+      "facts": [
+        {
+          "value": "58.18%",
+          "label": "same-day proxy visibility",
+          "detail": "5,792 / 9,955 account-days"
+        },
+        {
+          "value": "6.30%",
+          "label": "payment exceptions",
+          "detail": "479 / 7,600 supplied records"
+        },
+        {
+          "value": "87",
+          "label": "federated option score",
+          "detail": "vs 72 local / 60 global"
+        },
+        {
+          "value": "$0",
+          "label": "recognized value today",
+          "detail": "cash, P&L, capacity"
+        }
+      ],
+      "bullets": [
+        "Choose the federated design direction and seven evidence workstreams.",
+        "Keep all production, funding, cash, closure, labor, and value decisions behind later gates."
+      ],
+      "notes": "This is the conclusion loop. The diagnostic numbers create urgency and direction but not investment authority. Visibility is a calendar-date proxy. Payment metrics are within the supplied extract. The option score is analyst judgment. Zero recognized value is an evidence-control status, not a claim of zero opportunity or risk.",
+      "sources": [
+        "W2 visibility/payment diagnostics; W3 option/value models"
+      ]
+    },
+    {
+      "slide_id": "s03",
+      "type": "content",
+      "variant": "table",
+      "slide_intent": "evidence",
+      "visual_intent": "data",
+      "title": "Four linked failures explain ACG's treasury problem",
+      "subtitle": "The recommendation must fix ownership, evidence, control, and service together",
+      "table_treatment": "compact-ledger",
+      "headers": [
+        "Failure",
+        "Evidence",
+        "Management implication"
+      ],
+      "rows": [
+        [
+          "Visibility",
+          "58.18%; 2,534 ≥2d",
+          "Own source, cutoff, reconciliation, exception"
+        ],
+        [
+          "Liquidity",
+          "$21m/$35m/$46.2m",
+          "Certify mobility, buffers, economics before action"
+        ],
+        [
+          "Payment operation",
+          "31.51% manual touch; 6.30% exceptions",
+          "Prove causes; standardize safely"
+        ],
+        [
+          "Operating model",
+          "Local practices; three ERPs; no enterprise TMS",
+          "Federated policy/data/control spine with local rights"
+        ]
+      ],
+      "column_weights": [
+        0.21,
+        0.34,
+        0.45
+      ],
+      "caption": "Implication: a platform alone cannot resolve missing ownership, definitions, controls, and local decision rights.",
+      "notes": "The four failures form the system map for the rest of the deck. The slide does not claim that technology is unimportant; it places integration behind a governed operating model. Stakeholder statements are corroborating context, not proof.",
+      "sources": [
+        "W2 diagnostic report; W3 future-state operating model"
+      ]
+    },
+    {
+      "slide_id": "s04",
+      "type": "content",
+      "variant": "chart",
+      "slide_intent": "evidence",
+      "visual_intent": "data",
+      "title": "Portal and spreadsheet sources explain every delayed account-day in the supplied pattern",
+      "subtitle": "Automated sources are same-day under the proxy; manual sources are not",
+      "chart_treatment": "facts-below",
+      "chart": {
+        "type": "bar",
+        "categories": [
+          "API",
+          "Host-to-host",
+          "Portal",
+          "Spreadsheet"
+        ],
+        "series": [
+          {
+            "name": "Same-day account-days (%)",
+            "values": [
+              100,
+              100,
+              0,
+              0
+            ]
+          }
+        ],
+        "options": {
+          "catAxisTitle": "Visibility method",
+          "valAxisTitle": "Same-day proxy (%)",
+          "valAxisMinVal": 0,
+          "valAxisMaxVal": 100
+        }
+      },
+      "caption": "23 manual sources · 58.18% proxy · calendar-date only",
+      "notes": "The source-method concentration makes the first intervention testable: controlled source, receipt timestamp, balance type, owner, and exception. It does not prove that the method itself is causal; method can proxy for entity, bank, process, or data ownership.",
+      "sources": [
+        "W2_visibility_diagnostic.csv · Jan–Jun 2026"
+      ]
+    },
+    {
+      "slide_id": "s05",
+      "type": "content",
+      "variant": "chart",
+      "slide_intent": "evidence",
+      "visual_intent": "data",
+      "title": "The liquidity analysis defines a certification agenda—not a cash-release claim",
+      "subtitle": "14-day screen pass rates fall from 100% to 0% as the threshold rises",
+      "chart_treatment": "facts-below",
+      "chart": {
+        "type": "bar",
+        "categories": [
+          "$21m downside",
+          "$35m base",
+          "$46.2m upper"
+        ],
+        "series": [
+          {
+            "name": "Complete windows meeting threshold (%)",
+            "values": [
+              100,
+              82.14,
+              0
+            ]
+          }
+        ],
+        "options": {
+          "catAxisTitle": "14-day screen",
+          "valAxisTitle": "Pass rate (%)",
+          "valAxisMinVal": 0,
+          "valAxisMaxVal": 100
+        }
+      },
+      "caption": "168 windows · $0 recognized cash · VG01–VG05 open",
+      "notes": "The base $35m screen passes 138 of 168 complete windows. The slide avoids the word available. An account enters a funding decision only after current source, restriction, buffer, local/service context, timing, economics, authority, and Finance evidence close.",
+      "sources": [
+        "W2_liquidity_thresholds.csv; W3 business case"
+      ]
+    },
+    {
+      "slide_id": "s06",
+      "type": "content",
+      "variant": "stats",
+      "slide_intent": "evidence",
+      "visual_intent": "data",
+      "title": "Payment friction is material enough to diagnose—and too weakly evidenced to automate broadly",
+      "subtitle": "Within the supplied 7,600-record extract",
+      "facts": [
+        {
+          "value": "31.51%",
+          "label": "manual-touch rate",
+          "detail": "2,395 records"
+        },
+        {
+          "value": "6.30%",
+          "label": "exception rate",
+          "detail": "479 records"
+        },
+        {
+          "value": "5.00%",
+          "label": "late-release rate",
+          "detail": "380 records"
+        },
+        {
+          "value": "10.34%",
+          "label": "cross-border",
+          "detail": "786 records"
+        }
+      ],
+      "bullets": [
+        "Use the 120-record purposive frame to link source documents, reason codes, criticality, approvals, and event timing.",
+        "Select an intervention only after a consistent, remediable cause and a like-for-like baseline are established."
+      ],
+      "notes": "Manual-touch records have higher exception and late-release rates than non-manual records, but association is not causality. The 120-record frame contains four mutually exclusive cohorts and is designed for root-cause evidence, not prevalence, enterprise extrapolation, or a benefit claim.",
+      "sources": [
+        "W2_payment_diagnostic.csv; W3 payment pilot charter"
+      ]
+    },
+    {
+      "slide_id": "s07",
+      "type": "content",
+      "variant": "matrix",
+      "slide_intent": "message",
+      "visual_intent": "comparison",
+      "title": "The root causes sit upstream of the visible symptoms",
+      "subtitle": "Each root cause requires an owner and an observable control",
+      "quadrants": [
+        {
+          "title": "Ownership is split",
+          "body": "Data · mobility · value"
+        },
+        {
+          "title": "Data is incomplete",
+          "body": "Lineage · timestamps · populations"
+        },
+        {
+          "title": "Process & service",
+          "body": "Variable intake, cutoffs, repair loops and emergency practice."
+        },
+        {
+          "title": "Control & technology",
+          "body": "Access · SoD · audit · resilience tests"
+        }
+      ],
+      "summary_callout": "Do not automate an undefined process or centralize an uncertified decision right.",
+      "notes": "The maturity implication is qualitative: the operating model is fragmented across the four root-cause domains. The deck does not claim technology is causal. It assigns technology as an enabler after ownership, source, process, service, and control rules are explicit.",
+      "sources": [
+        "W2 process/RACI and maturity heatmap; stakeholder pack"
+      ]
+    },
+    {
+      "slide_id": "s08",
+      "type": "content",
+      "variant": "matrix",
+      "slide_intent": "message",
+      "visual_intent": "comparison",
+      "title": "Eight design principles resolve the tension between enterprise control and local responsiveness",
+      "subtitle": "Critical gates remain non-compensating",
+      "quadrants": [
+        {
+          "title": "Enterprise spine",
+          "body": "Daily evidence · global ownership · common policy · controlled metrics"
+        },
+        {
+          "title": "Local rights",
+          "body": "Certified context · local rights · visible exceptions"
+        },
+        {
+          "title": "Control by design",
+          "body": "SoD · access · audit · reconciliation · service · resilience · rollback"
+        },
+        {
+          "title": "Staged and reversible",
+          "body": "Existing ERPs · bounded cohorts · gates · rollback · local fallback"
+        }
+      ],
+      "summary_callout": "Any failed critical gate blocks the affected decision; value cannot compensate.",
+      "notes": "The full eight principles are client service, daily evidence, federated decision rights, standardization with exceptions, control, resilient staged integration, data ownership, and scalable acquisition readiness. This slide groups them into four board-level design choices.",
+      "sources": [
+        "W3 design principles and operating model"
+      ]
+    },
+    {
+      "slide_id": "s09",
+      "type": "content",
+      "variant": "chart",
+      "slide_intent": "decision",
+      "visual_intent": "data",
+      "title": "Federated coordination offers the best balance with a local fallback",
+      "subtitle": "Weighted option score / 100; scores select direction, not execution readiness",
+      "chart_treatment": "facts-below",
+      "chart": {
+        "type": "bar",
+        "categories": [
+          "Federated",
+          "Local",
+          "Global"
+        ],
+        "series": [
+          {
+            "name": "Weighted score",
+            "values": [
+              87,
+              72,
+              60
+            ]
+          }
+        ],
+        "options": {
+          "catAxisTitle": "Strategic option",
+          "valAxisTitle": "Score / 100",
+          "valAxisMinVal": 0,
+          "valAxisMaxVal": 100
+        }
+      },
+      "caption": "5/5 sensitivity wins · 0 gates closed · switch on failure",
+      "notes": "The option criteria and weights were locked before scoring. Scores are analyst judgment and do not include diagnostic benefit quantities. Global coordination remains on hold until legal/local, architecture, cyber/resilience, service, cost, mobility, and rollback evidence materially closes.",
+      "sources": [
+        "W3_option_summary.csv; W3_option_sensitivity.csv"
+      ]
+    },
+    {
+      "slide_id": "s10",
+      "type": "content",
+      "variant": "comparison-2col",
+      "slide_intent": "message",
+      "visual_intent": "comparison",
+      "title": "The target model centralizes standards and evidence—not every operational decision",
+      "subtitle": "One enterprise spine with governed regional and local execution",
+      "comparison_body_font_size": 10,
+      "left": {
+        "title": "Global spine",
+        "body": [
+          "Treasury: policy, data, position and mobility standards",
+          "CIO: integration, access, audit, cyber and resilience",
+          "Finance: cost/benefit admission and change control"
+        ]
+      },
+      "right": {
+        "title": "Regional and local rights",
+        "body": [
+          "Regions/BU: context, requests, critical service and emergencies",
+          "Shared Services: payment execution and exceptions"
+        ]
+      },
+      "verdict": "Internal Audit remains independent; Legal/Tax owns specialist conclusions; every production pilot requires a separate go/no-go.",
+      "notes": "The model addresses local concerns by making context and emergency rights explicit instead of informal. One accountable owner remains required per activity. Global policy ownership does not transfer every execution step to headquarters.",
+      "sources": [
+        "W3 future-state process/RACI; final governance/RACI"
+      ]
+    },
+    {
+      "slide_id": "s11",
+      "type": "content",
+      "variant": "table",
+      "slide_intent": "decision",
+      "visual_intent": "data",
+      "title": "Seven initiatives start with data, governance, and value control—not platform procurement",
+      "subtitle": "Priority score combines value 30%, risk 25%, feasibility 20%, dependency 15%, speed 10%",
+      "headers": [
+        "Rank",
+        "Initiative",
+        "Score",
+        "Accountable owner",
+        "First exit"
+      ],
+      "rows": [
+        [
+          "1",
+          "Cash data & visibility",
+          "94",
+          "Group Treasurer",
+          "G1 metric/population contract"
+        ],
+        [
+          "2",
+          "Benefits, cost & KPI assurance",
+          "92",
+          "CFO / Finance Benefits",
+          "G2 cost evidence"
+        ],
+        [
+          "3",
+          "Governance, service & adoption",
+          "86",
+          "CFO / Treasurer",
+          "G1 RACI and rights"
+        ],
+        [
+          "4",
+          "Payment controls & exceptions",
+          "85",
+          "Shared Services",
+          "Day 75 cause readout"
+        ],
+        [
+          "5",
+          "Liquidity certification",
+          "83",
+          "Group Treasurer",
+          "G2 certification design"
+        ],
+        [
+          "6",
+          "Integration, access & resilience",
+          "80",
+          "CIO",
+          "G3 rollback pass"
+        ],
+        [
+          "7",
+          "Account rationalization",
+          "63",
+          "Group Treasurer",
+          "Per-account G2 decision"
+        ]
+      ],
+      "column_weights": [
+        0.08,
+        0.3,
+        0.1,
+        0.24,
+        0.28
+      ],
+      "caption": "Scores order work; no score compensates for a failed critical gate.",
+      "notes": "I01, I07 and I06 start together because controlled data, value governance and decision rights are dependencies for all other work. Account rationalization ranks last because its direct fee case is modest, although it can progress quickly and safely with per-account validation.",
+      "sources": [
+        "W4_initiative_portfolio.csv · model v1"
+      ]
+    },
+    {
+      "slide_id": "s12",
+      "type": "content",
+      "variant": "table",
+      "slide_intent": "evidence",
+      "visual_intent": "data",
+      "title": "The business case stays credible by keeping unlike value types separate",
+      "subtitle": "Current validated, funded, and recognized value remains zero",
+      "headers": [
+        "Value type",
+        "Diagnostic quantity",
+        "Recognized",
+        "Admission gate"
+      ],
+      "rows": [
+        [
+          "Cash release",
+          "$21m / $35m / $46.2m screens",
+          "$0",
+          "VG01–VG05"
+        ],
+        [
+          "Annual P&L",
+          "$3,900 / $7,800 / $7,800 fee sensitivity",
+          "$0",
+          "VG06–VG07"
+        ],
+        [
+          "Productive capacity",
+          "50 / 150 / 150 hours/month",
+          "$0",
+          "VG08–VG10"
+        ],
+        [
+          "Risk reduction",
+          "Exposure and value not quantified",
+          "$0 ledger entry",
+          "VG11–VG12"
+        ]
+      ],
+      "column_weights": [
+        0.22,
+        0.4,
+        0.16,
+        0.22
+      ],
+      "caption": "Do not add rows. Provisional cost: $755k / $1.155m / $1.715m one-time; $175k / $281k / $442k recurring per year. All costs are analyst assumptions.",
+      "notes": "The base one-time planning amount fits the $1.0–$1.5m disclosed ceiling; the high case exceeds it by $215k. The base recurring amount is $281k per year and needs separate budget approval. ROI, NPV and payback remain unavailable because recognized benefits and actual cost/timing inputs are absent.",
+      "sources": [
+        "W3 business-case/value/cost outputs; W4 benefits tracker"
+      ]
+    },
+    {
+      "slide_id": "s13",
+      "type": "content",
+      "variant": "timeline",
+      "slide_intent": "process",
+      "visual_intent": "timeline",
+      "title": "Use 90 days to earn a bounded test before scaling",
+      "subtitle": "Day 90 is a decision gate—not a launch date",
+      "timeline_mode": "bands",
+      "milestones": [
+        {
+          "label": "0–30d",
+          "title": "Own the facts",
+          "body": "Lock populations, sources, owners and baselines."
+        },
+        {
+          "label": "31–60d",
+          "title": "Prove conditions",
+          "body": "Close local, control, architecture and cost gaps."
+        },
+        {
+          "label": "61–90d",
+          "title": "Make ready",
+          "body": "Prepare cohort gates, controls, rollback and freeze path."
+        },
+        {
+          "label": "M4–6",
+          "title": "Wave 1",
+          "body": "Separate approvals; bounded visibility and safe change."
+        },
+        {
+          "label": "M7–12",
+          "title": "Wave 2",
+          "body": "Scale only where cash and payment evidence holds."
+        },
+        {
+          "label": "M13–18",
+          "title": "BAU",
+          "body": "Embed ownership, support, controls and assurance."
+        }
+      ],
+      "notes": "The sequence is dependency-led. Any delay in critical evidence moves later dates right without weakening the gate. North America production routing or approval-workflow change cannot occur in the confirmed eight-week Q4 freeze and requires Rachel Kim's sign-off; exact dates remain open. Month 5 is the earliest realistic NA production planning floor.",
+      "sources": [
+        "W4 roadmap/stage-gate outputs; NA freeze constraint"
+      ]
+    },
+    {
+      "slide_id": "s14",
+      "type": "content",
+      "variant": "table",
+      "slide_intent": "decision",
+      "visual_intent": "data",
+      "title": "Governance converts the roadmap into stop, switch, and scale decisions",
+      "subtitle": "Critical risk cannot be averaged away",
+      "table_treatment": "decision-matrix",
+      "headers": [
+        "Risk / trigger",
+        "Preventive control",
+        "Decision owner",
+        "Response"
+      ],
+      "rows": [
+        [
+          "Unowned metric",
+          "G1 contract",
+          "CFO / Treasurer / CIO",
+          "Narrow, extend with owner/date, or switch"
+        ],
+        [
+          "Uncertified cash",
+          "VG01–VG05; $0 eligible",
+          "Treasurer / Finance",
+          "No action; keep value at $0"
+        ],
+        [
+          "Service / control / rollback failure",
+          "Blackout, emergency rights, tests",
+          "BU Finance / CIO / Control",
+          "Stop and rollback"
+        ],
+        [
+          "Cost > $1.5m or run budget absent",
+          "CR01–CR10; separate budgets",
+          "CFO / SteerCo",
+          "Stage, redesign, or switch"
+        ],
+        [
+          "Value formula or population drift",
+          "Finance dictionary/change control",
+          "Finance Benefits",
+          "Suspend, restate, review"
+        ]
+      ],
+      "column_weights": [
+        0.27,
+        0.28,
+        0.22,
+        0.23
+      ],
+      "caption": "Monthly Steering Committee · weekly Transformation Office · workstream forums · BAU Treasury Operating Council.",
+      "notes": "The governance system separates workstream management from gate authority. Finance Benefits admits value. Management control owners approve control design. Internal Audit remains independent. A program cannot remain indefinitely amber: G2 and G3 require an explicit decision.",
+      "sources": [
+        "W4 risk register; final governance/RACI"
+      ]
+    },
+    {
+      "slide_id": "s15",
+      "type": "content",
+      "variant": "timeline",
+      "slide_intent": "decision",
+      "visual_intent": "timeline",
+      "title": "Approve the direction and owners; return at Day 90",
+      "subtitle": "Five Steering Committee commitments activate the mobilization",
+      "timeline_mode": "bands",
+      "milestones": [
+        {
+          "label": "DAY 0",
+          "title": "Confirm direction",
+          "body": "CFO/SteerCo · signed fallback and boundary"
+        },
+        {
+          "label": "DAY 30",
+          "title": "Accept owners",
+          "body": "Executives · RACI and source/metric contracts"
+        },
+        {
+          "label": "DAY 30",
+          "title": "Lock NA calendar",
+          "body": "Rachel Kim/CFO · freeze dates and sign-off path"
+        },
+        {
+          "label": "DAY 60",
+          "title": "Prove affordability",
+          "body": "Finance/CIO/Procurement · CR01–CR10 pack"
+        },
+        {
+          "label": "DAY 90",
+          "title": "Take G3 decision",
+          "body": "CFO/SteerCo · stop, extend or bounded pilot"
+        }
+      ],
+      "notes": "Close with the same answer as slide 1, now supported by evidence. The decision should state what is approved, what is not approved, the owners, conditions, fallback, and date of the next decision.",
+      "sources": [
+        "Final recommendation memo; W4 decision log"
+      ]
+    },
+    {
+      "slide_id": "a01",
+      "type": "content",
+      "variant": "table",
+      "slide_intent": "evidence",
+      "table_treatment": "standard",
+      "title": "Appendix — Definitions, data quality, and methods bound every metric",
+      "headers": [
+        "Analysis",
+        "Method / definition",
+        "Data quality",
+        "Boundary"
+      ],
+      "rows": [
+        [
+          "Visibility",
+          "Same-date days ÷ expected days",
+          "9,955 rows; all delays use Portal/Spreadsheet",
+          "Proxy—not start-of-day/24h"
+        ],
+        [
+          "Liquidity",
+          "14-day minimum regional net",
+          "168 windows; no mobility fields",
+          "Screen—not movable cash"
+        ],
+        [
+          "Payments",
+          "Flags ÷ 7,600 records",
+          "Extract; no certified denominator",
+          "Association—not cause"
+        ],
+        [
+          "Accounts",
+          "Dormant + legacy + zero payments",
+          "55 accounts; local links untested",
+          "Candidate—not closure"
+        ],
+        [
+          "Capacity",
+          "Frequency × time × manual %",
+          "Management estimates; repairs unreconciled",
+          "Hours—not headcount/P&L"
+        ]
+      ],
+      "column_weights": [
+        0.18,
+        0.32,
+        0.28,
+        0.22
+      ],
+      "notes": "This appendix combines the required definitions, data-quality limitations, and methods. Full formulas, exclusions, source paths, alternative definitions, and tests are in the Week 2 metric contract and analysis logs.",
+      "sources": [
+        "W1 data-quality report · W2 metric contract and processed outputs"
+      ]
+    },
+    {
+      "slide_id": "a02",
+      "type": "content",
+      "variant": "table",
+      "slide_intent": "evidence",
+      "title": "Appendix — Detailed analyses, sensitivities, and rejected alternatives support the choice",
+      "headers": [
+        "Analysis",
+        "Base result",
+        "Sensitivity / rejected alternative",
+        "Decision implication"
+      ],
+      "rows": [
+        [
+          "Operating model",
+          "Federated 87 vs local 72 vs global 60",
+          "Wins 5/5 weights; reject global-now/local-only",
+          "Federated now; local fallback"
+        ],
+        [
+          "Liquidity",
+          "$35m base screen passes 138/168 windows",
+          "$21m: 168/168; $46.2m: 0/168",
+          "Certify before action"
+        ],
+        [
+          "Accounts",
+          "4 candidates; $7,800/year estimated fees",
+          "2 / 4 / 4 candidates across diagnostic cases",
+          "Validate one by one; no bulk closure"
+        ],
+        [
+          "Capacity",
+          "150 productive hours/month hypothesis",
+          "50 / 150 / 150 h/month; 617.72 total estimate",
+          "Hours are not headcount/P&L"
+        ],
+        [
+          "Affordability",
+          "$1.155m one-time + $281k/year recurring base",
+          "$755k / $1.155m / $1.715m; high +$215k",
+          "Source at G2; stage/redesign/switch"
+        ]
+      ],
+      "column_weights": [
+        0.18,
+        0.23,
+        0.34,
+        0.25
+      ],
+      "notes": "This is the compact detailed-analysis and sensitivity appendix. Rejected alternatives are explicit: immediate global coordination, indefinite local-only remediation, bulk account closure, automatic payment automation, and premature labor or benefit claims.",
+      "sources": [
+        "W2 diagnostic outputs · W3 option, sensitivity, business-case and cost outputs"
+      ]
+    },
+    {
+      "slide_id": "a03",
+      "type": "content",
+      "variant": "matrix",
+      "slide_intent": "references",
+      "title": "Appendix — Source and assumption controls keep claims auditable",
+      "quadrants": [
+        {
+          "title": "PROGRAM + ACG",
+          "body": "PROGRAM-STANDARD · ACG-DATA"
+        },
+        {
+          "title": "CALCULATED",
+          "body": "Reproducible ANALYST-CALC"
+        },
+        {
+          "title": "OPEN INPUTS",
+          "body": "ANALYST-ASSUMPTION · JUDGMENT"
+        },
+        {
+          "title": "CONTEXT + AUDIT",
+          "body": "JPM-PUBLIC · full register"
+        }
+      ],
+      "summary_callout": "Labels and paths: W4 source + assumptions registers · final evidence register · rebuild via src/ + data/processed/",
+      "notes": "The source register and assumptions register are part of the final evidence pack. Public material is context only. The rebuild chain runs from source datasets through documented Python outputs and fail-closed tests to the deck, memo, roadmap, KPI dictionary, and benefits dashboard.",
+      "sources": [
+        "W4 source and assumptions registers · Final evidence register · 24 Aug 2026"
+      ]
+    }
+  ],
+  "metadata": {
+    "renderer_role_contracts_v2": {
+      "schema_version": "renderer_role_contracts_v2",
+      "catalog_version": "renderer_role_contract_catalog_v2",
+      "composition_grammar_id": "consulting-answer-pyramid",
+      "style_preset": "data-heavy-boardroom",
+      "supported_layout_variants": [
+        "primary",
+        "alternate",
+        "dense"
+      ],
+      "roles": {
+        "title": {
+          "system_id": "title-answer-ledger",
+          "layout_family": "answer-ledger",
+          "coordinate_space": "slide",
+          "reading_order": [
+            "headline",
+            "support",
+            "anchor"
+          ],
+          "anchor_slot": "headline",
+          "density": {
+            "level": "medium",
+            "max_items": 3
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "title-answer-ledger"
+          },
+          "slots": {
+            "headline": [
+              0.18,
+              0.17,
+              0.52,
+              0.31
+            ],
+            "support": [
+              0.18,
+              0.55,
+              0.42,
+              0.14
+            ],
+            "anchor": [
+              0.76,
+              0.12,
+              0.2,
+              0.76
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "title"
+        },
+        "section": {
+          "system_id": "section-claim-chapters",
+          "layout_family": "claim-chapter",
+          "coordinate_space": "slide",
+          "reading_order": [
+            "index",
+            "headline",
+            "support"
+          ],
+          "anchor_slot": "headline",
+          "density": {
+            "level": "low",
+            "max_items": 3
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "section-claim-chapters"
+          },
+          "slots": {
+            "index": [
+              0.04,
+              0.18,
+              0.12,
+              0.18
+            ],
+            "headline": [
+              0.2,
+              0.2,
+              0.56,
+              0.32
+            ],
+            "support": [
+              0.2,
+              0.58,
+              0.48,
+              0.18
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "section"
+        },
+        "evidence": {
+          "system_id": "evidence-proof-stack",
+          "layout_family": "proof-stack",
+          "coordinate_space": "body",
+          "reading_order": [
+            "evidence_0",
+            "evidence_1",
+            "evidence_2",
+            "evidence_3"
+          ],
+          "anchor_slot": "evidence_0",
+          "density": {
+            "level": "high",
+            "max_items": 5
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "evidence-proof-stack"
+          },
+          "slots": {
+            "evidence_0": [
+              0.0,
+              0.0,
+              0.3,
+              1.0
+            ],
+            "evidence_1": [
+              0.35,
+              0.0,
+              0.65,
+              0.29
+            ],
+            "evidence_2": [
+              0.35,
+              0.355,
+              0.65,
+              0.29
+            ],
+            "evidence_3": [
+              0.35,
+              0.71,
+              0.65,
+              0.29
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "evidence"
+        },
+        "comparison": {
+          "system_id": "comparison-option-scorecard",
+          "layout_family": "criteria-scorecard",
+          "coordinate_space": "body",
+          "reading_order": [
+            "option_0",
+            "option_1",
+            "verdict"
+          ],
+          "anchor_slot": "option_0",
+          "density": {
+            "level": "high",
+            "max_items": 7
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "comparison-option-scorecard"
+          },
+          "slots": {
+            "option_0": [
+              0.0,
+              0.0,
+              0.47,
+              0.62
+            ],
+            "option_1": [
+              0.53,
+              0.0,
+              0.47,
+              0.62
+            ],
+            "verdict": [
+              0.0,
+              0.7,
+              1.0,
+              0.24
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "comparison"
+        },
+        "chart": {
+          "system_id": "data-executive-exhibit",
+          "layout_family": "executive-exhibit",
+          "coordinate_space": "body",
+          "reading_order": [
+            "chart",
+            "insight",
+            "facts"
+          ],
+          "anchor_slot": "chart",
+          "density": {
+            "level": "high",
+            "max_items": 4
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "data-executive-exhibit"
+          },
+          "slots": {
+            "chart": [
+              0.0,
+              0.0,
+              0.72,
+              1.0
+            ],
+            "insight": [
+              0.77,
+              0.0,
+              0.23,
+              0.42
+            ],
+            "facts": [
+              0.77,
+              0.49,
+              0.23,
+              0.51
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "chart"
+        },
+        "table": {
+          "system_id": "table-executive-ledger",
+          "layout_family": "executive-ledger",
+          "coordinate_space": "body",
+          "reading_order": [
+            "table",
+            "readout"
+          ],
+          "anchor_slot": "table",
+          "density": {
+            "level": "high",
+            "max_items": 8
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "data-executive-exhibit"
+          },
+          "slots": {
+            "table": [
+              0.0,
+              0.0,
+              0.72,
+              1.0
+            ],
+            "readout": [
+              0.77,
+              0.0,
+              0.23,
+              1.0
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "table"
+        },
+        "decision": {
+          "system_id": "decision-owner-commitment",
+          "layout_family": "owner-commitment",
+          "coordinate_space": "body",
+          "reading_order": [
+            "decision_0",
+            "decision_1",
+            "decision_2",
+            "decision_3",
+            "commitment"
+          ],
+          "anchor_slot": "commitment",
+          "density": {
+            "level": "high",
+            "max_items": 5
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "decision-owner-commitment"
+          },
+          "slots": {
+            "decision_0": [
+              0.0,
+              0.0,
+              0.46,
+              0.34
+            ],
+            "decision_1": [
+              0.54,
+              0.0,
+              0.46,
+              0.34
+            ],
+            "decision_2": [
+              0.0,
+              0.42,
+              0.46,
+              0.3
+            ],
+            "decision_3": [
+              0.54,
+              0.42,
+              0.46,
+              0.3
+            ],
+            "commitment": [
+              0.0,
+              0.8,
+              1.0,
+              0.2
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "decision"
+        },
+        "references": {
+          "system_id": "references-executive-notes",
+          "layout_family": "executive-notes",
+          "coordinate_space": "body",
+          "reading_order": [
+            "register",
+            "notes"
+          ],
+          "anchor_slot": "register",
+          "density": {
+            "level": "high",
+            "max_items": 10
+          },
+          "supported_variants": [
+            "primary",
+            "alternate",
+            "dense"
+          ],
+          "fallback": {
+            "version": "renderer_role_systems_v1",
+            "system_id": "references-executive-notes"
+          },
+          "slots": {
+            "register": [
+              0.0,
+              0.0,
+              0.74,
+              1.0
+            ],
+            "notes": [
+              0.79,
+              0.0,
+              0.21,
+              1.0
+            ]
+          },
+          "grammar_id": "consulting-answer-pyramid",
+          "role": "references"
+        }
+      }
+    }
+  }
+}

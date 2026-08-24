@@ -1,0 +1,220 @@
+{
+  "topic": "Project Northstar — Final Steering Committee",
+  "audience": "ACG CFO-led Steering Committee making a mobilization decision",
+  "objective": "Authorize a 90-day evidence mobilization for federated coordination while preserving the local fallback and all later production/funding gates.",
+  "thesis": "ACG has enough evidence to choose a controlled federated direction, but not enough to approve production value; ownership, evidence, control, service, and affordability must be proved through G0–G6.",
+  "narrative_arc": [
+    {
+      "act": "answer",
+      "purpose": "State the exact decision and boundary",
+      "slides": [
+        "s01",
+        "s02"
+      ]
+    },
+    {
+      "act": "diagnosis",
+      "purpose": "Show the linked cash, liquidity, payment and ownership failures",
+      "slides": [
+        "s03",
+        "s04",
+        "s05",
+        "s06",
+        "s07"
+      ]
+    },
+    {
+      "act": "choice",
+      "purpose": "Derive the design principles, option and target model",
+      "slides": [
+        "s08",
+        "s09",
+        "s10"
+      ]
+    },
+    {
+      "act": "execution",
+      "purpose": "Define initiatives, value controls, roadmap and governance",
+      "slides": [
+        "s11",
+        "s12",
+        "s13",
+        "s14"
+      ]
+    },
+    {
+      "act": "decision",
+      "purpose": "Close with named commitments and the next decision",
+      "slides": [
+        "s15"
+      ]
+    },
+    {
+      "act": "appendix",
+      "purpose": "Preserve definitions, gate detail and traceability",
+      "slides": [
+        "a01",
+        "a02",
+        "a03"
+      ]
+    }
+  ],
+  "slide_plan": [
+    {
+      "slide_id": "s01",
+      "role": "title",
+      "message": "Authorize 90 days, not implementation value",
+      "variant": "title",
+      "visual_strategy": "answer-led board cover",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s02",
+      "role": "decision",
+      "message": "Choose direction while keeping value and production gated",
+      "variant": "stats",
+      "visual_strategy": "four governed decision metrics",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s03",
+      "role": "evidence",
+      "message": "Four failures form one system",
+      "variant": "table",
+      "visual_strategy": "failure-to-implication ledger",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s04",
+      "role": "evidence",
+      "message": "Delayed visibility is source-concentrated",
+      "variant": "chart",
+      "visual_strategy": "editable method comparison with facts rail",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s05",
+      "role": "evidence",
+      "message": "Liquidity is a screen, not cash release",
+      "variant": "chart",
+      "visual_strategy": "threshold pass-rate exhibit",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s06",
+      "role": "evidence",
+      "message": "Payment friction needs cause evidence",
+      "variant": "stats",
+      "visual_strategy": "four extract metrics and bounded next action",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s07",
+      "role": "evidence",
+      "message": "Root causes are upstream",
+      "variant": "matrix",
+      "visual_strategy": "ownership/data/process/control matrix",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s08",
+      "role": "message",
+      "message": "Design balances enterprise spine and local rights",
+      "variant": "matrix",
+      "visual_strategy": "four board-level design choices",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s09",
+      "role": "comparison",
+      "message": "Federated leads with local fallback",
+      "variant": "chart",
+      "visual_strategy": "option scores plus gate facts",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s10",
+      "role": "message",
+      "message": "Standards centralize; local execution remains governed",
+      "variant": "comparison-2col",
+      "visual_strategy": "global spine versus local rights",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s11",
+      "role": "decision",
+      "message": "Seven initiatives start with foundations",
+      "variant": "table",
+      "visual_strategy": "ranked owner/action ledger",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s12",
+      "role": "evidence",
+      "message": "Value types remain separate",
+      "variant": "table",
+      "visual_strategy": "four-value ledger",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s13",
+      "role": "process",
+      "message": "90 days earn the next decision",
+      "variant": "timeline",
+      "visual_strategy": "six-phase roadmap",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s14",
+      "role": "decision",
+      "message": "Governance converts risks into decisions",
+      "variant": "table",
+      "visual_strategy": "trigger-control-owner-response ledger",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "s15",
+      "role": "decision",
+      "message": "Approve five commitments and return at Day 90",
+      "variant": "timeline",
+      "visual_strategy": "Day 0/30/60/90 commitment bands",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "a01",
+      "role": "references",
+      "message": "Definitions, data quality, and methods preserve boundaries",
+      "variant": "table",
+      "visual_strategy": "compact method and data-quality contract",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "a02",
+      "role": "references",
+      "message": "Detailed analyses, sensitivities, and rejected alternatives support the choice",
+      "variant": "table",
+      "visual_strategy": "base-result and sensitivity decision ledger",
+      "source_status": "sourced"
+    },
+    {
+      "slide_id": "a03",
+      "role": "references",
+      "message": "Sources, assumptions, and traceability make claims auditable",
+      "variant": "matrix",
+      "visual_strategy": "four-layer source, assumption, and audit-control matrix",
+      "source_status": "sourced"
+    }
+  ],
+  "design_notes": {
+    "style_preset_reason": "Data-heavy boardroom supports concise claims, editable charts, compact ledgers and visible sources.",
+    "rhythm_break": "Alternate stats, charts, matrices, comparison, timeline and decision tables; never repeat a decorative card grid.",
+    "visual_motif": "Board-index page system with restrained navy/blue/cyan accents and source-line footers.",
+    "core_slide_limit": 15,
+    "appendix_slide_count": 3,
+    "design_dna": "board risk memo",
+    "style_preset": "data-heavy-boardroom",
+    "style_seed": "northstar-final-steerco-v1",
+    "mix_rule": "Keep the consulting answer-pyramid and board-ledger page system coherent; vary only evidence-fit slide treatments."
+  },
+  "target_slide_count": 18
+}
