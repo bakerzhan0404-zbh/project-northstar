@@ -24,7 +24,7 @@ ACG should spend the first 90 days making a later production decision evidence-r
 | Mobilization | Days 1–30 | Establish controlled facts and ownership | Reconciled populations; metric contracts; owners; freeze calendar; decision rights | Proceed, narrow, or extend evidence |
 | Evidence and design | Days 31–60 | Prove local, control, service, architecture, and affordability conditions | Certification and control designs; cost ranges; remediation owners; fallback viability | Proceed, switch to local stabilization, or stop |
 | Decision readiness | Days 61–90 | Make a later bounded test safe and measurable | Locked baselines/targets; cohort evidence; rollback; production/funding decision requirements | Stop, extend, or authorize a separate bounded pilot |
-| Wave 1 | Months 4–6 | Deliver controlled visibility and targeted no-regret improvement | Approved read-only visibility; governed daily position; bounded payment change outside freeze; validated low-risk closures; live KPI/benefit controls | Launch/rollback at G4; sustain or redesign |
+| Wave 1 | Months 4–6 (North America production no earlier than Month 5) | Deliver controlled visibility and targeted no-regret improvement | Approved read-only visibility; governed daily position; bounded payment change outside freeze; validated low-risk closures; live KPI/benefit controls | Launch/rollback at G4; sustain or redesign |
 | Wave 2 | Months 7–12 | Expand only where Wave 1 evidence holds | Broader certified visibility; liquidity decision discipline; priority payment standardization; selected interfaces; training and support | Scale, hold, or redesign at G5 |
 | Scale and BAU | Months 13–18 | Embed the federated model and hand off control | Stable operating council; support and control testing; approved manual-work retirement; benefits assurance; acquisition-ready standards | Accept BAU or extend at G6 |
 
@@ -36,7 +36,7 @@ ACG should spend the first 90 days making a later production decision evidence-r
 | G1 | Day 30 | Controlled populations, sources, definitions, owners, calendars, and baseline gaps | Group Treasurer / CIO / Shared Services | Proceed, narrow, or extend |
 | G2 | Day 60 | Local rights, controls, architecture, resilience, cost ranges, and remediation ownership | CFO / CIO / Control owners | Proceed, switch, or stop |
 | G3 | Day 90 | Baselines, target rules, cohort readiness, closed critical gates, rollback, freeze/sign-off path | CFO / Steering Committee | Stop, extend, or authorize a separate bounded pilot |
-| G4 | Months 4–6 | Funding and production approvals, control/service pass, outside applicable freeze | CFO / CIO / BU Finance | Launch, delay, or rollback |
+| G4 | Months 4–6 (NA production ≥ Month 5) | Funding and production approvals, control/service pass, outside applicable freeze, NA BU CFO sign-off where North America is in scope | CFO / CIO / BU Finance | Launch, delay, or rollback |
 | G5 | Months 9–12 | Sustained like-for-like outcomes, validated benefits, service/control pass, refreshed costs | Steering Committee | Scale, hold, or redesign |
 | G6 | Months 15–18 | Stable ownership, procedures, support, control testing, risk acceptance, benefit handoff | CFO / Group Treasurer / CIO | Accept BAU or extend |
 
@@ -70,6 +70,18 @@ No average readiness score can override a failed critical gate.
 **Owner confirmation → population/metric control → local/control/architecture review → bottom-up cost evidence → target and cohort readiness → rollback rehearsal → G3 decision → separate funding/production approval → Wave 1 → sustained evidence → G5 scale.**
 
 Any delay in critical evidence moves the later milestones right. It does not justify weakening the gate.
+
+## Affordability ceiling
+
+Every wave in this roadmap is sequenced against the FY2026 initial transformation envelope of **`$1.0–$1.5m`**, confirmed by the Group CFO. The envelope is a **ceiling for the initial stage only** — not a cost estimate, approved budget, spend authority, committed funding, or an ROI denominator.
+
+The provisional planning range for Wave 1 is `$755k / $1,155k / $1,715k` one-time and `$175k / $281k / $442k` recurring per year (`ANALYST-ASSUMPTION`; see `Northstar_Final_Recommendation_Memo.md` and `data/processed/W3_provisional_cost_estimates.csv`). Two consequences for sequencing:
+
+1. The **base** one-time case fits the ceiling, so a Wave 1 of the scope described here is plausibly affordable — not demonstrated affordable, because CR01–CR10 remain open.
+2. The **high** case exceeds the ceiling by `$215k`. If bottom-up evidence lands there, Wave 1 does not proceed on this plan; it returns for staged CFO/SteerCo approval after demonstrated Wave 1 benefits.
+3. The **recurring** run rate is not covered by the FY2026 envelope at all and needs its own approved budget line before any go-live.
+
+G2 (Day 60) is the gate where the bottom-up range replaces this assumption. No wave may pass G4 on an assumed cost.
 
 ## North America freeze rule
 

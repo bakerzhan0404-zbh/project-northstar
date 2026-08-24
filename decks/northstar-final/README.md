@@ -1,3 +1,20 @@
+> **SUPERSEDED — do not build from this workspace.**
+>
+> The final executive deck is now built by `src/week4_final_deck.py`, which
+> reuses the Week 2/3 house-style design system in `src/week3_steering_deck.py`.
+> Rebuild with:
+>
+> ```bash
+> python3 src/week4_final_deck.py
+> soffice --headless --convert-to pdf --outdir deliverables/final \
+>   deliverables/final/Northstar_Final_Executive_Deck.pptx
+> ```
+>
+> This directory is retained only as the authoring record of the first build,
+> which used an external presentation toolchain and produced a different visual
+> language. It requires `PRESENTATION_SKILL_ROOT`, is not reproducible from this
+> repository, and no longer matches the shipped deck.
+
 # Project Northstar — Final Steering Committee
 
 This workspace is the saved authoring source for the `project-northstar-final-steering-committee` deck.

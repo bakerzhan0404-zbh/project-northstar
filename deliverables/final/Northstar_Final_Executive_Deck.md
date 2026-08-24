@@ -6,7 +6,7 @@
 **Format:** 18 slides total — 15 core slides (the rubric cap) plus a 3-slide appendix
 **Decision boundary:** Direction and 90-day evidence mobilization only; no production, funding, cash, closure, labor, benefit, or scale approval
 
-This file is the human-readable source and speaker-note companion to the editable PowerPoint and PDF. The canonical structured source and build controls are in `decks/northstar-final/outline.json` and `decks/northstar-final/`.
+This file is the human-readable source and speaker-note companion to the editable PowerPoint and PDF. The shipped `.pptx` and `.pdf` are built by `src/week4_final_deck.py`, which reuses the Week 2/3 house-style design system in `src/week3_steering_deck.py`. Rebuild with `python3 src/week4_final_deck.py`, then export the PDF with LibreOffice. The `decks/northstar-final/` workspace records the superseded first build and is no longer the build path.
 
 ## Core deck
 
