@@ -1,0 +1,153 @@
+{
+  "contract_version": "deck_design_contract_v1",
+  "stable_prompt_id": "northstar-final-steerco-v1",
+  "user_request_summary": "Build a 15-core-slide final executive deck plus appendix that asks ACG to authorize a 90-day evidence mobilization for federated coordination, with a local-stabilization fallback and no production or funding authorization.",
+  "deck_identity": {
+    "working_title": "Project Northstar — Final Steering Committee",
+    "audience": "ACG CFO-led Steering Committee",
+    "use_context": "15-minute executive decision presentation plus leave-behind",
+    "target_outcome": "Approve the 90-day evidence mobilization, named owners, stage gates, and fallback; preserve later production and funding decisions.",
+    "density": "dense report/leave-behind"
+  },
+  "design_dna": "board risk memo",
+  "choice_resolution": {
+    "contract_version": "deck_choice_resolution_v1",
+    "resolved_choices": [
+      {"id": "audience_context", "answer": "ACG CFO-led Steering Committee making a mobilization decision"},
+      {"id": "style_density", "answer": "Figure-first report"},
+      {"id": "visual_source_policy", "answer": "Best judgment; cite key claims"}
+    ],
+    "design_fields_locked": ["style preset", "board-ledger page system", "source-line footers", "15 core slide limit", "no external imagery"]
+  },
+  "style_system": {
+    "style_preset": "data-heavy-boardroom",
+    "style_seed": "northstar-final-steerco-v1",
+    "background_system": "white board report with dark navy cover and restrained blue/cyan accents",
+    "font_pair": "clean_modern_v1",
+    "palette_key": "blue-gray",
+    "page_system": "board-ledger",
+    "header_system": {"header_mode": "bar", "header_variant": "auto", "header_variants": ["split-rule", "left-accent", "top-bottom-rule", "plain"]},
+    "footer_system": {"footer_mode": "source-line", "footer_page_numbers": true, "footer_source_label": "Sources", "footer_refs_label": "Refs"},
+    "title_slide_system": {"title_layout": "split-hero", "title_motif": "none"},
+    "section_system": {"section_motif": "none"},
+    "chart_system": {"chart_treatment": "facts-right"},
+    "table_system": {"table_treatment": "compact-ledger"},
+    "figure_table_system": {"figure_table_treatment": "table-first", "table_treatment": "compact-ledger"},
+    "stats_system": {"stats_mode": "policy-bands"},
+    "matrix_system": {"matrix_mode": "open-quadrants"},
+    "summary_callout_system": {"summary_callout_mode": "default"},
+    "comparison_system": {"comparison_mode": "scorecard"},
+    "renderer_treatment_defaults": {
+      "page_system": "board-ledger",
+      "structural_motif": "board-index",
+      "title_layout": "split-hero",
+      "footer_mode": "source-line",
+      "chart_treatment": "facts-right",
+      "table_treatment": "compact-ledger",
+      "figure_table_treatment": "table-first",
+      "stats_mode": "policy-bands",
+      "matrix_mode": "open-quadrants",
+      "summary_callout_mode": "default",
+      "image_sidebar_mode": "analysis-rail",
+      "comparison_mode": "scorecard"
+    },
+    "style_mix_matrix": {
+      "mix_rule": "Keep the consulting answer-pyramid and board-ledger page system coherent; vary only evidence-fit slide treatments.",
+      "chart_treatment_pool": ["facts-right", "minimal"],
+      "table_treatment_pool": ["compact-ledger", "readout-sidecar", "decision-matrix"],
+      "stats_mode_pool": ["policy-bands", "feature-left"],
+      "matrix_mode_pool": ["open-quadrants"],
+      "timeline_mode_pool": ["bands"],
+      "header_variant_pool": ["split-rule", "left-accent", "top-bottom-rule", "plain"],
+      "footer_pool": ["source-line"]
+    }
+  },
+  "readability_contract": {
+    "min_title_pt": 24,
+    "min_body_pt": 12,
+    "min_caption_pt": 7.5,
+    "max_title_lines": 2,
+    "max_slide_text_lines": 10,
+    "max_slide_words": 110,
+    "max_slide_chars": 760,
+    "footer_reserved_inches": 0.34,
+    "chart_label_min_pt": 8,
+    "table_density_rule": "Split or summarize rather than shrinking below 12 pt.",
+    "whitespace_rule": "Use one dominant evidence object and avoid stranded content.",
+    "figure_crop_rule": "No external figures are used; editable charts and tables carry evidence."
+  },
+  "structure_blueprint": {
+    "target_slide_count": 18,
+    "core_slide_count": 15,
+    "appendix_slide_count": 3,
+    "allowed_variants": ["title", "stats", "chart", "table", "matrix", "comparison-2col", "timeline"],
+    "forbidden_variants": ["generated-image", "decorative cards-3", "unsourced kpi-hero"],
+    "slide_sequence": [
+      {"slide_id": "s01", "role": "title", "variant": "title", "purpose": "Exact decision"},
+      {"slide_id": "s02", "role": "decision", "variant": "stats", "purpose": "Conclusion and evidence boundary"},
+      {"slide_id": "s03", "role": "evidence", "variant": "table", "purpose": "Diagnostic system map"},
+      {"slide_id": "s04", "role": "evidence", "variant": "chart", "purpose": "Visibility finding"},
+      {"slide_id": "s05", "role": "evidence", "variant": "chart", "purpose": "Liquidity screen boundary"},
+      {"slide_id": "s06", "role": "evidence", "variant": "stats", "purpose": "Payment finding"},
+      {"slide_id": "s07", "role": "evidence", "variant": "matrix", "purpose": "Root causes"},
+      {"slide_id": "s08", "role": "message", "variant": "matrix", "purpose": "Design principles"},
+      {"slide_id": "s09", "role": "comparison", "variant": "chart", "purpose": "Option choice"},
+      {"slide_id": "s10", "role": "message", "variant": "comparison-2col", "purpose": "Target operating model"},
+      {"slide_id": "s11", "role": "decision", "variant": "table", "purpose": "Initiative portfolio"},
+      {"slide_id": "s12", "role": "evidence", "variant": "table", "purpose": "Business-case boundary"},
+      {"slide_id": "s13", "role": "process", "variant": "timeline", "purpose": "Roadmap"},
+      {"slide_id": "s14", "role": "decision", "variant": "table", "purpose": "Risk and governance"},
+      {"slide_id": "s15", "role": "decision", "variant": "table", "purpose": "Commitments and next decision"},
+      {"slide_id": "a01", "role": "references", "variant": "table", "purpose": "Metric definitions"},
+      {"slide_id": "a02", "role": "references", "variant": "table", "purpose": "Stage gates"},
+      {"slide_id": "a03", "role": "references", "variant": "table", "purpose": "Evidence and reproducibility"}
+    ]
+  },
+  "evidence_and_assets": {
+    "source_policy": "Cite key claims on every content slide; keep definitions and limitations visible; public JPMorgan material is context only.",
+    "proof_burden": "Use reconciled ACG project outputs first, then analyst assumptions and judgments with explicit labels.",
+    "research_needed": false,
+    "local_data_needed": false,
+    "asset_plan": {"images": [], "charts": [], "tables": [], "icons": [], "backgrounds": [], "generated_images": []},
+    "analysis_artifact_plan": {
+      "source_files": ["data/processed/W2_visibility_diagnostic.csv", "data/processed/W2_liquidity_thresholds.csv", "data/processed/W2_payment_diagnostic.csv", "data/processed/W3_option_summary.csv", "data/processed/W4_initiative_portfolio.csv", "data/processed/W4_stage_gates.csv"],
+      "producer_scripts": ["src/week2_diagnostic.py", "src/week3_strategy.py", "src/week3_business_case.py", "src/week4_implementation.py"],
+      "artifact_policy": "Editable inline charts/tables with speaker-note provenance; no raster data figures required."
+    }
+  },
+  "continuity_rules": {
+    "recurring_tags": ["EVIDENCE", "BOUNDARY", "DECISION"],
+    "carry_forward_rule": "Each slide resolves evidence into a boundary or named decision; the opener and closer repeat the same approval ask.",
+    "source_footer_rule": "Short source line on every content slide; complete paths in notes and final evidence register."
+  },
+  "qa_contract": {
+    "required_checks": ["planning validation", "preflight", "strict geometry", "rendered visual review", "placeholder check", "delivery readiness"],
+    "fail_on": ["planning warnings", "whitespace warnings", "design warnings", "placeholder text", "stale sources"],
+    "visual_review_required": true
+  },
+  "slide_quality_contract": {
+    "contract_version": "slide_quality_contract_v1",
+    "title_floor_pt": 24,
+    "body_floor_pt": 12,
+    "caption_floor_pt": 7.5,
+    "source_coverage_required": true,
+    "visual_anchor_required": true,
+    "placeholder_markers_forbidden": true
+  },
+  "speed_contract": {"profile": "quality-first", "final_render_required": true, "visual_repair_cycle_required": true},
+  "agent_execution_plan": {"owner": "main agent", "delegation": "none", "reason": "Current collaboration rules prohibit sub-agent use; main agent performs rendered inspection."},
+  "missing_inputs": [
+    {"question": "Exact North America eight-week freeze calendar", "owner": "NA BU Finance", "treatment": "Open assumption; Month 5 planning floor"}
+  ],
+  "assumptions": [
+    "No corporate logo or proprietary brand assets are required.",
+    "A restrained boardroom style is appropriate for the CFO-led audience.",
+    "All factual claims can be supported from local project evidence without web research."
+  ],
+  "authoring_instructions": [
+    "Keep 15 core slides plus three appendix slides.",
+    "Write claim-led titles and make every evidence limitation visible.",
+    "Use editable charts and tables; no decorative imagery.",
+    "Close with the same 90-day mobilization decision stated on slide 1."
+  ]
+}
