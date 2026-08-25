@@ -69,13 +69,13 @@ def main() -> None:
     memo_pdf = FINAL / "Northstar_Final_Recommendation_Memo.pdf"
     outline = json.loads((ROOT / "decks" / "northstar-final" / "outline.json").read_text(encoding="utf-8"))
     slide_ids = [slide["slide_id"] for slide in outline["slides"]]
-    assert slide_ids == [f"s{i:02d}" for i in range(1, 16)] + [f"a{i:02d}" for i in range(1, 4)]
-    assert pptx_slide_count(deck_pptx) == len(slide_ids) == 18, "final deck must contain 15 core plus 3 appendix slides"
-    assert pdf_page_count(deck_pdf) == 18, "final deck PDF must match the 18-slide PPTX"
+    assert slide_ids == [f"s{i:02d}" for i in range(1, 16)] + [f"a{i:02d}" for i in range(1, 5)]
+    assert pptx_slide_count(deck_pptx) == len(slide_ids) == 19, "final deck must contain 15 core plus 4 appendix slides"
+    assert pdf_page_count(deck_pdf) == 19, "final deck PDF must match the 19-slide PPTX"
     memo_pages = pdf_page_count(memo_pdf)
     assert 1 <= memo_pages <= 6, "final recommendation memo must not exceed six pages"
     assert f"{memo_pages} A4 pages" in corpus, "memo page-count evidence must match the PDF"
-    assert "18 slides total — 15 core slides (the rubric cap) plus a 3-slide appendix" in corpus
+    assert "19 slides total — 15 core slides (the rubric cap) plus a 4-slide appendix" in corpus
     for name in working_files:
         require(W4 / name)
 

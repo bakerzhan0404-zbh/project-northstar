@@ -241,7 +241,7 @@
       "variant": "matrix",
       "slide_intent": "message",
       "visual_intent": "comparison",
-      "title": "The root causes sit upstream of the visible symptoms",
+      "title": "Six measures tell management whether this is working",
       "subtitle": "Each root cause requires an owner and an observable control",
       "quadrants": [
         {
@@ -762,6 +762,36 @@
       "variant": "matrix",
       "slide_intent": "references",
       "title": "Appendix — Source and assumption controls keep claims auditable",
+      "quadrants": [
+        {
+          "title": "PROGRAM + ACG",
+          "body": "PROGRAM-STANDARD · ACG-DATA"
+        },
+        {
+          "title": "CALCULATED",
+          "body": "Reproducible ANALYST-CALC"
+        },
+        {
+          "title": "OPEN INPUTS",
+          "body": "ANALYST-ASSUMPTION · JUDGMENT"
+        },
+        {
+          "title": "CONTEXT + AUDIT",
+          "body": "JPM-PUBLIC · full register"
+        }
+      ],
+      "summary_callout": "Labels and paths: W4 source + assumptions registers · final evidence register · rebuild via src/ + data/processed/",
+      "notes": "The source register and assumptions register are part of the final evidence pack. Public material is context only. The rebuild chain runs from source datasets through documented Python outputs and fail-closed tests to the deck, memo, roadmap, KPI dictionary, and benefits dashboard.",
+      "sources": [
+        "W4 source and assumptions registers · Final evidence register · 24 Aug 2026"
+      ]
+    },
+    {
+      "slide_id": "a04",
+      "type": "content",
+      "variant": "matrix",
+      "slide_intent": "references",
+      "title": "The remaining eight KPIs complete the performance contract",
       "quadrants": [
         {
           "title": "PROGRAM + ACG",

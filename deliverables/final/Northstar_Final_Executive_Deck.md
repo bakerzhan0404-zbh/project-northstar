@@ -3,7 +3,7 @@
 **Prepared by:** Baker
 **Date:** 24 August 2026
 **Audience:** CFO-led Steering Committee
-**Format:** 18 slides total — 15 core slides (the rubric cap) plus a 3-slide appendix
+**Format:** 19 slides total — 15 core slides (the rubric cap) plus a 4-slide appendix
 **Decision boundary:** Direction and 90-day evidence mobilization only; no production, funding, cash, closure, labor, benefit, or scale approval
 
 This file is the human-readable source and speaker-note companion to the editable PowerPoint and PDF. The shipped `.pptx` and `.pdf` are built by `src/week4_final_deck.py`, which reuses the Week 2/3 house-style design system in `src/week3_steering_deck.py`. Rebuild with `python3 src/week4_final_deck.py`, then export the PDF with LibreOffice. The `decks/northstar-final/` workspace records the superseded first build and is no longer the build path.
@@ -39,9 +39,11 @@ Across 168 complete 14-day windows, the `$21m` screen passes 168, the `$35m` scr
 
 The supplied extract shows **31.51% manual touch**, **6.30% exceptions**, **5.00% late release**, and **10.34% cross-border**. These are associations; the 120-record source-linked sample must establish causes and controls.
 
-### 7. The root causes sit upstream of the visible symptoms
+### 7. Six measures tell management whether this is working
 
-Ownership is split; core data lineage is incomplete; process/service practices vary; and access, SoD, audit, reconciliation, resilience, and staged integration require explicit design and testing.
+Two performance signals, one value gate, two safety gates, one readiness gate: same-day cash visibility (**58.18%** → ≥90% in the approved cohort at G4); payment exception rate (**6.30%** → ≥20% like-for-like reduction by G5); certified movable cash (**$0** recognized, target only after VG01–VG05); rollback within four hours (not tested, pass before G3); change-attributable incidents (**0**, any event triggers review); and evidence-gate closure (**0%** → VG/CR packages closed per decision).
+
+Speaker note: "Not available" and "$0 recognized" mean the evidence has not met the rule—not that the risk or the opportunity is zero. The remaining eight KPIs are in Appendix D. Root causes are not a separate slide: slide 3 already states the same four failures and their management implications.
 
 ### 8. Eight design principles resolve enterprise control versus local responsiveness
 
@@ -92,6 +94,10 @@ Shows the option-weight sensitivities, liquidity thresholds, account and capacit
 ### 18. Source and assumption controls keep claims auditable
 
 Separates `PROGRAM-STANDARD`, `ACG-DATA`, `ANALYST-CALC`, `ANALYST-ASSUMPTION`, `ANALYST-JUDGMENT`, and `JPM-PUBLIC`; points to the final source and assumptions registers; and records the rebuild path through documented outputs and fail-closed tests.
+
+### 19. The remaining eight KPIs complete the performance contract
+
+Two-plus-day delayed account-days, reconciled cash positions, manual-touch rate, late-release rate, emergency-payment compliance, trained and access-certified roles, verified fee removal, and productively redeployed hours. Each is tracked by its owning function and escalated to the committee only on breach. Every KPI requires a controlled population, definition, formula, source, owner, and change history before use.
 
 ## Provenance
 
