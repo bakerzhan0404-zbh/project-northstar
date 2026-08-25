@@ -71,6 +71,41 @@ No average readiness score can override a failed critical gate.
 
 Any delay in critical evidence moves the later milestones right. It does not justify weakening the gate.
 
+## What the 90 days consume
+
+The 90-day timebox is evidence work carried by internal people. Its cost profile is therefore mostly time, not spend — but neither has been stated until now, and a timebox cannot be authorized without both.
+
+### Internal staff time
+
+| Role | Commitment | Principal Days 1–90 contribution |
+|---|---|---|
+| Programme / PMO lead | 0.5 FTE | Runs the timebox; assembles each gate pack |
+| Treasury data owner | 0.5 FTE | Source, cutoff, and reconciliation definitions; population control |
+| Group Treasury SME | 0.3 FTE | Mobility, buffer, and policy certification input |
+| Shared Services lead / SME | 0.5 FTE | 120-record payment review; process and service definitions |
+| IT / data engineering | 0.4 FTE | Lineage, extraction, and interface assessment; safe-environment rehearsal |
+| Control / risk owner | 0.2 FTE | Authorization, SoD, access, and audit design review |
+| Regional Finance (3 regions) | 0.45 FTE combined | Local restrictions, critical flows, calendars, emergency rights |
+| Finance benefits lead | 0.2 FTE | Cost evidence and recognition-rule design |
+| **Total** | **≈ 3.05 FTE sustained** | **≈ 195–200 person-days across the 90 days** |
+
+Commitments are `ANALYST-ASSUMPTION`. They must be confirmed with each named owner at G0, because an unfunded time commitment is the most common reason an evidence timebox silently stalls. Backfill for the Shared Services and Treasury data roles is the most likely requirement and sits in CR06.
+
+### External spending before G2
+
+External spend is **permitted but tightly bounded**, because some certification genuinely cannot be produced internally:
+
+| Permitted before G2 | Not permitted before G3 |
+|---|---|
+| Legal, tax, and regulatory opinions on cash transferability | Software, licence, or subscription purchase |
+| Independent architecture or cyber review where in-house capacity is absent | Platform or TMS selection, trial, or commitment |
+| Bank tariff and account documentation retrieval | Implementation or integration statements of work |
+| Specialist advice on control or resilience design | Any multi-year, auto-renewing, or termination-fee contract |
+
+**Cap before G2: `$75k` total external spend**, `ANALYST-ASSUMPTION`, drawn against the FY2026 `$1.0–$1.5m` ceiling and requiring CFO approval to exceed. No engagement may commit ACG beyond the G2 decision point, and no advisory engagement may be structured so that stopping at G2 incurs a penalty.
+
+The cap exists so the 90 days cannot quietly become a procurement runway. Its purpose is to buy *evidence*, not capability: nothing purchased before G2 should be difficult to walk away from at G2.
+
 ## Affordability ceiling
 
 Every wave in this roadmap is sequenced against the FY2026 initial transformation envelope of **`$1.0–$1.5m`**, confirmed by the Group CFO. The envelope is a **ceiling for the initial stage only** — not a cost estimate, approved budget, spend authority, committed funding, or an ROI denominator.
