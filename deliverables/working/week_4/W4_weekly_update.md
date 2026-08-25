@@ -7,7 +7,7 @@
 
 ## Executive summary
 
-The recommendation is to authorize a **90-day evidence mobilization for federated coordination**, with local stabilization as the explicit fallback and a separate Day-90 decision before any bounded pilot. Week 4 converts the Week 3 validation case into seven initiatives, G0–G6 stage gates, a 30/60/90-day plan, a 12–18 month roadmap, governance and RACI, fourteen KPIs, and a non-additive benefits ledger. It is executable as a controlled evidence programme — not as an investment or production approval. Recognized cash, P&L, and capacity value remains `$0`, risk value is not quantified, and CR01–CR10 and VG01–VG12 remain open. **The next client action is ownership, not technology selection.**
+Authorize a **90-day evidence mobilization for federated coordination**, with local stabilization as the explicit fallback and a separate Day-90 decision before any bounded pilot. Week 4 converts the Week 3 validation case into an executable evidence programme — not an investment or production approval. Recognized cash, P&L, and capacity value remains `$0`, risk value is not quantified, and CR01–CR10 and VG01–VG12 remain open. **The next client action is ownership, not technology selection.**
 
 ## Work completed
 
@@ -23,9 +23,9 @@ The recommendation is to authorize a **90-day evidence mobilization for federate
 
 ## What the evidence suggests
 
-- **Federated coordination is the best next direction** — base scores `87 / 72 / 60` and it leads all five weight sensitivities. Authorize evidence mobilization, not rollout. *(Medium confidence.)*
-- **Ownership and metric control are the first 30-day deliverables** — 55 accounts, 9,955 account-days, and 7,600 payments all carry source gaps. G1 must close before any operational target is set. *(High for supplied populations.)*
-- **Value remains conditional** — `$21m / $35m / $46.2m` screens, four closure candidates, and capacity hypotheses all still recognize `$0`. Finance gatekeeping runs from Day 1. *(High for current treatment; low for future value.)*
+- **The direction survives challenge** — base scores `87 / 72 / 60`, and federated leads all five weight sensitivities, so the choice does not depend on one weighting. *(Medium confidence.)*
+- **Ownership is the binding constraint, not analysis** — 55 accounts, 9,955 account-days, and 7,600 payments all carry source gaps. G1 must close before any operational target is set. *(High for supplied populations.)*
+- **Nothing is yet bookable** — every candidate benefit fails a validation gate, so Finance gatekeeping runs from Day 1 rather than at the end. *(High for current treatment; low for future value.)*
 
 ## Hypothesis changes
 

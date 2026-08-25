@@ -67,7 +67,7 @@ def main() -> None:
     deck_pptx = FINAL / "Northstar_Final_Executive_Deck.pptx"
     deck_pdf = FINAL / "Northstar_Final_Executive_Deck.pdf"
     memo_pdf = FINAL / "Northstar_Final_Recommendation_Memo.pdf"
-    outline = json.loads((ROOT / "decks" / "northstar-final" / "outline.json").read_text(encoding="utf-8"))
+    outline = json.loads((ROOT / "deliverables" / "final" / "Northstar_Final_Executive_Deck_outline.json").read_text(encoding="utf-8"))
     slide_ids = [slide["slide_id"] for slide in outline["slides"]]
     assert slide_ids == [f"s{i:02d}" for i in range(1, 16)] + [f"a{i:02d}" for i in range(1, 5)]
     assert pptx_slide_count(deck_pptx) == len(slide_ids) == 19, "final deck must contain 15 core plus 4 appendix slides"
