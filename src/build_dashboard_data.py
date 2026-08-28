@@ -1,6 +1,11 @@
 """Build the fail-closed data contract for the interactive dashboard.
 
-The dashboard reads only the reconciled Week 1 and Week 2 analytical outputs.
+The dashboard reads the reconciled Week 1 and Week 2 diagnostic outputs plus the
+Week 3 option comparison and the Week 4 execution plan.  Diagnostic evidence and
+the decision pack are kept in separate contract sections: the Week 4 initiatives,
+gates, roadmap, KPIs, and benefit ledger are analyst proposals pending client
+approval, and recognized benefit value stays at zero until each category's value
+gates close.
 This adapter deliberately fails before producing JSON if a control total,
 required evidence boundary, or cohort reconciliation changes.  In particular,
 validated movable cash is represented as ``None``/``not_established``; the
@@ -45,7 +50,28 @@ INPUT_FILES = {
     "accounts": "W2_account_diagnostic.csv",
     "account_day_facts": "W2_dashboard_account_day_facts.csv",
     "payment_facts": "W2_dashboard_payment_facts.csv",
+    "w3_options": "W3_option_summary.csv",
+    "w4_initiatives": "W4_initiative_portfolio.csv",
+    "w4_gates": "W4_stage_gates.csv",
+    "w4_roadmap": "W4_roadmap_milestones.csv",
+    "w4_kpis": "W4_kpi_dictionary.csv",
+    "w4_benefits": "W4_benefits_tracker.csv",
 }
+
+# Diagnostic inputs carry measured ACG data that passed the Week 1 structural
+# checks and Week 2 reconciliation controls. Decision inputs are analyst design
+# artifacts: they are governed and version-locked, but they are not measured
+# data and must never be counted as though they were.
+DIAGNOSTIC_INPUT_KEYS = (
+    "w1_checks", "w1_metrics", "w2_reconciliation", "visibility",
+    "liquidity_scenarios", "liquidity_thresholds", "payments",
+    "process_capacity", "repair_baseline", "accounts",
+    "account_day_facts", "payment_facts",
+)
+DECISION_INPUT_KEYS = (
+    "w3_options", "w4_initiatives", "w4_gates", "w4_roadmap",
+    "w4_kpis", "w4_benefits",
+)
 
 ACCOUNT_DAY_FACT_COLUMNS = [
     "date",
@@ -144,6 +170,65 @@ CLOSURE_BOUNDARY = (
     "Local purpose, dependencies, signatories, service continuity, closure cost, "
     "and fee removal are not validated"
 )
+
+# --- Week 3 option comparison and Week 4 execution plan -------------------
+W3_WEIGHT_LOCK_VERSION = "W3-DP-v1 · 2026-08-18"
+W4_MODEL_VERSION = "W4-EXECUTION-PLAN-v1 · 2026-08-24"
+
+OPTION_BOUNDARY = (
+    "Design-selection score only; it is not a readiness, value, confidence, or "
+    "funding measure, and a failed critical gate cannot be averaged away"
+)
+INITIATIVE_BOUNDARY = (
+    "Analyst implementation design; no initiative is funded, resourced, staffed, "
+    "or authorized to execute"
+)
+GATE_BOUNDARY = (
+    "Every gate is open; no gate has been passed and none may be skipped or "
+    "compensated for by a high score elsewhere"
+)
+ROADMAP_BOUNDARY = (
+    "Planned sequence pending G0 authorization; timing moves with gate closure "
+    "and is not a delivery commitment"
+)
+KPI_BOUNDARY = (
+    "Proposed measures with owner and target approval open; a baseline shown as "
+    "not established has not met its evidence rule, and is not a value of zero"
+)
+BENEFIT_BOUNDARY = (
+    "Cash, P&L, capacity, and risk use different units and recognition rules and "
+    "must never be summed; recognized value stays $0 until each category's value "
+    "gates close"
+)
+
+EXPECTED_OPTIONS = {
+    "local_stabilization": (72.0, 2, 0),
+    "federated_coordination": (87.0, 1, 5),
+    "globally_coordinated": (60.0, 3, 0),
+}
+EXPECTED_INITIATIVE_SCORES = {
+    "I01": (94.0, 1),
+    "I07": (92.0, 2),
+    "I06": (86.0, 3),
+    "I03": (85.0, 4),
+    "I02": (83.0, 5),
+    "I05": (80.0, 6),
+    "I04": (63.0, 7),
+}
+EXPECTED_GATE_IDS = ("G0", "G1", "G2", "G3", "G4", "G5", "G6")
+EXPECTED_MILESTONE_GATES = {
+    "M01": "G1", "M02": "G2", "M03": "G3",
+    "M04": "G4", "M05": "G5", "M06": "G6",
+}
+EXPECTED_BENEFIT_CATEGORIES = {
+    "B01": "Cash release",
+    "B02": "Annual P&L",
+    "B03": "Capacity",
+    "B04": "Risk reduction",
+}
+# Baselines that must stay tied to the published diagnostic numbers, so the
+# decision pack cannot drift away from the evidence it claims to measure.
+EXPECTED_KPI_BASELINES = {"K01": "58.18", "K05": "31.51", "K06": "6.30"}
 
 QUALITY_DIMENSION_CHECKS = {
     "uniqueness": (
@@ -1370,6 +1455,191 @@ def _validate_filter_facts(frames: Mapping[str, pd.DataFrame]) -> None:
         )
 
 
+def _semicolon_list(value: Any) -> list[str]:
+    """Split a semicolon-delimited cell into trimmed, non-empty tokens."""
+    return [part.strip() for part in str(value).split(";") if part.strip()]
+
+
+def _expect_prefix(actual: Any, prefix: str, label: str) -> None:
+    """Assert a long prose cell still carries its governing prefix."""
+    text = str(actual).strip()
+    if not text.startswith(prefix):
+        raise DashboardDataError(
+            f"{label} must start with {prefix!r}; found {text[:80]!r}"
+        )
+
+
+def _validate_options(frames: Mapping[str, pd.DataFrame]) -> None:
+    """Certify the Week 3 option comparison behind the recommended direction."""
+    options = frames["w3_options"]
+    _require_columns(
+        options,
+        {"option_id", "option_name", "option_description", "base_weighted_score_0_to_100",
+         "base_rank", "provisional_preferred_option", "sensitivity_wins",
+         "sensitivity_scenarios", "switch_condition", "execution_gate_status",
+         "recommendation_status", "evidence_label", "weight_lock_version",
+         "evidence_boundary"},
+        INPUT_FILES["w3_options"],
+    )
+    if len(options) != 3 or options["option_id"].duplicated().any():
+        raise DashboardDataError("Option summary must contain three unique options")
+    preferred = options.loc[
+        options["provisional_preferred_option"].astype(str).str.lower() == "true"
+    ]
+    if len(preferred) != 1:
+        raise DashboardDataError(
+            f"Exactly one option must be preferred; found {len(preferred)}"
+        )
+    if str(preferred.iloc[0]["option_id"]) != "federated_coordination":
+        raise DashboardDataError(
+            "Federated coordination must remain the preferred option"
+        )
+    for _, row in options.iterrows():
+        key = str(row["option_id"])
+        if key not in EXPECTED_OPTIONS:
+            raise DashboardDataError(f"Unexpected option id {key}")
+        score, rank, wins = EXPECTED_OPTIONS[key]
+        _expect_number(row["base_weighted_score_0_to_100"], score, f"{key} option score")
+        _expect_number(row["base_rank"], rank, f"{key} option rank")
+        _expect_number(row["sensitivity_wins"], wins, f"{key} sensitivity wins")
+        _expect_number(row["sensitivity_scenarios"], 5, f"{key} sensitivity scenarios")
+        _expect_text(row["evidence_label"], "ANALYST-JUDGMENT", f"{key} evidence label")
+        _expect_text(
+            row["weight_lock_version"], W3_WEIGHT_LOCK_VERSION, f"{key} weight lock"
+        )
+        _expect_prefix(row["execution_gate_status"], "OPEN", f"{key} execution gate status")
+
+
+def _validate_w4_decision(frames: Mapping[str, pd.DataFrame]) -> None:
+    """Certify the Week 4 execution plan before it can reach the dashboard."""
+    initiatives = frames["w4_initiatives"]
+    _require_columns(
+        initiatives,
+        {"initiative_id", "initiative_name", "outcome", "accountable_owner",
+         "delivery_lead", "wave", "required_gates", "completion_evidence",
+         "value_boundary", "weighted_priority_score_0_to_100", "priority_rank",
+         "evidence_label", "evidence_boundary", "model_version"},
+        INPUT_FILES["w4_initiatives"],
+    )
+    if len(initiatives) != 7 or initiatives["initiative_id"].duplicated().any():
+        raise DashboardDataError(
+            "Initiative portfolio must contain seven unique initiatives"
+        )
+    known_gates = set(EXPECTED_GATE_IDS)
+    for _, row in initiatives.iterrows():
+        key = str(row["initiative_id"])
+        if key not in EXPECTED_INITIATIVE_SCORES:
+            raise DashboardDataError(f"Unexpected initiative id {key}")
+        score, rank = EXPECTED_INITIATIVE_SCORES[key]
+        _expect_number(
+            row["weighted_priority_score_0_to_100"], score, f"{key} priority score"
+        )
+        _expect_number(row["priority_rank"], rank, f"{key} priority rank")
+        _expect_text(row["evidence_label"], "ANALYST-JUDGMENT", f"{key} evidence label")
+        _expect_text(row["model_version"], W4_MODEL_VERSION, f"{key} model version")
+        unknown = sorted(set(_semicolon_list(row["required_gates"])) - known_gates)
+        if unknown:
+            raise DashboardDataError(
+                f"Initiative {key} requires unknown gate(s): {', '.join(unknown)}"
+            )
+    ranks = sorted(int(value) for value in initiatives["priority_rank"])
+    if ranks != list(range(1, 8)):
+        raise DashboardDataError(
+            "Initiative priority ranks must be 1-7 with no ties or gaps"
+        )
+
+    gates = frames["w4_gates"]
+    _require_columns(
+        gates,
+        {"gate_id", "timing", "gate_name", "minimum_exit_evidence", "decision_owner",
+         "allowed_decision", "current_status", "evidence_label", "model_version"},
+        INPUT_FILES["w4_gates"],
+    )
+    if tuple(str(value) for value in gates["gate_id"]) != EXPECTED_GATE_IDS:
+        raise DashboardDataError("Stage gates must be G0-G6 in order")
+    for _, row in gates.iterrows():
+        key = str(row["gate_id"])
+        _expect_text(row["current_status"], "OPEN", f"{key} status")
+        _expect_text(row["evidence_label"], "ANALYST-JUDGMENT", f"{key} evidence label")
+        _expect_text(row["model_version"], W4_MODEL_VERSION, f"{key} model version")
+
+    roadmap = frames["w4_roadmap"]
+    _require_columns(
+        roadmap,
+        {"milestone_id", "phase", "timing", "scope_and_outcome", "exit_gate",
+         "linked_initiatives", "status", "evidence_label", "model_version"},
+        INPUT_FILES["w4_roadmap"],
+    )
+    if len(roadmap) != 6 or roadmap["milestone_id"].duplicated().any():
+        raise DashboardDataError("Roadmap must contain six unique milestones")
+    known_initiatives = set(EXPECTED_INITIATIVE_SCORES)
+    for _, row in roadmap.iterrows():
+        key = str(row["milestone_id"])
+        expected_gate = EXPECTED_MILESTONE_GATES.get(key)
+        if expected_gate is None:
+            raise DashboardDataError(f"Unexpected roadmap milestone {key}")
+        _expect_text(row["exit_gate"], expected_gate, f"{key} exit gate")
+        _expect_prefix(row["status"], "PLANNED", f"{key} status")
+        _expect_text(row["model_version"], W4_MODEL_VERSION, f"{key} model version")
+        unknown = sorted(
+            set(_semicolon_list(row["linked_initiatives"])) - known_initiatives
+        )
+        if unknown:
+            raise DashboardDataError(
+                f"Milestone {key} references unknown initiative(s): {', '.join(unknown)}"
+            )
+
+    kpis = frames["w4_kpis"]
+    _require_columns(
+        kpis,
+        {"kpi_id", "dimension", "kpi_name", "definition_and_formula", "unit",
+         "current_baseline", "baseline_boundary", "target_logic", "frequency",
+         "accountable_owner", "source_system_or_evidence", "indicator_type",
+         "status", "evidence_label", "model_version"},
+        INPUT_FILES["w4_kpis"],
+    )
+    if len(kpis) != 14 or kpis["kpi_id"].duplicated().any():
+        raise DashboardDataError("KPI dictionary must contain fourteen unique measures")
+    for _, row in kpis.iterrows():
+        key = str(row["kpi_id"])
+        _expect_prefix(row["status"], "PROPOSED", f"KPI {key} status")
+        _expect_text(row["model_version"], W4_MODEL_VERSION, f"KPI {key} model version")
+    for kpi_id, expected in EXPECTED_KPI_BASELINES.items():
+        row = _one_row(kpis, INPUT_FILES["w4_kpis"], kpi_id=kpi_id)
+        if str(row["current_baseline"]).strip() != expected:
+            raise DashboardDataError(
+                f"KPI {kpi_id} baseline must stay tied to the diagnostic value "
+                f"{expected}; found {str(row['current_baseline']).strip()!r}"
+            )
+
+    benefits = frames["w4_benefits"]
+    _require_columns(
+        benefits,
+        {"benefit_id", "value_category", "diagnostic_quantity_name",
+         "diagnostic_quantity", "diagnostic_unit", "validated_value_usd",
+         "funded_value_usd", "recognized_value_usd", "required_gates",
+         "accountable_owner", "recognition_boundary", "aggregation_rule",
+         "status", "model_version"},
+        INPUT_FILES["w4_benefits"],
+    )
+    if len(benefits) != 4 or benefits["benefit_id"].duplicated().any():
+        raise DashboardDataError(
+            "Benefits tracker must contain four unique value categories"
+        )
+    for _, row in benefits.iterrows():
+        key = str(row["benefit_id"])
+        expected_category = EXPECTED_BENEFIT_CATEGORIES.get(key)
+        if expected_category is None:
+            raise DashboardDataError(f"Unexpected benefit id {key}")
+        _expect_text(row["value_category"], expected_category, f"{key} value category")
+        # The central claim of the pack: nothing has been recognized yet.
+        for column in ("validated_value_usd", "funded_value_usd", "recognized_value_usd"):
+            _expect_number(row[column], 0, f"{key} {column}")
+        _expect_prefix(row["aggregation_rule"], "NON-ADDITIVE", f"{key} aggregation rule")
+        _expect_prefix(row["status"], "OPEN", f"{key} status")
+        _expect_text(row["model_version"], W4_MODEL_VERSION, f"{key} model version")
+
+
 def validate_dashboard_inputs(frames: Mapping[str, pd.DataFrame]) -> None:
     """Certify controls and boundaries; raise before any dashboard is built."""
     missing = sorted(set(INPUT_FILES).difference(frames))
@@ -1377,12 +1647,29 @@ def validate_dashboard_inputs(frames: Mapping[str, pd.DataFrame]) -> None:
         raise DashboardDataError(
             "Missing loaded dashboard input(s): " + ", ".join(missing)
         )
+    # Every input must declare its evidential stage, so a new file can never be
+    # counted as measured diagnostic evidence by default.
+    unclassified = sorted(
+        set(INPUT_FILES) - set(DIAGNOSTIC_INPUT_KEYS) - set(DECISION_INPUT_KEYS)
+    )
+    if unclassified:
+        raise DashboardDataError(
+            "Input(s) not classified as diagnostic or decision evidence: "
+            + ", ".join(unclassified)
+        )
+    overlapping = sorted(set(DIAGNOSTIC_INPUT_KEYS) & set(DECISION_INPUT_KEYS))
+    if overlapping:
+        raise DashboardDataError(
+            "Input(s) claimed by both evidence stages: " + ", ".join(overlapping)
+        )
     _validate_w1(frames)
     _validate_reconciliation(frames)
     _validate_visibility(frames)
     _validate_liquidity(frames)
     _validate_payments(frames)
     _validate_guardrails(frames)
+    _validate_options(frames)
+    _validate_w4_decision(frames)
     _validate_filter_facts(frames)
 
 
@@ -1700,7 +1987,7 @@ def _build_quality_contract(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any
             "total": len(reconciliation),
             "label": "Week 2 reconciliation controls",
         },
-        "source_artifacts": len(INPUT_FILES),
+        "source_artifacts": len(DIAGNOSTIC_INPUT_KEYS),
         "population_controls": population_controls,
         "dimensions": _build_quality_dimensions(frames),
         "monitoring": {
@@ -1748,6 +2035,46 @@ def _build_definitions() -> Dict[str, Any]:
             ),
             "search_aliases": [
                 "dashboard guide", "methodology", "scope", "how to read"
+            ],
+        },
+        "roadmap": {
+            "title": "Decision and roadmap",
+            "meaning": (
+                "The Week 3 option comparison and Week 4 execution plan behind the "
+                "recommended direction: initiatives, stage gates, milestones, KPIs, "
+                "and the benefit ledger."
+            ),
+            "calculation": (
+                "Options and initiatives carry weighted design scores; gates, "
+                "milestones, KPIs, and benefit categories are listed as separate "
+                "records with their own owners, evidence, and boundaries."
+            ),
+            "formula": (
+                "No value is totalled. Cash, P&L, capacity, and risk use different "
+                "units and separate recognition gates, so the four benefit "
+                "categories are never summed."
+            ),
+            "sources": [
+                INPUT_FILES["w3_options"],
+                INPUT_FILES["w4_initiatives"],
+                INPUT_FILES["w4_gates"],
+                INPUT_FILES["w4_roadmap"],
+                INPUT_FILES["w4_kpis"],
+                INPUT_FILES["w4_benefits"],
+            ],
+            "boundary": (
+                "Analyst proposal pending client approval. Nothing here is "
+                "approved, funded, resourced, or authorized to execute, every "
+                "stage gate is open, and recognized value is $0."
+            ),
+            "next_action": (
+                "Confirm the direction, the named owners, and the Day 30/60/90 "
+                "evidence gates before any production or funding decision."
+            ),
+            "search_aliases": [
+                "roadmap", "initiatives", "stage gates", "gates", "kpi", "kpis",
+                "benefits", "recommendation", "options", "federated", "milestones",
+                "decision pack", "90 days",
             ],
         },
         "quality": {
@@ -1923,9 +2250,224 @@ def _build_definitions() -> Dict[str, Any]:
     }
 
 
+def _build_decision_pack(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
+    """Return the Week 3/4 decision, roadmap, KPI, and benefit contract.
+
+    Every element is an analyst proposal pending client approval.  The four
+    benefit categories are emitted as separate rows with an explicit
+    non-additive rule, and no total is calculated anywhere in this section.
+    """
+    options = frames["w3_options"].sort_values("option_order")
+    initiatives = frames["w4_initiatives"].sort_values("priority_rank")
+    gates = frames["w4_gates"]
+    roadmap = frames["w4_roadmap"]
+    kpis = frames["w4_kpis"]
+    benefits = frames["w4_benefits"]
+
+    option_rows = []
+    preferred_name = ""
+    fallback_name = ""
+    for _, row in options.iterrows():
+        key = str(row["option_id"])
+        is_preferred = str(row["provisional_preferred_option"]).lower() == "true"
+        option_rows.append(
+            {
+                "option_id": key,
+                "name": str(row["option_name"]),
+                "description": str(row["option_description"]),
+                "score": _as_float(
+                    row["base_weighted_score_0_to_100"], f"{key} option score"
+                ),
+                "rank": _as_int(row["base_rank"], f"{key} option rank"),
+                "preferred": is_preferred,
+                "sensitivity_wins": _as_int(
+                    row["sensitivity_wins"], f"{key} sensitivity wins"
+                ),
+                "sensitivity_scenarios": _as_int(
+                    row["sensitivity_scenarios"], f"{key} sensitivity scenarios"
+                ),
+                "switch_condition": str(row["switch_condition"]),
+                "recommendation_status": str(row["recommendation_status"]),
+            }
+        )
+        if is_preferred:
+            preferred_name = str(row["option_name"])
+        if key == "local_stabilization":
+            fallback_name = str(row["option_name"])
+
+    initiative_rows = [
+        {
+            "initiative_id": str(row["initiative_id"]),
+            "name": str(row["initiative_name"]),
+            "outcome": str(row["outcome"]),
+            "accountable_owner": str(row["accountable_owner"]),
+            "delivery_lead": str(row["delivery_lead"]),
+            "wave": str(row["wave"]),
+            "priority_score": _as_float(
+                row["weighted_priority_score_0_to_100"],
+                f"{row['initiative_id']} priority score",
+            ),
+            "priority_rank": _as_int(
+                row["priority_rank"], f"{row['initiative_id']} priority rank"
+            ),
+            "required_gates": _semicolon_list(row["required_gates"]),
+            "completion_evidence": str(row["completion_evidence"]),
+            "value_boundary": str(row["value_boundary"]),
+        }
+        for _, row in initiatives.iterrows()
+    ]
+
+    gate_rows = [
+        {
+            "gate_id": str(row["gate_id"]),
+            "timing": str(row["timing"]),
+            "name": str(row["gate_name"]),
+            "minimum_exit_evidence": str(row["minimum_exit_evidence"]),
+            "decision_owner": str(row["decision_owner"]),
+            "allowed_decision": str(row["allowed_decision"]),
+            "status": str(row["current_status"]),
+        }
+        for _, row in gates.iterrows()
+    ]
+
+    roadmap_rows = [
+        {
+            "milestone_id": str(row["milestone_id"]),
+            "phase": str(row["phase"]),
+            "timing": str(row["timing"]),
+            "scope_and_outcome": str(row["scope_and_outcome"]),
+            "exit_gate": str(row["exit_gate"]),
+            "linked_initiatives": _semicolon_list(row["linked_initiatives"]),
+            "status": str(row["status"]),
+        }
+        for _, row in roadmap.iterrows()
+    ]
+
+    # A baseline the evidence has not established is emitted as null, never as
+    # zero: "not established" and "measured zero" are different claims.
+    kpi_rows = []
+    for _, row in kpis.iterrows():
+        raw_baseline = str(row["current_baseline"]).strip()
+        established = raw_baseline.lower() not in {
+            "not available", "not tested", "not established",
+        }
+        kpi_rows.append(
+            {
+                "kpi_id": str(row["kpi_id"]),
+                "dimension": str(row["dimension"]),
+                "name": str(row["kpi_name"]),
+                "definition": str(row["definition_and_formula"]),
+                "unit": str(row["unit"]),
+                "baseline": raw_baseline if established else None,
+                "baseline_display": raw_baseline if established else "not_established",
+                "baseline_boundary": str(row["baseline_boundary"]),
+                "target_logic": str(row["target_logic"]),
+                "frequency": str(row["frequency"]),
+                "accountable_owner": str(row["accountable_owner"]),
+                "evidence_source": str(row["source_system_or_evidence"]),
+                "indicator_type": str(row["indicator_type"]),
+                "status": str(row["status"]),
+            }
+        )
+
+    benefit_rows = [
+        {
+            "benefit_id": str(row["benefit_id"]),
+            "value_category": str(row["value_category"]),
+            "diagnostic_quantity_name": str(row["diagnostic_quantity_name"]),
+            "diagnostic_quantity": str(row["diagnostic_quantity"]).strip(),
+            "diagnostic_unit": str(row["diagnostic_unit"]),
+            "validated_value_usd": _as_float(
+                row["validated_value_usd"], f"{row['benefit_id']} validated value"
+            ),
+            "funded_value_usd": _as_float(
+                row["funded_value_usd"], f"{row['benefit_id']} funded value"
+            ),
+            "recognized_value_usd": _as_float(
+                row["recognized_value_usd"], f"{row['benefit_id']} recognized value"
+            ),
+            "required_gates": str(row["required_gates"]),
+            "accountable_owner": str(row["accountable_owner"]),
+            "recognition_boundary": str(row["recognition_boundary"]),
+            "status": str(row["status"]),
+        }
+        for _, row in benefits.iterrows()
+    ]
+
+    return {
+        "status": "direction_proposed_no_execution_authority",
+        "decision_requested": (
+            "Authorize a 90-day evidence mobilization for a federated treasury "
+            "operating model"
+        ),
+        "recommended_direction": preferred_name,
+        "fallback_direction": fallback_name,
+        "authority_boundary": (
+            "Direction and evidence work only. This authorizes no production "
+            "change, funding, cash movement, account closure, labor removal, "
+            "procurement, benefit recognition, or scale."
+        ),
+        "options": {
+            "rows": option_rows,
+            "sensitivity_scenarios": 5,
+            "evidence_label": "ANALYST-JUDGMENT",
+            "decision_boundary": OPTION_BOUNDARY,
+        },
+        "initiatives": {
+            "count": len(initiative_rows),
+            "rows": initiative_rows,
+            "evidence_label": "ANALYST-JUDGMENT",
+            "decision_boundary": INITIATIVE_BOUNDARY,
+        },
+        "gates": {
+            "count": len(gate_rows),
+            "open_count": sum(1 for row in gate_rows if row["status"] == "OPEN"),
+            "passed_count": 0,
+            "rows": gate_rows,
+            "evidence_label": "ANALYST-JUDGMENT",
+            "decision_boundary": GATE_BOUNDARY,
+        },
+        "roadmap": {
+            "count": len(roadmap_rows),
+            "rows": roadmap_rows,
+            "evidence_label": "ANALYST-JUDGMENT",
+            "decision_boundary": ROADMAP_BOUNDARY,
+        },
+        "kpis": {
+            "count": len(kpi_rows),
+            "established_baselines": sum(
+                1 for row in kpi_rows if row["baseline"] is not None
+            ),
+            "rows": kpi_rows,
+            "evidence_label": (
+                "MIXED — ACG-DATA / ANALYST-CALC / ANALYST-JUDGMENT"
+            ),
+            "decision_boundary": KPI_BOUNDARY,
+        },
+        "benefits": {
+            "count": len(benefit_rows),
+            "rows": benefit_rows,
+            "recognized_value_usd": 0,
+            "aggregation_rule": "NON-ADDITIVE — do not sum categories",
+            "evidence_label": "ANALYST-JUDGMENT",
+            "decision_boundary": BENEFIT_BOUNDARY,
+        },
+        "source_artifacts": len(DECISION_INPUT_KEYS),
+        "model_version": W4_MODEL_VERSION,
+        "weight_lock_version": W3_WEIGHT_LOCK_VERSION,
+        "evidence_label": "ANALYST-JUDGMENT",
+        "decision_boundary": (
+            "Analyst proposal pending client approval; no element of this pack "
+            "is approved, funded, or authorized to execute"
+        ),
+    }
+
+
 def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
     """Return a deterministic JSON-ready dashboard contract without writing."""
     validate_dashboard_inputs(frames)
+
+    decision_pack = _build_decision_pack(frames)
 
     visibility = frames["visibility"]
     visibility_overall = _one_row(
@@ -2147,7 +2689,10 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
             "title": "Project Northstar — Treasury decision dashboard",
             "period_start": "2026-01-01",
             "period_end": "2026-06-30",
-            "scope": "Week 1–2 diagnostic snapshot; supplied data, not live operations",
+            "scope": (
+                "Weeks 1–4 final pack; Week 1–2 diagnostic evidence with the "
+                "Week 3–4 recommendation, supplied data, not live operations"
+            ),
             "status": "reconciled_to_supplied_controls_source_certification_open",
             "last_updated": DATA_RELEASE_DATE,
             # Filled in below once the payload is complete: a content fingerprint
@@ -2155,13 +2700,18 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
             "data_version": "",
         },
         "decision": {
-            "status": "validation_required",
-            "headline": "Design and test; do not fund or execute yet.",
+            "status": "direction_proposed_no_execution_authority",
+            "headline": (
+                "Authorize a 90-day evidence mobilization; do not fund or "
+                "execute yet."
+            ),
             "next_step": (
-                "Prioritize delayed reporting sources and payment root causes; "
-                "certify mobility before booking value."
+                "Adopt federated coordination as the direction with local "
+                "stabilization as the fallback, then close the Day 30, 60, and "
+                "90 evidence gates before any production or funding decision."
             ),
         },
+        "decision_pack": decision_pack,
         "quality": quality,
         "visibility": {
             "accounts_total": _as_int(
@@ -2263,7 +2813,13 @@ def build_dashboard_data(frames: Mapping[str, pd.DataFrame]) -> Dict[str, Any]:
         "filtering": filtering,
         "definitions": definitions,
         "sources": [
-            {"file": filename, "role": key}
+            {
+                "file": filename,
+                "role": key,
+                "stage": (
+                    "diagnostic" if key in DIAGNOSTIC_INPUT_KEYS else "decision"
+                ),
+            }
             for key, filename in INPUT_FILES.items()
         ],
     }

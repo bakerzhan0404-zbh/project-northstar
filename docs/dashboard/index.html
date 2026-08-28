@@ -212,10 +212,10 @@
             <div class="menu-decision-copy">
               <p class="menu-decision-eyebrow">
                 <span class="menu-decision-dot" aria-hidden="true"></span>
-                Primary recommendation · <span id="menu-decision-status">Validation required</span>
+                Primary recommendation · <span id="menu-decision-status">Loading…</span>
               </p>
-              <h2 id="menu-decision-headline">Design and test; do not fund or execute yet.</h2>
-              <p id="menu-decision-next">Prioritize delayed reporting sources and payment root causes; certify mobility before booking value.</p>
+              <h2 id="menu-decision-headline">Loading the governed recommendation…</h2>
+              <p id="menu-decision-next">Loading the governed next step…</p>
               <p id="menu-decision-confidence" class="menu-decision-confidence">Loading evidence-base strength…</p>
               <div class="menu-decision-actions">
                 <button id="start-guided-review" class="button button-primary" type="button" data-start-guided-review data-requires-data disabled>Start Guided Review</button>
@@ -263,6 +263,11 @@
                   <li>
                     <button type="button" data-select-dashboard-view="evidence" aria-controls="quality-view" data-requires-data disabled>
                       <span class="menu-index">06</span><span><strong>Data Quality &amp; Evidence</strong><small>Structural checks, reconciliation controls, source artifacts, and open certification limits.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button type="button" data-select-dashboard-view="roadmap" aria-controls="roadmap-view" data-requires-data disabled>
+                      <span class="menu-index">07</span><span><strong>Decision &amp; Roadmap</strong><small>Recommended direction, seven initiatives, stage gates, and the non-additive benefit ledger.</small></span><span class="menu-arrow" aria-hidden="true">→</span>
                     </button>
                   </li>
                 </ul>
@@ -335,7 +340,7 @@
             <summary data-detail-summary="decision">
               <span class="operation-kicker">Decision</span>
               <span class="operation-copy">
-                <strong id="decision-title">Design and test; do not fund or execute yet.</strong>
+                <strong id="decision-title">Loading the governed recommendation…</strong>
                 <span id="decision-support">Evidence is loading.</span>
               </span>
               <span class="operation-status decision-badge">Portfolio-wide · Validation required</span>
@@ -701,6 +706,93 @@
               </div>
             </div>
           </details>
+        </section>
+
+        <section id="roadmap-view" class="quality-view" aria-labelledby="roadmap-view-title" hidden>
+          <article class="quality-hero">
+            <div>
+              <p class="quality-eyebrow">Week 3–4 decision pack</p>
+              <h3 id="roadmap-view-title">Decision &amp; Roadmap</h3>
+              <p id="roadmap-decision-requested">Loading the requested decision…</p>
+            </div>
+            <p id="roadmap-authority" class="quality-certification">Loading the authority boundary.</p>
+          </article>
+
+          <div class="quality-control-grid" aria-label="Decision pack headline controls">
+            <article>
+              <span>Recommended direction</span>
+              <strong id="roadmap-direction">—</strong>
+              <small id="roadmap-fallback">Fallback pending</small>
+            </article>
+            <article>
+              <span>Stage gates</span>
+              <strong id="roadmap-gate-count">—</strong>
+              <small>None passed; none may be skipped</small>
+            </article>
+            <article>
+              <span>Recognized benefit value</span>
+              <strong id="roadmap-recognized">—</strong>
+              <small>Four categories, never summed</small>
+            </article>
+          </div>
+
+          <section class="quality-dimensions" aria-labelledby="roadmap-options-title">
+            <div class="quality-section-heading">
+              <div><span>Option comparison</span><h3 id="roadmap-options-title">Why federated coordination</h3></div>
+              <p id="roadmap-options-note">Design-selection scores only</p>
+            </div>
+            <div id="roadmap-option-list" class="quality-dimension-list"></div>
+          </section>
+
+          <section class="quality-dimensions" aria-labelledby="roadmap-initiatives-title">
+            <div class="quality-section-heading">
+              <div><span>Initiative portfolio</span><h3 id="roadmap-initiatives-title">Seven initiatives in priority order</h3></div>
+              <p id="roadmap-initiatives-note">Ranked by weighted priority score</p>
+            </div>
+            <div id="roadmap-initiative-list" class="quality-dimension-list"></div>
+          </section>
+
+          <section class="quality-dimensions" aria-labelledby="roadmap-benefits-title">
+            <div class="quality-section-heading">
+              <div><span>Benefit ledger</span><h3 id="roadmap-benefits-title">Four value types, four separate ledgers</h3></div>
+              <p id="roadmap-benefits-rule">NON-ADDITIVE</p>
+            </div>
+            <p id="roadmap-benefits-note" class="quality-coverage-note">A diagnostic quantity is a screen or an estimate. It is not validated, funded, or recognized value, and the categories use different units that cannot be added.</p>
+            <div id="roadmap-benefit-list" class="quality-dimension-list"></div>
+          </section>
+
+          <details id="roadmap-gates-disclosure" class="quality-support-disclosure">
+            <summary>
+              <span><strong>Stage gates G0–G6</strong><small id="roadmap-gates-summary">Loading gate status…</small></span>
+              <span class="quality-disclosure-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="quality-support-panel">
+              <div id="roadmap-gate-list" class="quality-issue-list"></div>
+            </div>
+          </details>
+
+          <details id="roadmap-milestones-disclosure" class="quality-support-disclosure">
+            <summary>
+              <span><strong>90-day and 18-month sequence</strong><small id="roadmap-milestones-summary">Loading milestones…</small></span>
+              <span class="quality-disclosure-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="quality-support-panel">
+              <div id="roadmap-milestone-list" class="quality-issue-list"></div>
+            </div>
+          </details>
+
+          <details id="roadmap-kpi-disclosure" class="quality-support-disclosure">
+            <summary>
+              <span><strong>KPI and benefits framework</strong><small id="roadmap-kpi-summary">Loading measures…</small></span>
+              <span class="quality-disclosure-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="quality-support-panel">
+              <p class="quality-issue-note">A baseline shown as <strong>not established</strong> has not met its evidence rule. That is not a measured value of zero.</p>
+              <div id="roadmap-kpi-list" class="quality-issue-list"></div>
+            </div>
+          </details>
+
+          <p id="roadmap-boundary" class="quality-boundary">Loading decision boundary…</p>
         </section>
 
         <section id="detail-pages" class="detail-pages" aria-labelledby="detail-page-title" hidden>

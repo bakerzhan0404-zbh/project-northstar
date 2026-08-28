@@ -4,6 +4,7 @@ import functools
 import hashlib
 import http.server
 import json
+import re
 import struct
 import subprocess
 import sys
@@ -262,7 +263,7 @@ class DashboardUiTest(unittest.TestCase):
         dimension_branch = choose_search.split('if (entry.kind === "dimension")', 1)[1]
         self.assertNotIn("activeDashboardView =", dimension_branch)
 
-    def test_menu_first_body_maps_six_views_to_seven_native_disclosures(self) -> None:
+    def test_menu_first_body_maps_seven_views_to_seven_native_disclosures(self) -> None:
         expected_mapping = {
             "decision": "executive",
             "visibility": "cash",
@@ -336,8 +337,9 @@ class DashboardUiTest(unittest.TestCase):
             "payments": "detail-payments",
             "workload": "detail-capacity",
             "evidence": "quality-view",
+            "roadmap": "roadmap-view",
         }
-        self.assertEqual(len(menu_buttons), 6)
+        self.assertEqual(len(menu_buttons), 7)
         self.assertEqual(
             {attrs["data-select-dashboard-view"]: attrs.get("aria-controls") for _, attrs in menu_buttons},
             expected_controls,
@@ -354,6 +356,7 @@ class DashboardUiTest(unittest.TestCase):
             "Payment Operations",
             "Process Workload",
             "Data Quality &amp; Evidence",
+            "Decision &amp; Roadmap",
         ):
             self.assertIn(label, self.index)
         for description in (
@@ -419,7 +422,7 @@ class DashboardUiTest(unittest.TestCase):
         self.assertNotIn("hidden", tags_by_id["dashboard-menu-hub"])
         self.assertNotIn("hidden", tags_by_id["menu-page"])
         self.assertEqual(
-            sum("data-select-dashboard-view" in attrs for _, attrs in self.parser.tags), 6
+            sum("data-select-dashboard-view" in attrs for _, attrs in self.parser.tags), 7
         )
 
         # Findings are declared portfolio-wide and never imply a composite score.
@@ -804,6 +807,165 @@ class DashboardUiTest(unittest.TestCase):
             self.script,
         )
         self.assertIn('id="dashboard-menu-title" tabindex="-1"', self.index)
+
+    def test_markup_never_hardcodes_a_recommendation(self) -> None:
+        """The decision is contract-driven; the markup must not assert one.
+
+        Static placeholder text is what a reader sees before the JSON loads,
+        with scripting disabled, and if the contract fails validation. A
+        hard-coded conclusion there can contradict the published pack, which is
+        exactly what happened when the dashboard advanced from Week 2 to Week 4.
+        """
+        # The superseded Week 2 stance must not survive anywhere in the shipped
+        # page or script.
+        self.assertNotIn("Design and test", self.index)
+        self.assertNotIn("Design and test", self.script)
+
+        # Neither headline element may ship with a sourced-looking claim.
+        for element_id in ("menu-decision-headline", "decision-title"):
+            match = re.search(
+                rf'id="{element_id}"[^>]*>([^<]*)<', self.index
+            )
+            self.assertIsNotNone(match, f"{element_id} is missing from the markup")
+            placeholder = match.group(1).strip()
+            self.assertNotIn(placeholder, self.payload["decision"]["headline"])
+            self.assertTrue(
+                placeholder.startswith("Loading"),
+                f"{element_id} placeholder must be neutral, found {placeholder!r}",
+            )
+
+        # Both are filled from the governed contract at render time.
+        self.assertIn(
+            'setText("#menu-decision-headline", dashboardData.decision.headline);',
+            self.script,
+        )
+        self.assertIn(
+            'setText("#decision-title", dashboardData.decision.headline);',
+            self.script,
+        )
+
+    def test_failed_validation_withdraws_the_recommendation(self) -> None:
+        """Fail-closed means the conclusion goes away, not just the numbers."""
+        failure = self.script[
+            self.script.index("function showDataFailure()"):
+        ]
+        failure = failure[: failure.index("\nfunction ")]
+
+        # Every element that carries the recommendation must be cleared.
+        for element_id in (
+            "menu-decision-status",
+            "menu-decision-headline",
+            "menu-decision-next",
+            "menu-decision-confidence",
+            "decision-title",
+            "decision-support",
+        ):
+            self.assertIn(f'setText("#{element_id}"', failure)
+
+        self.assertIn("No recommendation published.", failure)
+        # The failure path must not name a superseded scope.
+        self.assertNotIn("Week 1–2 diagnostic snapshot", failure)
+
+    def test_roadmap_view_publishes_the_decision_pack(self) -> None:
+        pack = self.payload["decision_pack"]
+
+        # The view is registered as a landing page, not an accordion of topics.
+        self.assertIn('roadmap: Object.freeze({', self.script)
+        self.assertIn('label: "Decision & Roadmap"', self.script)
+        self.assertIn('applicability: "Analyst proposal · filters do not apply"', self.script)
+        self.assertIn('data-select-dashboard-view="roadmap"', self.index)
+        self.assertIn('id="roadmap-view"', self.index)
+
+        # Every region the renderer fills must exist in the markup.
+        for element_id in (
+            "roadmap-decision-requested", "roadmap-authority", "roadmap-direction",
+            "roadmap-fallback", "roadmap-gate-count", "roadmap-recognized",
+            "roadmap-option-list", "roadmap-initiative-list", "roadmap-benefit-list",
+            "roadmap-gate-list", "roadmap-milestone-list", "roadmap-kpi-list",
+            "roadmap-boundary",
+        ):
+            self.assertIn(f'id="{element_id}"', self.index)
+
+        # It is hidden until chosen, like every other view.
+        tags_by_id = {
+            attrs["id"]: attrs for _, attrs in self.parser.tags if "id" in attrs
+        }
+        self.assertIn("hidden", tags_by_id["roadmap-view"])
+
+        # The landing states the boundary rather than implying authority.
+        self.assertEqual(pack["status"], "direction_proposed_no_execution_authority")
+        self.assertIn("no production change", pack["authority_boundary"])
+        self.assertIn("roadmap", self.payload["definitions"])
+        self.assertTrue(self.payload["definitions"]["roadmap"]["boundary"])
+
+        # The decision headline is the Week 4 recommendation, not the Week 2 stance.
+        self.assertIn("90-day evidence mobilization", self.payload["decision"]["headline"])
+        self.assertNotIn("Design and test", self.payload["decision"]["headline"])
+
+    def test_governed_sources_separate_measured_data_from_design_artifacts(self) -> None:
+        sources = self.payload["sources"]
+        stages = [source["stage"] for source in sources]
+
+        self.assertEqual(len(sources), 18)
+        self.assertEqual(stages.count("diagnostic"), 12)
+        self.assertEqual(stages.count("decision"), 6)
+        # The data-quality tile counts measured evidence only: Week 3/4 design
+        # files never passed the Week 1 checks or Week 2 reconciliation, so
+        # counting them there would overstate the evidence base.
+        self.assertEqual(self.payload["quality"]["source_artifacts"], 12)
+        self.assertEqual(self.payload["decision_pack"]["source_artifacts"], 6)
+        self.assertTrue(all(
+            source["stage"] == "decision"
+            for source in sources
+            if source["file"].startswith(("W3_", "W4_"))
+        ))
+
+    def test_decision_pack_validation_fails_closed(self) -> None:
+        node_script = """
+const fs = require('node:fs');
+const { assertDashboardData } = require('./docs/dashboard/app.js');
+const base = JSON.parse(fs.readFileSync('./docs/dashboard/dashboard_data.json', 'utf8'));
+assertDashboardData(base);
+const clone = () => JSON.parse(JSON.stringify(base));
+const mutations = [
+  data => { delete data.decision_pack; },
+  data => { data.decision_pack.status = 'approved_for_execution'; },
+  data => { data.decision_pack.benefits.rows[0].recognized_value_usd = 35000000; },
+  data => { data.decision_pack.benefits.rows[1].validated_value_usd = 7800; },
+  data => { data.decision_pack.benefits.rows[2].funded_value_usd = 1; },
+  data => { data.decision_pack.benefits.recognized_value_usd = 1; },
+  data => { data.decision_pack.benefits.aggregation_rule = 'Total benefit'; },
+  data => { data.decision_pack.benefits.rows.pop(); },
+  data => { data.decision_pack.gates.rows[0].status = 'PASSED'; },
+  data => { data.decision_pack.gates.passed_count = 3; },
+  data => { data.decision_pack.gates.rows.pop(); },
+  data => { data.decision_pack.options.rows[0].preferred = true; },
+  data => { data.decision_pack.options.rows.pop(); },
+  data => { data.decision_pack.options.decision_boundary = ''; },
+  data => { data.decision_pack.initiatives.rows.pop(); },
+  data => { data.decision_pack.initiatives.rows[1].priority_rank = 1; },
+  data => { data.decision_pack.roadmap.rows.pop(); },
+  data => { data.decision_pack.kpis.rows.pop(); },
+  data => { data.decision_pack.kpis.rows.find(row => row.baseline === null).baseline = 0; },
+];
+let rejected = 0;
+for (const mutate of mutations) {
+  const data = clone();
+  mutate(data);
+  try { assertDashboardData(data); } catch { rejected += 1; }
+}
+process.stdout.write(JSON.stringify({ rejected, total: mutations.length }));
+"""
+        completed = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        result = json.loads(completed.stdout)
+        self.assertEqual(result["rejected"], result["total"])
+        self.assertEqual(result["total"], 19)
 
     def test_quality_contract_validation_fails_closed_on_incomplete_evidence(self) -> None:
         node_script = """
@@ -1301,7 +1463,6 @@ process.stdout.write(JSON.stringify({
         combined = "\n".join((self.index, self.script))
         required = (
             "supplied data, not live operations",
-            "Design and test; do not fund or execute yet.",
             "Reporting-date proxy—not start-of-day or elapsed-24-hour performance.",
             "Validated mobility: not established by supplied data.",
             "screening sensitivity—not surplus cash or transfer authorization.",
@@ -1313,6 +1474,16 @@ process.stdout.write(JSON.stringify({
         )
         for phrase in required:
             self.assertIn(phrase, combined)
+
+        # The recommendation itself is contract-driven, not markup, so its
+        # caution is asserted against the published decision rather than the
+        # static files. It must still refuse funding and execution.
+        headline = self.payload["decision"]["headline"]
+        self.assertIn("do not fund or execute yet", headline)
+        self.assertEqual(
+            self.payload["decision"]["status"],
+            "direction_proposed_no_execution_authority",
+        )
 
     def test_csv_derived_content_is_not_injected_as_html(self) -> None:
         prohibited = ("innerHTML", "outerHTML", "insertAdjacentHTML")

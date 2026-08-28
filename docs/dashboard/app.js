@@ -161,6 +161,12 @@ const DASHBOARD_VIEWS = Object.freeze({
     description: "Structural checks, reconciliation controls, source artifacts, and open certification limits.",
     topics: Object.freeze([]),
   }),
+  roadmap: Object.freeze({
+    label: "Decision & Roadmap",
+    applicability: "Analyst proposal · filters do not apply",
+    description: "Recommended direction, seven initiatives, stage gates, and the non-additive benefit ledger.",
+    topics: Object.freeze([]),
+  }),
 });
 const TOPIC_DASHBOARD_VIEW = Object.freeze(Object.fromEntries(
   Object.entries(DASHBOARD_VIEWS).flatMap(([view, config]) => config.topics.map((topic) => [topic, view])),
@@ -301,7 +307,7 @@ function collapseNestedDetails() {
 }
 
 function collapseQualityDisclosures() {
-  getAll("#quality-view details").forEach((detail) => {
+  getAll("#quality-view details, #roadmap-view details").forEach((detail) => {
     detail.open = false;
   });
 }
@@ -333,8 +339,15 @@ function syncDashboardViewVisibility() {
     node.hidden = !dashboardData;
   });
   if (selectedHeader) selectedHeader.hidden = !activeConfig || detailPageOpen;
-  if (signals) signals.hidden = !activeConfig || activeView === "evidence" || detailPageOpen;
+  const roadmapView = get("#roadmap-view");
+  if (signals) {
+    signals.hidden = !activeConfig
+      || activeView === "evidence"
+      || activeView === "roadmap"
+      || detailPageOpen;
+  }
   if (qualityView) qualityView.hidden = activeView !== "evidence" || detailPageOpen;
+  if (roadmapView) roadmapView.hidden = activeView !== "roadmap" || detailPageOpen;
   if (filterToolbar) {
     filterToolbar.hidden = !dashboardData;
   }
@@ -376,9 +389,15 @@ function selectDashboardView(view, { focus = true, announceSelection = true } = 
   updateResetState();
   if (focus) window.requestAnimationFrame(() => get("#selected-view-title").focus());
   if (announceSelection) {
-    announce(view === "evidence"
-      ? "Data Quality & Evidence view shown. Governed evidence landing displayed."
-      : `${DASHBOARD_VIEWS[view].label} view shown. All sections are collapsed.`);
+    let announcement;
+    if (view === "evidence") {
+      announcement = "Data Quality & Evidence view shown. Governed evidence landing displayed.";
+    } else if (view === "roadmap") {
+      announcement = "Decision & Roadmap view shown. Analyst proposal; no element is approved or funded.";
+    } else {
+      announcement = `${DASHBOARD_VIEWS[view].label} view shown. All sections are collapsed.`;
+    }
+    announce(announcement);
   }
   return true;
 }
@@ -526,6 +545,7 @@ function assertDashboardData(data) {
     "payments",
     "quality",
     "guardrails",
+    "decision_pack",
     "sources",
     "filtering",
     "definitions",
@@ -545,6 +565,57 @@ function assertDashboardData(data) {
   }
   if (data.liquidity.funded_case.value_usd !== 0 || data.liquidity.funded_case.status !== "not_fundable") {
     throw new Error("Liquidity funded case is not fail-closed");
+  }
+  const pack = data.decision_pack;
+  const packSections = ["options", "initiatives", "gates", "roadmap", "kpis", "benefits"];
+  for (const section of packSections) {
+    if (!pack[section] || !Array.isArray(pack[section].rows)) {
+      throw new Error(`Decision pack section is malformed: ${section}`);
+    }
+    if (typeof pack[section].decision_boundary !== "string" || !pack[section].decision_boundary.trim()) {
+      throw new Error(`Decision pack section has no boundary: ${section}`);
+    }
+  }
+  if (pack.status !== "direction_proposed_no_execution_authority") {
+    throw new Error("Decision pack must not claim execution authority");
+  }
+  if (pack.options.rows.length !== 3 || pack.options.rows.filter((row) => row.preferred).length !== 1) {
+    throw new Error("Exactly one of three options must be preferred");
+  }
+  if (pack.initiatives.rows.length !== 7 || pack.initiatives.count !== 7) {
+    throw new Error("Initiative portfolio must contain seven initiatives");
+  }
+  const ranks = pack.initiatives.rows.map((row) => row.priority_rank).sort((a, b) => a - b);
+  if (ranks.join(",") !== "1,2,3,4,5,6,7") {
+    throw new Error("Initiative priority ranks must be 1-7 without ties");
+  }
+  if (pack.gates.rows.length !== 7 || pack.gates.passed_count !== 0) {
+    throw new Error("Stage gates must be seven and none may be recorded as passed");
+  }
+  if (!pack.gates.rows.every((row) => row.status === "OPEN")) {
+    throw new Error("Every stage gate must remain open");
+  }
+  if (pack.roadmap.rows.length !== 6) {
+    throw new Error("Roadmap must contain six milestones");
+  }
+  if (pack.kpis.rows.length !== 14) {
+    throw new Error("KPI framework must contain fourteen measures");
+  }
+  // A baseline that has not met its evidence rule must stay null, never 0:
+  // "not established" and "measured zero" are different claims.
+  if (!pack.kpis.rows.every((row) => row.baseline === null || typeof row.baseline === "string")) {
+    throw new Error("KPI baselines must be a string or null");
+  }
+  if (pack.benefits.rows.length !== 4 || pack.benefits.recognized_value_usd !== 0) {
+    throw new Error("Benefit ledger must hold four categories at zero recognized value");
+  }
+  if (!pack.benefits.rows.every((row) => row.validated_value_usd === 0
+    && row.funded_value_usd === 0
+    && row.recognized_value_usd === 0)) {
+    throw new Error("No benefit category may record validated, funded, or recognized value");
+  }
+  if (!/^NON-ADDITIVE/.test(String(pack.benefits.aggregation_rule))) {
+    throw new Error("Benefit categories must be declared non-additive");
   }
   const quality = data.quality;
   const populationControls = Array.isArray(quality.population_controls) ? quality.population_controls : [];
@@ -576,8 +647,8 @@ function assertDashboardData(data) {
     || !validPopulationControls
     || quality.source_artifacts !== 12
     || !Array.isArray(data.sources)
-    || data.sources.length !== 12
-    || quality.source_artifacts !== data.sources.length
+    || data.sources.length !== 18
+    || quality.source_artifacts !== data.sources.filter((source) => source && source.stage === "diagnostic").length
     || quality.w1_checks.label !== "Week 1 structural checks"
     || quality.w1_checks.passed !== 52
     || quality.w1_checks.total !== 52
@@ -602,8 +673,16 @@ function showDataFailure() {
   clearVisualizationOutputs();
   closeSearch();
   closeFilterPanel({ restoreFocus: false });
-  setText("#dashboard-scope", "Week 1–2 diagnostic snapshot · supplied data unavailable");
+  setText("#dashboard-scope", "Supplied data unavailable · validation did not complete");
   setText("#data-status", "Unavailable — validation failed");
+  // A page that cannot validate its contract must not keep asserting a
+  // recommendation. Remove the decision before anything else is cleared.
+  setText("#menu-decision-status", "Unavailable");
+  setText("#menu-decision-headline", "No recommendation published.");
+  setText("#menu-decision-next", "The governed contract did not validate, so no next step is shown.");
+  setText("#menu-decision-confidence", "No evidence base published.");
+  setText("#decision-title", "No recommendation published.");
+  setText("#decision-support", "The governed contract did not validate.");
   ["#visibility-kpi", "#funded-case-value", "#payment-kpi", "#regional-kpi"].forEach((selector) => setText(selector, "Unavailable"));
   setText("#mobility-status", "No current result published.");
   setText("#liquidity-boundary", "Data unavailable — validation did not complete.");
@@ -1156,6 +1235,176 @@ function renderQualityLanding() {
     );
     population.append(item);
   });
+}
+
+function roadmapRow(titleText, metaText, cards, { statusText = "", statusKey = "" } = {}) {
+  const detail = make("details", "quality-dimension");
+  const summary = make("summary");
+  const title = make("span", "quality-dimension-title");
+  title.append(make("strong", "", titleText), make("small", "", metaText));
+  summary.append(title);
+  if (statusText) {
+    const status = make("span", "quality-status", statusText);
+    if (statusKey) status.dataset.qualityStatus = statusKey;
+    summary.append(status);
+  }
+  summary.append(qualityChevron());
+  const panel = make("div", "quality-dimension-panel");
+  const grid = make("div", "quality-evidence-grid");
+  cards.forEach(([label, content, extra]) => {
+    if (content === undefined || content === null || content === "") return;
+    grid.append(qualityDetailCard(label, content, extra || ""));
+  });
+  panel.append(grid);
+  detail.append(summary, panel);
+  detail.addEventListener("toggle", () => {
+    const parentId = detail.parentElement && detail.parentElement.id;
+    if (detail.open && parentId) closeQualityGroup(`#${parentId}`, detail);
+    updateResetState();
+  });
+  return detail;
+}
+
+function renderRoadmapLanding() {
+  if (!dashboardData || !dashboardData.decision_pack) return;
+  const pack = dashboardData.decision_pack;
+
+  setText("#roadmap-decision-requested", pack.decision_requested);
+  setText("#roadmap-authority", pack.authority_boundary);
+  setText("#roadmap-direction", pack.recommended_direction);
+  setText("#roadmap-fallback", `Fallback: ${pack.fallback_direction}`);
+  setText(
+    "#roadmap-gate-count",
+    `${formatNumber(pack.gates.open_count)} of ${formatNumber(pack.gates.count)} open`,
+  );
+  setText("#roadmap-recognized", formatUsdCompact(pack.benefits.recognized_value_usd));
+  setText("#roadmap-boundary", pack.decision_boundary);
+  setText("#roadmap-options-note", pack.options.decision_boundary);
+  setText("#roadmap-initiatives-note", pack.initiatives.decision_boundary);
+  setText("#roadmap-benefits-rule", pack.benefits.aggregation_rule);
+  setText(
+    "#roadmap-gates-summary",
+    `${formatNumber(pack.gates.count)} gates · ${formatNumber(pack.gates.passed_count)} passed · ${pack.gates.decision_boundary}`,
+  );
+  setText(
+    "#roadmap-milestones-summary",
+    `${formatNumber(pack.roadmap.count)} milestones · ${pack.roadmap.decision_boundary}`,
+  );
+  setText(
+    "#roadmap-kpi-summary",
+    `${formatNumber(pack.kpis.count)} measures · ${formatNumber(pack.kpis.established_baselines)} with an established baseline`,
+  );
+
+  const optionList = get("#roadmap-option-list");
+  if (optionList && !optionList.childElementCount) {
+    pack.options.rows.forEach((option) => {
+      optionList.append(roadmapRow(
+        option.name,
+        `Score ${formatNumber(option.score)} · rank ${formatNumber(option.rank)} · led ${formatNumber(option.sensitivity_wins)} of ${formatNumber(option.sensitivity_scenarios)} weightings`,
+        [
+          ["What it is", option.description],
+          ["Recommendation status", option.recommendation_status],
+          ["Switch condition", option.switch_condition, "quality-detail-boundary"],
+        ],
+        {
+          statusText: option.preferred ? "Preferred" : "Alternative",
+          statusKey: option.preferred ? "measured" : "documented",
+        },
+      ));
+    });
+  }
+
+  const initiativeList = get("#roadmap-initiative-list");
+  if (initiativeList && !initiativeList.childElementCount) {
+    pack.initiatives.rows.forEach((initiative) => {
+      initiativeList.append(roadmapRow(
+        `${initiative.priority_rank}. ${initiative.name}`,
+        `${initiative.initiative_id} · priority ${formatNumber(initiative.priority_score)} · ${initiative.wave}`,
+        [
+          ["Outcome", initiative.outcome],
+          ["Accountable owner", initiative.accountable_owner],
+          ["Delivery lead", initiative.delivery_lead],
+          ["Required gates", initiative.required_gates.join(", ")],
+          ["Completion evidence", initiative.completion_evidence],
+          ["Value boundary", initiative.value_boundary, "quality-detail-boundary"],
+        ],
+      ));
+    });
+  }
+
+  const benefitList = get("#roadmap-benefit-list");
+  if (benefitList && !benefitList.childElementCount) {
+    pack.benefits.rows.forEach((benefit) => {
+      benefitList.append(roadmapRow(
+        benefit.value_category,
+        `Diagnostic quantity ${benefit.diagnostic_quantity} ${benefit.diagnostic_unit} · recognized ${formatUsdCompact(benefit.recognized_value_usd)}`,
+        [
+          ["Diagnostic quantity", `${benefit.diagnostic_quantity_name}: ${benefit.diagnostic_quantity} ${benefit.diagnostic_unit}`],
+          ["Validated value", formatUsdCompact(benefit.validated_value_usd)],
+          ["Funded value", formatUsdCompact(benefit.funded_value_usd)],
+          ["Recognized value", formatUsdCompact(benefit.recognized_value_usd)],
+          ["Required value gates", benefit.required_gates],
+          ["Accountable owner", benefit.accountable_owner],
+          ["Recognition boundary", benefit.recognition_boundary, "quality-detail-boundary"],
+        ],
+        { statusText: "Open", statusKey: "documented" },
+      ));
+    });
+  }
+
+  const gateList = get("#roadmap-gate-list");
+  if (gateList && !gateList.childElementCount) {
+    pack.gates.rows.forEach((gate) => {
+      gateList.append(roadmapRow(
+        `${gate.gate_id} — ${gate.name}`,
+        `${gate.timing} · ${gate.decision_owner}`,
+        [
+          ["Minimum exit evidence", gate.minimum_exit_evidence],
+          ["Allowed decision", gate.allowed_decision],
+        ],
+        { statusText: gate.status, statusKey: "documented" },
+      ));
+    });
+  }
+
+  const milestoneList = get("#roadmap-milestone-list");
+  if (milestoneList && !milestoneList.childElementCount) {
+    pack.roadmap.rows.forEach((milestone) => {
+      milestoneList.append(roadmapRow(
+        `${milestone.phase} — ${milestone.timing}`,
+        `${milestone.milestone_id} · exits at ${milestone.exit_gate} · ${milestone.linked_initiatives.length} initiatives`,
+        [
+          ["Scope and outcome", milestone.scope_and_outcome],
+          ["Linked initiatives", milestone.linked_initiatives.join(", ")],
+          ["Status", milestone.status, "quality-detail-boundary"],
+        ],
+      ));
+    });
+  }
+
+  const kpiList = get("#roadmap-kpi-list");
+  if (kpiList && !kpiList.childElementCount) {
+    pack.kpis.rows.forEach((kpi) => {
+      const established = kpi.baseline !== null && kpi.baseline !== undefined;
+      kpiList.append(roadmapRow(
+        kpi.name,
+        `${kpi.kpi_id} · ${kpi.dimension} · baseline ${established ? `${kpi.baseline} ${kpi.unit}` : "not established"}`,
+        [
+          ["Definition and formula", kpi.definition],
+          ["Baseline", established ? `${kpi.baseline} ${kpi.unit}` : "Not established — the evidence rule has not been met. This is not a measured zero."],
+          ["Baseline boundary", kpi.baseline_boundary, "quality-detail-boundary"],
+          ["Target logic", kpi.target_logic],
+          ["Frequency", kpi.frequency],
+          ["Accountable owner", kpi.accountable_owner],
+          ["Evidence source", kpi.evidence_source],
+        ],
+        {
+          statusText: established ? "Baselined" : "Not established",
+          statusKey: established ? "measured" : "documented",
+        },
+      ));
+    });
+  }
 }
 
 function renderFilterChrome() {
@@ -3575,6 +3824,7 @@ function renderAll() {
   renderHeader();
   renderMenuFindings();
   renderQualityLanding();
+  renderRoadmapLanding();
   renderFilterChrome();
   renderVisibility();
   renderLiquidity();

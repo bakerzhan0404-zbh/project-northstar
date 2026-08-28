@@ -1,6 +1,6 @@
 # Interactive Dashboard V2
 
-This dashboard turns the concise Figma V2 design into a data-connected diagnostic experience. It reads one governed JSON contract generated from the committed Week 1 and Week 2 processed outputs, including validated account-day and payment facts for filtering.
+This dashboard turns the concise Figma V2 design into a data-connected diagnostic experience. It reads one governed JSON contract generated from the committed Week 1 and Week 2 processed outputs, including validated account-day and payment facts for filtering, plus the Week 3 option comparison and Week 4 execution plan behind the final recommendation.
 
 ## Live dashboard
 
@@ -20,6 +20,17 @@ python3 -m http.server 8000 --bind 127.0.0.1
 Open `http://127.0.0.1:8000/docs/dashboard/`.
 
 The published site is a static snapshot of this folder: pure HTML, CSS, and JavaScript reading one pre-generated JSON file, with no backend, no build step, and no live connection to any operational system.
+
+## Two evidence stages, counted separately
+
+The contract carries eighteen governed inputs, split by what kind of evidence they are:
+
+| Stage | Inputs | What it means |
+|---|---:|---|
+| `diagnostic` | 12 | Measured ACG data that passed the Week 1 structural checks and Week 2 reconciliation controls |
+| `decision` | 6 | Week 3–4 analyst design artifacts — version-locked and governed, but not measured data |
+
+The Data Quality & Evidence tile counts the twelve diagnostic artifacts only. The Week 3–4 planning files never went through the Week 1 checks or Week 2 reconciliation, so counting them there would imply they carry the same evidential weight as measured data. `validate_dashboard_inputs` fails closed if any input is added without declaring its stage.
 
 ## Traceability and export
 
@@ -97,6 +108,7 @@ Search, filters, the applied-scope summary, and the Metric guide remain availabl
 | Payment Operations | Deduplicated cohorts, exceptions, and repair time | Payment friction | `Date + dimensions` |
 | Process Workload | Independent management and payment-file workload estimates | Capacity evidence | `Global · filters do not apply` |
 | Data Quality & Evidence | Structural checks, controls, governed sources, and certification limits | Governed quality-evidence landing | `Governed contract · filters do not apply` |
+| Decision & Roadmap | Recommended direction, initiative portfolio, stage gates, milestones, KPIs, and the benefit ledger | Week 3–4 decision landing | `Analyst proposal · filters do not apply` |
 
 A normal menu selection reveals only the mapped content and leaves every analytical section collapsed. Metric search may route directly to a view and open one matching section. Switching views collapses the previous section, while filters and the liquidity/payment control choices remain applied.
 
@@ -116,6 +128,7 @@ Reference-inspired visuals appear only after a view is selected and an analytica
 | Capacity evidence | Two shared-scale comparison bars | The bars compare the management process estimate with the supplied payment-file monthly average without adding them or presenting either as removable labor or cashable savings. |
 | Closure evidence | A row-level candidate table | Account, entity, bank, account currency, USD fee estimate, candidate rule, and validation status stay together so every row reads as a validation candidate—not an approved closure. |
 | Data Quality & Evidence | Contract status, seven evidence dimensions, a baseline-only monitoring state, population provenance, and a 15-item validation queue | Closed dimension rows keep the landing concise; opening one reveals its definition, grain, rule coverage, evidence limit, proposed owner, source, and next action without inventing a pass-rate score. |
+| Decision & Roadmap | Three scored options with one preferred, seven ranked initiatives, seven open stage gates, six milestones, fourteen KPIs, and four benefit categories | Each record keeps its own owner, evidence, and boundary. Nothing is totalled: the four benefit categories use different units and separate recognition gates, so the page shows them side by side at `$0` recognized rather than as a benefit figure. |
 
 ### Data Quality & Evidence
 

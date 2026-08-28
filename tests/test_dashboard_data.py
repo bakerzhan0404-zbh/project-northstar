@@ -13,6 +13,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from build_dashboard_data import (  # noqa: E402
     DashboardDataError,
+    DECISION_INPUT_KEYS,
+    DIAGNOSTIC_INPUT_KEYS,
     INPUT_FILES,
     build_dashboard_data,
     load_dashboard_inputs,
@@ -124,7 +126,11 @@ class DashboardDataTest(unittest.TestCase):
                 "label": "Week 2 reconciliation controls",
             },
         )
-        self.assertEqual(quality["source_artifacts"], len(INPUT_FILES))
+        # Diagnostic artifacts only: Week 3/4 design files are governed, but
+        # they are not measured data and must not inflate this count.
+        self.assertEqual(quality["source_artifacts"], len(DIAGNOSTIC_INPUT_KEYS))
+        self.assertEqual(quality["source_artifacts"], 12)
+        self.assertLess(quality["source_artifacts"], len(INPUT_FILES))
         self.assertEqual(
             [(row["key"], row["value"]) for row in quality["population_controls"]],
             [
@@ -332,6 +338,7 @@ class DashboardDataTest(unittest.TestCase):
                 "payments",
                 "regions",
                 "gates",
+                "roadmap",
             },
         )
         required = {
@@ -356,6 +363,128 @@ class DashboardDataTest(unittest.TestCase):
         second = build_dashboard_data(self.frames)
         self.assertEqual(first, second)
         self.assertEqual(output.exists(), existed_before)
+
+    def test_decision_pack_publishes_the_week_four_execution_plan(self) -> None:
+        pack = build_dashboard_data(self.frames)["decision_pack"]
+
+        self.assertEqual(pack["status"], "direction_proposed_no_execution_authority")
+        self.assertEqual(pack["recommended_direction"], "Federated coordination")
+        self.assertEqual(pack["fallback_direction"], "Local stabilization")
+        self.assertEqual(pack["source_artifacts"], 6)
+
+        # Exactly one preferred option, and it led every weighting.
+        options = {row["option_id"]: row for row in pack["options"]["rows"]}
+        self.assertEqual(len(options), 3)
+        self.assertEqual(
+            [row["option_id"] for row in pack["options"]["rows"] if row["preferred"]],
+            ["federated_coordination"],
+        )
+        self.assertEqual(options["federated_coordination"]["score"], 87.0)
+        self.assertEqual(options["local_stabilization"]["score"], 72.0)
+        self.assertEqual(options["globally_coordinated"]["score"], 60.0)
+        self.assertEqual(options["federated_coordination"]["sensitivity_wins"], 5)
+        self.assertEqual(options["federated_coordination"]["sensitivity_scenarios"], 5)
+
+        # Seven initiatives, ranked without ties, in descending score order.
+        initiatives = pack["initiatives"]["rows"]
+        self.assertEqual(pack["initiatives"]["count"], 7)
+        self.assertEqual([row["priority_rank"] for row in initiatives], list(range(1, 8)))
+        self.assertEqual(
+            [row["initiative_id"] for row in initiatives],
+            ["I01", "I07", "I06", "I03", "I02", "I05", "I04"],
+        )
+        self.assertEqual(initiatives[0]["priority_score"], 94.0)
+        self.assertEqual(initiatives[-1]["priority_score"], 63.0)
+
+        # Every gate is open and none is recorded as passed.
+        gates = pack["gates"]
+        self.assertEqual([row["gate_id"] for row in gates["rows"]],
+                         ["G0", "G1", "G2", "G3", "G4", "G5", "G6"])
+        self.assertEqual(gates["open_count"], 7)
+        self.assertEqual(gates["passed_count"], 0)
+        self.assertTrue(all(row["status"] == "OPEN" for row in gates["rows"]))
+
+        self.assertEqual(pack["roadmap"]["count"], 6)
+        self.assertEqual(
+            [row["exit_gate"] for row in pack["roadmap"]["rows"]],
+            ["G1", "G2", "G3", "G4", "G5", "G6"],
+        )
+
+    def test_decision_pack_keeps_value_unrecognized_and_non_additive(self) -> None:
+        pack = build_dashboard_data(self.frames)["decision_pack"]
+        benefits = pack["benefits"]
+
+        self.assertEqual(benefits["count"], 4)
+        self.assertEqual(benefits["recognized_value_usd"], 0)
+        self.assertTrue(benefits["aggregation_rule"].startswith("NON-ADDITIVE"))
+        self.assertEqual(
+            [row["value_category"] for row in benefits["rows"]],
+            ["Cash release", "Annual P&L", "Capacity", "Risk reduction"],
+        )
+        # The central claim of the pack: a diagnostic quantity is not value.
+        for row in benefits["rows"]:
+            self.assertEqual(row["validated_value_usd"], 0)
+            self.assertEqual(row["funded_value_usd"], 0)
+            self.assertEqual(row["recognized_value_usd"], 0)
+            self.assertTrue(row["recognition_boundary"])
+
+    def test_kpi_baselines_separate_not_established_from_zero(self) -> None:
+        pack = build_dashboard_data(self.frames)["decision_pack"]
+        kpis = {row["kpi_id"]: row for row in pack["kpis"]["rows"]}
+
+        self.assertEqual(pack["kpis"]["count"], 14)
+        # Measured baselines stay tied to the published diagnostic numbers.
+        self.assertEqual(kpis["K01"]["baseline"], "58.18")
+        self.assertEqual(kpis["K05"]["baseline"], "31.51")
+        self.assertEqual(kpis["K06"]["baseline"], "6.30")
+        # An unmet evidence rule is null and labelled, never a numeric zero.
+        for kpi_id in ("K03", "K08", "K10", "K13"):
+            self.assertIsNone(kpis[kpi_id]["baseline"])
+            self.assertEqual(kpis[kpi_id]["baseline_display"], "not_established")
+        self.assertEqual(pack["kpis"]["established_baselines"], 10)
+        self.assertNotIn(0, [row["baseline"] for row in pack["kpis"]["rows"]])
+
+    def test_recognized_benefit_value_fails_closed(self) -> None:
+        frames = copy.deepcopy(self.frames)
+        mask = frames["w4_benefits"]["benefit_id"].eq("B01")
+        frames["w4_benefits"].loc[mask, "recognized_value_usd"] = 35_000_000
+        with self.assertRaisesRegex(DashboardDataError, "B01 recognized_value_usd"):
+            build_dashboard_data(frames)
+
+    def test_passed_stage_gate_fails_closed(self) -> None:
+        frames = copy.deepcopy(self.frames)
+        mask = frames["w4_gates"]["gate_id"].eq("G1")
+        frames["w4_gates"].loc[mask, "current_status"] = "PASSED"
+        with self.assertRaisesRegex(DashboardDataError, "G1 status"):
+            build_dashboard_data(frames)
+
+    def test_changed_initiative_priority_fails_closed(self) -> None:
+        frames = copy.deepcopy(self.frames)
+        mask = frames["w4_initiatives"]["initiative_id"].eq("I04")
+        frames["w4_initiatives"].loc[mask, "weighted_priority_score_0_to_100"] = 99
+        with self.assertRaisesRegex(DashboardDataError, "I04 priority score"):
+            build_dashboard_data(frames)
+
+    def test_second_preferred_option_fails_closed(self) -> None:
+        frames = copy.deepcopy(self.frames)
+        mask = frames["w3_options"]["option_id"].eq("globally_coordinated")
+        frames["w3_options"].loc[mask, "provisional_preferred_option"] = True
+        with self.assertRaisesRegex(DashboardDataError, "Exactly one option must be preferred"):
+            build_dashboard_data(frames)
+
+    def test_kpi_baseline_drift_from_the_diagnostic_fails_closed(self) -> None:
+        frames = copy.deepcopy(self.frames)
+        mask = frames["w4_kpis"]["kpi_id"].eq("K01")
+        frames["w4_kpis"].loc[mask, "current_baseline"] = "90.00"
+        with self.assertRaisesRegex(DashboardDataError, "K01 baseline must stay tied"):
+            build_dashboard_data(frames)
+
+    def test_milestone_referencing_unknown_initiative_fails_closed(self) -> None:
+        frames = copy.deepcopy(self.frames)
+        mask = frames["w4_roadmap"]["milestone_id"].eq("M01")
+        frames["w4_roadmap"].loc[mask, "linked_initiatives"] = "I01; I99"
+        with self.assertRaisesRegex(DashboardDataError, "unknown initiative"):
+            build_dashboard_data(frames)
 
     def test_changed_control_total_fails_closed(self) -> None:
         frames = copy.deepcopy(self.frames)
@@ -465,18 +594,43 @@ class DashboardDataTest(unittest.TestCase):
         self.assertEqual(
             sources,
             [
-                {"file": filename, "role": role}
+                {
+                    "file": filename,
+                    "role": role,
+                    "stage": (
+                        "diagnostic" if role in DIAGNOSTIC_INPUT_KEYS else "decision"
+                    ),
+                }
                 for role, filename in INPUT_FILES.items()
             ],
         )
         self.assertIn(
-            {"file": "W2_dashboard_account_day_facts.csv", "role": "account_day_facts"},
+            {
+                "file": "W2_dashboard_account_day_facts.csv",
+                "role": "account_day_facts",
+                "stage": "diagnostic",
+            },
             sources,
         )
         self.assertIn(
-            {"file": "W2_dashboard_payment_facts.csv", "role": "payment_facts"},
+            {
+                "file": "W4_stage_gates.csv",
+                "role": "w4_gates",
+                "stage": "decision",
+            },
             sources,
         )
+        # The two stages must partition the inputs: an unclassified file would
+        # otherwise be silently counted as measured diagnostic evidence.
+        self.assertEqual(
+            set(DIAGNOSTIC_INPUT_KEYS) | set(DECISION_INPUT_KEYS),
+            set(INPUT_FILES),
+        )
+        self.assertEqual(
+            set(DIAGNOSTIC_INPUT_KEYS) & set(DECISION_INPUT_KEYS), set()
+        )
+        self.assertEqual(len(DIAGNOSTIC_INPUT_KEYS), 12)
+        self.assertEqual(len(DECISION_INPUT_KEYS), 6)
 
     def test_atomic_writer_emits_strict_json(self) -> None:
         payload = build_dashboard_data(self.frames)
