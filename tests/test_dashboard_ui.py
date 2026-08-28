@@ -240,9 +240,11 @@ class DashboardUiTest(unittest.TestCase):
         ):
             self.assertEqual(tags_by_id[control_id][0], "select")
 
-        model_script = '<script src="filter_model.js" defer></script>'
-        app_script = '<script src="app.js" defer></script>'
+        # Script URLs carry a cache-busting stamp, so match the path only.
+        model_script = '<script src="filter_model.js?'
+        app_script = '<script src="app.js?'
         self.assertIn(model_script, self.index)
+        self.assertIn('defer></script>', self.index)
         self.assertLess(self.index.index(model_script), self.index.index(app_script))
 
     def test_filters_remain_visible_and_navigation_does_not_recalculate_scope(self) -> None:
@@ -807,6 +809,60 @@ class DashboardUiTest(unittest.TestCase):
             self.script,
         )
         self.assertIn('id="dashboard-menu-title" tabindex="-1"', self.index)
+
+    def test_scripts_and_contract_ship_as_a_matched_pair(self) -> None:
+        """A cached script must never run against a newer contract.
+
+        GitHub Pages serves every file with max-age=600 and an independent age,
+        so without a versioned URL a browser can hold a stale script while
+        fetching fresh JSON. That combination fails closed and reads as a data
+        outage when the data is fine.
+        """
+        published = self.payload["meta"]["data_version"]
+        for asset in ("filter_model.js", "app.js"):
+            match = re.search(
+                rf'<script src="{re.escape(asset)}\?v=([0-9a-f]{{10}})&amp;d=([^"]+)"',
+                self.index,
+            )
+            self.assertIsNotNone(match, f"{asset} is not version-stamped")
+            digest, data_version = match.group(1), match.group(2)
+
+            # v is the script's own content hash, so editing it busts the cache.
+            actual = hashlib.sha256(
+                (ROOT / "docs" / "dashboard" / asset).read_bytes()
+            ).hexdigest()[:10]
+            self.assertEqual(
+                digest, actual,
+                f"{asset} stamp is stale; re-run src/build_dashboard_data.py",
+            )
+            # d is the contract the page was built against.
+            self.assertEqual(data_version, published)
+
+        # The page compares its own d= against the fetched payload.
+        self.assertIn("PAGE_ASSET_VERSION", self.script)
+        self.assertIn('/[?&]d=([^&]+)/', self.script)
+        self.assertIn("showStaleClient(PAGE_ASSET_VERSION, publishedVersion)", self.script)
+
+    def test_version_skew_reads_as_a_stale_page_not_a_data_outage(self) -> None:
+        stale = self.script[self.script.index("function showStaleClient("):]
+        stale = stale[: stale.index("\nfunction ")]
+
+        self.assertIn("This page is out of date.", stale)
+        self.assertIn("Reload", stale)
+        self.assertIn("#data-error-reload", stale)
+        # It must not claim the published data failed validation.
+        self.assertNotIn("validation did not complete", stale)
+        self.assertNotIn("No dashboard result has been published", stale)
+
+        # A genuine failure keeps the original wording and offers no reload.
+        failure = self.script[self.script.index("function showDataFailure()"):]
+        failure = failure[: failure.index("\nfunction ")]
+        self.assertIn("Data unavailable — validation did not complete.", failure)
+        self.assertIn("reloadButton", failure)
+
+        self.assertIn('id="data-error-title"', self.index)
+        self.assertIn('id="data-error-detail"', self.index)
+        self.assertIn('id="data-error-reload"', self.index)
 
     def test_markup_never_hardcodes_a_recommendation(self) -> None:
         """The decision is contract-driven; the markup must not assert one.
@@ -1499,8 +1555,9 @@ process.stdout.write(JSON.stringify({
         self.assertNotIn("http://", combined)
         self.assertNotIn("https://", combined)
         self.assertIn('href="styles.css"', self.index)
-        self.assertIn('src="filter_model.js"', self.index)
-        self.assertIn('src="app.js"', self.index)
+        # Local scripts, stamped for cache busting but never remote.
+        self.assertIn('src="filter_model.js?', self.index)
+        self.assertIn('src="app.js?', self.index)
         self.assertIn('fetch("dashboard_data.json"', self.script)
 
     def test_guided_review_wizard_has_three_governed_steps_and_controls(self) -> None:

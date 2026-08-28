@@ -19,6 +19,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import tempfile
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -36,6 +37,14 @@ DATA_RELEASE_DATE = "2026-08-23"
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED = ROOT / "data" / "processed"
 OUTPUT = ROOT / "docs" / "dashboard" / "dashboard_data.json"
+PAGE = ROOT / "docs" / "dashboard" / "index.html"
+
+# Scripts that must load as a matched pair with the contract they read. GitHub
+# Pages serves every file with max-age=600 and an independent age, so without a
+# versioned URL a browser can run a cached script against a newer contract and
+# fail closed for no real reason. Stamping the query string forces a refetch
+# whenever the published payload changes.
+VERSIONED_ASSETS = ("filter_model.js", "app.js")
 
 INPUT_FILES = {
     "w1_checks": "W1_data_quality_checks.csv",
@@ -2882,11 +2891,42 @@ def write_dashboard_data(
     return destination
 
 
+def stamp_asset_versions(
+    payload: Mapping[str, Any], page_path: Path = PAGE
+) -> bool:
+    """Pin the page's script URLs to their own content and to the contract.
+
+    Each script carries ``v`` — a hash of that file's bytes, so editing a script
+    always busts its cache — and ``d``, the published data version, so the
+    script can tell whether the contract it just fetched came from the same
+    build. Returns True when the page changed; the stamp is idempotent.
+    """
+    page = Path(page_path)
+    markup = page.read_text(encoding="utf-8")
+    data_version = payload["meta"]["data_version"]
+    updated = markup
+    for asset in VERSIONED_ASSETS:
+        asset_path = page.parent / asset
+        digest = hashlib.sha256(asset_path.read_bytes()).hexdigest()[:10]
+        replacement = f'<script src="{asset}?v={digest}&amp;d={data_version}"'
+        updated = re.sub(
+            rf'<script src="{re.escape(asset)}(\?[^"]*)?"',
+            lambda _match, value=replacement: value,
+            updated,
+        )
+    if updated == markup:
+        return False
+    page.write_text(updated, encoding="utf-8")
+    return True
+
+
 def main() -> None:
     frames = load_dashboard_inputs()
     payload = build_dashboard_data(frames)
     output = write_dashboard_data(payload)
     print(f"Wrote {output.relative_to(ROOT)}")
+    if stamp_asset_versions(payload):
+        print(f"Stamped {PAGE.relative_to(ROOT)} to {payload['meta']['data_version']}")
 
 
 if __name__ == "__main__":

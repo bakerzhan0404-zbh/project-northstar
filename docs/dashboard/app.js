@@ -4,6 +4,21 @@ const FilterModel = typeof window !== "undefined"
   ? window.NorthstarFilterModel
   : (typeof module !== "undefined" && module.exports ? require("./filter_model.js") : null);
 
+// The contract version this page was built against, read from our own script
+// URL (the builder stamps `d=`). A mismatch against the fetched payload means
+// the browser cached one half of a deploy, not that the data is broken.
+const PAGE_ASSET_VERSION = (() => {
+  try {
+    const src = typeof document !== "undefined" && document.currentScript
+      ? document.currentScript.src
+      : "";
+    const match = /[?&]d=([^&]+)/.exec(src || "");
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+})();
+
 const DEFAULT_VIEW = Object.freeze({
   detailPage: null,
   liquidityDays: 14,
@@ -664,6 +679,35 @@ function assertDashboardData(data) {
   }
 }
 
+function showStaleClient(pageVersion, publishedVersion) {
+  dashboardData = null;
+  currentSummary = null;
+  document.body.classList.add("data-unavailable");
+  get("#data-error").hidden = false;
+  setDataControlsDisabled(true);
+  clearVisualizationOutputs();
+  setText("#data-error-title", "This page is out of date.");
+  setText(
+    "#data-error-detail",
+    `Your browser cached an older version of this dashboard (${pageVersion}) `
+    + `while the published data is ${publishedVersion}. Reload to get the current version.`,
+  );
+  const reload = get("#data-error-reload");
+  if (reload) {
+    reload.hidden = false;
+    reload.onclick = () => window.location.reload(true);
+  }
+  setText("#dashboard-scope", "Cached page · reload to see the published dashboard");
+  setText("#data-status", "Out of date — reload");
+  setText("#menu-decision-status", "Out of date");
+  setText("#menu-decision-headline", "Reload to see the published recommendation.");
+  setText("#menu-decision-next", "This page was served from your browser cache.");
+  setText("#menu-decision-confidence", "");
+  setText("#decision-title", "Reload to see the published recommendation.");
+  setText("#decision-support", "This page was served from your browser cache.");
+  get("#dashboard-shell").setAttribute("aria-busy", "false");
+}
+
 function showDataFailure() {
   dashboardData = null;
   currentSummary = null;
@@ -673,6 +717,10 @@ function showDataFailure() {
   clearVisualizationOutputs();
   closeSearch();
   closeFilterPanel({ restoreFocus: false });
+  setText("#data-error-title", "Data unavailable — validation did not complete.");
+  setText("#data-error-detail", "No dashboard result has been published.");
+  const reloadButton = get("#data-error-reload");
+  if (reloadButton) reloadButton.hidden = true;
   setText("#dashboard-scope", "Supplied data unavailable · validation did not complete");
   setText("#data-status", "Unavailable — validation failed");
   // A page that cannot validate its contract must not keep asserting a
@@ -3843,6 +3891,13 @@ async function initializeDashboard() {
     const response = await fetch("dashboard_data.json", { cache: "no-store" });
     if (!response.ok) throw new Error(`Dashboard data request failed: ${response.status}`);
     const data = await response.json();
+    // A cached script running against a newer contract is a stale browser, not
+    // a broken dashboard. Say which one it is before failing closed.
+    const publishedVersion = data && data.meta ? data.meta.data_version : null;
+    if (PAGE_ASSET_VERSION && publishedVersion && publishedVersion !== PAGE_ASSET_VERSION) {
+      showStaleClient(PAGE_ASSET_VERSION, publishedVersion);
+      return;
+    }
     assertDashboardData(data);
     dashboardData = data;
     defaultFilters = FilterModel.createDefaultState(data);

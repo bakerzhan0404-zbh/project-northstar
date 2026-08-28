@@ -6,16 +6,17 @@
     <meta name="description" content="Project Northstar treasury diagnostic dashboard">
     <title>Project Northstar — Treasury decision dashboard</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="filter_model.js" defer></script>
-    <script src="app.js" defer></script>
+    <script src="filter_model.js?v=df1525c71c&amp;d=2.0+52ba1fc646" defer></script>
+    <script src="app.js?v=ac9d7e21cc&amp;d=2.0+52ba1fc646" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#dashboard-menu-hub">Skip to dashboard menu</a>
 
     <div id="dashboard-shell" class="dashboard-shell" aria-busy="true">
       <div id="data-error" class="data-error" role="alert" hidden>
-        <strong>Data unavailable — validation did not complete.</strong>
-        <span>No dashboard result has been published.</span>
+        <strong id="data-error-title">Data unavailable — validation did not complete.</strong>
+        <span id="data-error-detail">No dashboard result has been published.</span>
+        <button id="data-error-reload" type="button" hidden>Reload this page</button>
       </div>
 
       <header class="dashboard-header">

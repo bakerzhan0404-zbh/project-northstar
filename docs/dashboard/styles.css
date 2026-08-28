@@ -130,6 +130,31 @@ fieldset:disabled {
   border-radius: 10px;
 }
 
+.data-error {
+  flex-wrap: wrap;
+}
+
+#data-error-reload {
+  margin-left: auto;
+  padding: 7px 14px;
+  font: inherit;
+  font-weight: 600;
+  color: #fff1ed;
+  cursor: pointer;
+  background: #742a20;
+  border: 1px solid #742a20;
+  border-radius: 8px;
+}
+
+#data-error-reload:hover {
+  background: #5c211a;
+}
+
+#data-error-reload:focus-visible {
+  outline: 2px solid #742a20;
+  outline-offset: 2px;
+}
+
 .dashboard-header {
   display: grid;
   min-height: 64px;
